@@ -42,10 +42,10 @@ const Index = () => {
     const curiousScore = (answers[3] + answers[7] + answers[9]) / 3;
 
     const possibleProfiles = [];
-    if (humanistScore >= 7) possibleProfiles.push('Humaniste');
-    if (innovativeScore >= 7) possibleProfiles.push('Innovant');
-    if (ecoGuideScore >= 7) possibleProfiles.push('Éco-guide');
-    if (curiousScore >= 7) possibleProfiles.push('Curieux');
+    if (humanistScore >= 5) possibleProfiles.push('Humaniste');
+    if (innovativeScore >= 5) possibleProfiles.push('Innovant');
+    if (ecoGuideScore >= 5) possibleProfiles.push('Éco-guide');
+    if (curiousScore >= 5) possibleProfiles.push('Curieux');
 
     return possibleProfiles;
   };
