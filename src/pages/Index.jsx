@@ -60,6 +60,14 @@ const Index = () => {
     setFinalProfile(profile);
   };
 
+  const resetTest = () => {
+    setStep('userInfo');
+    setUserInfo(null);
+    setAnswers(Array(10).fill(5));
+    setProfiles([]);
+    setFinalProfile(null);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <h1 className="text-3xl font-bold mb-6">Test de Profil d'Impacteur</h1>
@@ -78,15 +86,18 @@ const Index = () => {
         </div>
       )}
       {step === 'results' && (
-        <ResultsDisplay
-          profiles={profiles}
-          onProfileSelect={handleProfileSelect}
-        />
-      )}
-      {finalProfile && (
-        <div className="mt-6">
-          <h2 className="text-2xl font-bold">Votre profil final</h2>
-          <p className="text-xl mt-2">Vous êtes un <strong>{finalProfile}</strong></p>
+        <div>
+          <ResultsDisplay
+            profiles={profiles}
+            onProfileSelect={handleProfileSelect}
+          />
+          {finalProfile && (
+            <div className="mt-6">
+              <h2 className="text-2xl font-bold">Votre profil final</h2>
+              <p className="text-xl mt-2">Vous êtes un <strong>{finalProfile}</strong></p>
+            </div>
+          )}
+          <Button onClick={resetTest} className="mt-6">Retour au test</Button>
         </div>
       )}
     </div>
