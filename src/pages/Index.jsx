@@ -147,7 +147,6 @@ const Index = () => {
             onReset={resetTest}
           />
           <div className="mt-4 space-x-4">
-            <Button onClick={resetTest}>Retour au test</Button>
             <Button onClick={toggleAllResults}>
               {showAllResults ? 'Masquer tous les résultats' : 'Voir tous les résultats'}
             </Button>
