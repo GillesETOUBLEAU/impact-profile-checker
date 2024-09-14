@@ -36,8 +36,12 @@ const Index = () => {
           last_name: userInfo.lastName,
           email: userInfo.email,
           ...Object.fromEntries(answers.map((value, index) => [`question_${index + 1}`, value])),
-          ...Object.fromEntries(Object.entries(profileData.scores).map(([key, value]) => [key.toLowerCase(), value])),
-          profiles: profileData.profiles
+          humanist_score: profileData.scores.humanistScore,
+          innovative_score: profileData.scores.innovativeScore,
+          eco_guide_score: profileData.scores.ecoGuideScore,
+          curious_score: profileData.scores.curiousScore,
+          profiles: profileData.profiles,
+          selected_profile: null // Initialize as null, will be updated when user selects a profile
         }
       ])
       .select();
