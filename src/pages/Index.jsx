@@ -3,6 +3,7 @@ import UserInfoForm from '../components/UserInfoForm';
 import QuestionSlider from '../components/QuestionSlider';
 import ResultsDisplay from '../components/ResultsDisplay';
 import { Button } from "@/components/ui/button";
+import { supabase } from '../lib/supabase';
 
 const questions = [
   "Vous êtes particulièrement sensible aux problématiques sociales et vous cherchez à apporter des solutions pour aider les autres.",
@@ -47,12 +48,54 @@ const Index = () => {
     if (ecoGuideScore >= 5) possibleProfiles.push('Éco-guide');
     if (curiousScore >= 5) possibleProfiles.push('Curieux');
 
-    return possibleProfiles;
+    return {
+      profiles: possibleProfiles,
+      scores: {
+        humanistScore,
+        innovativeScore,
+        ecoGuideScore,
+        curiousScore
+      }
+    };
   };
 
-  const handleSubmitAnswers = () => {
-    const calculatedProfiles = calculateProfiles();
-    setProfiles(calculatedProfiles);
+  const saveTestResults = async (profileData) => {
+    const { data, error } = await supabase
+      .from('impact_profile_tests')
+      .insert([
+        {
+          first_name: userInfo.firstName,
+          last_name: userInfo.lastName,
+          email: userInfo.email,
+          question_1: answers[0],
+          question_2: answers[1],
+          question_3: answers[2],
+          question_4: answers[3],
+          question_5: answers[4],
+          question_6: answers[5],
+          question_7: answers[6],
+          question_8: answers[7],
+          question_9: answers[8],
+          question_10: answers[9],
+          humanist_score: profileData.scores.humanistScore,
+          innovative_score: profileData.scores.innovativeScore,
+          eco_guide_score: profileData.scores.ecoGuideScore,
+          curious_score: profileData.scores.curiousScore,
+          profiles: profileData.profiles
+        }
+      ]);
+
+    if (error) {
+      console.error('Error saving test results:', error);
+    } else {
+      console.log('Test results saved successfully:', data);
+    }
+  };
+
+  const handleSubmitAnswers = async () => {
+    const profileData = calculateProfiles();
+    setProfiles(profileData.profiles);
+    await saveTestResults(profileData);
     setStep('results');
   };
 
