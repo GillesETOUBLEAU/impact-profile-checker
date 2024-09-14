@@ -41,7 +41,7 @@ const Index = () => {
           eco_guide_score: profileData.scores.ecoGuideScore,
           curious_score: profileData.scores.curiousScore,
           profiles: profileData.profiles,
-          selected_profile: null // Initialize as null, will be updated when user selects a profile
+          selected_profile: profileData.profiles.length === 1 ? profileData.profiles[0] : null
         }
       ])
       .select();
@@ -58,6 +58,9 @@ const Index = () => {
     const profileData = calculateProfiles(answers);
     setProfiles(profileData.profiles);
     await saveTestResults(profileData);
+    if (profileData.profiles.length === 1) {
+      setFinalProfile(profileData.profiles[0]);
+    }
     setStep('results');
   };
 

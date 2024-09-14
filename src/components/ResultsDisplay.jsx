@@ -2,12 +2,16 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 
 const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) => {
+  const displayProfile = finalProfile || (profiles.length === 1 ? profiles[0] : null);
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Votre profil d'Impacteur</h2>
-      {profiles.length > 1 && !finalProfile ? (
+      {displayProfile ? (
+        <p className="text-xl">Vous êtes un <strong>{displayProfile}</strong></p>
+      ) : (
         <>
-          <p>Vous avez plusieurs profils possibles. Veuillez en choisir un :</p>
+          <p>Veuillez choisir votre profil :</p>
           <div className="space-y-2">
             {profiles.map((profile) => (
               <Button key={profile} onClick={() => onProfileSelect(profile)} className="w-full">
@@ -16,14 +20,6 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
             ))}
           </div>
         </>
-      ) : (
-        <p className="text-xl">Votre profil est : <strong>{finalProfile || profiles[0]}</strong></p>
-      )}
-      {finalProfile && (
-        <div className="mt-6">
-          <h2 className="text-2xl font-bold">Votre profil final</h2>
-          <p className="text-xl mt-2">Vous êtes un <strong>{finalProfile}</strong></p>
-        </div>
       )}
       <Button onClick={onReset} className="mt-6">Retour au test</Button>
     </div>
