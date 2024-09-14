@@ -1,14 +1,18 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://tqvrsvdphejiwmtgxdvg.supabase.co'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_PROJECT_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_API_KEY
 
-if (!supabaseAnonKey) {
-  console.error('VITE_SUPABASE_API_KEY is not defined in environment variables')
-  throw new Error('Supabase API key is missing')
+let supabase = null
+
+try {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase URL or API key is missing from environment variables')
+  }
+  supabase = createClient(supabaseUrl, supabaseAnonKey)
+  console.log('Supabase client initialized successfully')
+} catch (error) {
+  console.error('Failed to initialize Supabase client:', error.message)
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-// Log the Supabase URL (but not the key for security reasons)
-console.log('Supabase URL:', supabaseUrl)
+export { supabase }
