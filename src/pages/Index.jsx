@@ -31,6 +31,7 @@ const Index = () => {
   const saveTestResults = async (profileData) => {
     try {
       console.log('Saving test results:', profileData);
+      const selectedProfile = profileData.profiles.length === 1 ? profileData.profiles[0] : null;
       const { data, error } = await supabase
         .from('impact_profile_tests')
         .insert([
@@ -44,7 +45,7 @@ const Index = () => {
             eco_guide_score: profileData.scores.ecoGuideScore,
             curious_score: profileData.scores.curiousScore,
             profiles: profileData.profiles,
-            selected_profile: profileData.profiles.length === 1 ? profileData.profiles[0] : null
+            selected_profile: selectedProfile
           }
         ])
         .select();
@@ -57,6 +58,9 @@ const Index = () => {
       console.log('Test results saved successfully:', data);
       toast.success('Résultats enregistrés avec succès!');
       setTestId(data[0].id);
+      if (selectedProfile) {
+        setFinalProfile(selectedProfile);
+      }
     } catch (error) {
       console.error('Unexpected error saving test results:', error);
       toast.error('Une erreur inattendue est survenue.');
@@ -68,9 +72,6 @@ const Index = () => {
       const profileData = calculateProfiles(answers);
       setProfiles(profileData.profiles);
       await saveTestResults(profileData);
-      if (profileData.profiles.length === 1) {
-        setFinalProfile(profileData.profiles[0]);
-      }
       setStep('results');
     } catch (error) {
       console.error('Error submitting answers:', error);
@@ -98,6 +99,9 @@ const Index = () => {
         console.error('Unexpected error updating selected profile:', error);
         toast.error('Une erreur inattendue est survenue lors de la mise à jour du profil.');
       }
+    } else {
+      console.error('Test ID is not available. Cannot update selected profile.');
+      toast.error('Impossible de mettre à jour le profil sélectionné. ID de test manquant.');
     }
   };
 
@@ -129,7 +133,8 @@ const Index = () => {
       )}
       {step === 'results' && (
         <ResultsDisplay
-          profile={finalProfile || (profiles.length === 1 ? profiles[0] : null)}
+          profiles={profiles}
+          finalProfile={finalProfile}
           onProfileSelect={handleProfileSelect}
           onReset={resetTest}
         />
