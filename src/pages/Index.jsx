@@ -5,6 +5,7 @@ import ResultsDisplay from '../components/ResultsDisplay';
 import { Button } from "@/components/ui/button";
 import { supabase } from '../lib/supabase';
 import { questions, calculateProfiles } from '../utils/profileUtils';
+import { toast } from 'sonner';
 
 const Index = () => {
   const [step, setStep] = useState('userInfo');
@@ -28,54 +29,74 @@ const Index = () => {
   };
 
   const saveTestResults = async (profileData) => {
-    const { data, error } = await supabase
-      .from('impact_profile_tests')
-      .insert([
-        {
-          first_name: userInfo.firstName,
-          last_name: userInfo.lastName,
-          email: userInfo.email,
-          ...Object.fromEntries(answers.map((value, index) => [`question_${index + 1}`, value])),
-          humanist_score: profileData.scores.humanistScore,
-          innovative_score: profileData.scores.innovativeScore,
-          eco_guide_score: profileData.scores.ecoGuideScore,
-          curious_score: profileData.scores.curiousScore,
-          profiles: profileData.profiles,
-          selected_profile: profileData.profiles.length === 1 ? profileData.profiles[0] : null
-        }
-      ])
-      .select();
+    try {
+      console.log('Saving test results:', profileData);
+      const { data, error } = await supabase
+        .from('impact_profile_tests')
+        .insert([
+          {
+            first_name: userInfo.firstName,
+            last_name: userInfo.lastName,
+            email: userInfo.email,
+            ...Object.fromEntries(answers.map((value, index) => [`question_${index + 1}`, value])),
+            humanist_score: profileData.scores.humanistScore,
+            innovative_score: profileData.scores.innovativeScore,
+            eco_guide_score: profileData.scores.ecoGuideScore,
+            curious_score: profileData.scores.curiousScore,
+            profiles: profileData.profiles,
+            selected_profile: profileData.profiles.length === 1 ? profileData.profiles[0] : null
+          }
+        ])
+        .select();
 
-    if (error) {
-      console.error('Error saving test results:', error);
-    } else {
+      if (error) {
+        console.error('Error saving test results:', error);
+        toast.error('Une erreur est survenue lors de l\'enregistrement des résultats.');
+        throw error;
+      }
       console.log('Test results saved successfully:', data);
+      toast.success('Résultats enregistrés avec succès!');
       setTestId(data[0].id);
+    } catch (error) {
+      console.error('Unexpected error saving test results:', error);
+      toast.error('Une erreur inattendue est survenue.');
     }
   };
 
   const handleSubmitAnswers = async () => {
-    const profileData = calculateProfiles(answers);
-    setProfiles(profileData.profiles);
-    await saveTestResults(profileData);
-    if (profileData.profiles.length === 1) {
-      setFinalProfile(profileData.profiles[0]);
+    try {
+      const profileData = calculateProfiles(answers);
+      setProfiles(profileData.profiles);
+      await saveTestResults(profileData);
+      if (profileData.profiles.length === 1) {
+        setFinalProfile(profileData.profiles[0]);
+      }
+      setStep('results');
+    } catch (error) {
+      console.error('Error submitting answers:', error);
+      toast.error('Une erreur est survenue lors de la soumission des réponses.');
     }
-    setStep('results');
   };
 
   const handleProfileSelect = async (profile) => {
     setFinalProfile(profile);
     if (testId) {
-      const { error } = await supabase
-        .from('impact_profile_tests')
-        .update({ selected_profile: profile })
-        .eq('id', testId);
+      try {
+        const { error } = await supabase
+          .from('impact_profile_tests')
+          .update({ selected_profile: profile })
+          .eq('id', testId);
 
-      if (error) {
-        console.error('Error updating selected profile:', error);
-      } else {
+        if (error) {
+          console.error('Error updating selected profile:', error);
+          toast.error('Erreur lors de la mise à jour du profil sélectionné.');
+          throw error;
+        }
         console.log('Selected profile updated successfully');
+        toast.success('Profil sélectionné mis à jour avec succès!');
+      } catch (error) {
+        console.error('Unexpected error updating selected profile:', error);
+        toast.error('Une erreur inattendue est survenue lors de la mise à jour du profil.');
       }
     }
   };
@@ -108,8 +129,7 @@ const Index = () => {
       )}
       {step === 'results' && (
         <ResultsDisplay
-          profiles={profiles}
-          finalProfile={finalProfile}
+          profile={finalProfile || (profiles.length === 1 ? profiles[0] : null)}
           onProfileSelect={handleProfileSelect}
           onReset={resetTest}
         />
