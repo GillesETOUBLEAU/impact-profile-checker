@@ -18,8 +18,12 @@ CREATE TABLE impact_profile_tests (
   eco_guide_score NUMERIC(3,2) NOT NULL,
   curious_score NUMERIC(3,2) NOT NULL,
   profiles TEXT[] NOT NULL,
+  selected_profile TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create an index on the email column for faster lookups
 CREATE INDEX impact_profile_tests_email_idx ON impact_profile_tests (email);
+
+-- Add a comment to the selected_profile column
+COMMENT ON COLUMN impact_profile_tests.selected_profile IS 'The profile chosen by the user from the available profiles';
