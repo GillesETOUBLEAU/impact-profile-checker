@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import UserInfoForm from '../components/UserInfoForm';
 import QuestionSlider from '../components/QuestionSlider';
 import ResultsDisplay from '../components/ResultsDisplay';
+import AllResultsDisplay from '../components/AllResultsDisplay';
 import { Button } from "@/components/ui/button";
 import { supabase } from '../lib/supabase';
 import { questions, calculateProfiles } from '../utils/profileUtils';
@@ -14,6 +15,7 @@ const Index = () => {
   const [profiles, setProfiles] = useState([]);
   const [finalProfile, setFinalProfile] = useState(null);
   const [testId, setTestId] = useState(null);
+  const [showAllResults, setShowAllResults] = useState(false);
 
   const handleUserInfoSubmit = (info) => {
     setUserInfo(info);
@@ -112,6 +114,11 @@ const Index = () => {
     setProfiles([]);
     setFinalProfile(null);
     setTestId(null);
+    setShowAllResults(false);
+  };
+
+  const toggleAllResults = () => {
+    setShowAllResults(!showAllResults);
   };
 
   return (
@@ -132,12 +139,21 @@ const Index = () => {
         </div>
       )}
       {step === 'results' && (
-        <ResultsDisplay
-          profiles={profiles}
-          finalProfile={finalProfile}
-          onProfileSelect={handleProfileSelect}
-          onReset={resetTest}
-        />
+        <>
+          <ResultsDisplay
+            profiles={profiles}
+            finalProfile={finalProfile}
+            onProfileSelect={handleProfileSelect}
+            onReset={resetTest}
+          />
+          <div className="mt-4 space-x-4">
+            <Button onClick={resetTest}>Retour au test</Button>
+            <Button onClick={toggleAllResults}>
+              {showAllResults ? 'Masquer tous les résultats' : 'Voir tous les résultats'}
+            </Button>
+          </div>
+          {showAllResults && <AllResultsDisplay />}
+        </>
       )}
     </div>
   );
