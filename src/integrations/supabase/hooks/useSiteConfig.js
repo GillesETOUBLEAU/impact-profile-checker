@@ -15,46 +15,34 @@ export const useSiteConfig = () => useQuery({
             const { data, error } = await supabase
                 .from('site_config')
                 .select('*')
-                .limit(1)
-                .single();
+                .maybeSingle();
             
             if (error) {
                 console.error('Error fetching site config:', error);
-                if (error.code === 'PGRST116') {
-                    console.log('No site config found. Creating default config...');
-                    const defaultConfig = {
-                        header_text: 'Welcome to Impact Profile Checker',
-                        footer_text: 'Copyright © 2023 Impact Profile Checker',
-                        logo_url: 'https://tqvrsvdphejiwmtgxdvg.supabase.co/storage/v1/object/public/site-assets/default-logo.png'
-                    };
+                throw new Error(error.message);
+            }
 
-                    const { data: newConfig, error: insertError } = await supabase
-                        .from('site_config')
-                        .insert([defaultConfig])
-                        .select()
-                        .single();
+            if (!data) {
+                console.log('No site config found. Creating default config...');
+                const defaultConfig = {
+                    header_text: 'Welcome to Impact Profile Checker',
+                    footer_text: 'Copyright © 2023 Impact Profile Checker',
+                    logo_url: 'https://tqvrsvdphejiwmtgxdvg.supabase.co/storage/v1/object/public/site-assets/default-logo.png'
+                };
 
-                    if (insertError) {
-                        console.error('Error inserting default config:', insertError);
-                        throw new Error(insertError.message);
-                    }
+                const { data: newConfig, error: insertError } = await supabase
+                    .from('site_config')
+                    .insert([defaultConfig])
+                    .select()
+                    .single();
 
-                    console.log('Default config created:', newConfig);
-                    return newConfig;
-                } else {
-                    console.error('Unexpected error:', error);
-                    console.log('Supabase project URL:', import.meta.env.VITE_SUPABASE_PROJECT_URL);
-                    console.log('Supabase API key (first 5 chars):', import.meta.env.VITE_SUPABASE_API_KEY.substring(0, 5));
-                    console.log('Check Supabase security settings:');
-                    console.log('1. Verify "Authentication" settings and API keys');
-                    console.log('2. Review RLS policies for site_config table in "Database" section');
-                    console.log('3. Ensure site_config table exists and has correct structure');
-                    console.log('4. Check JWT token expiration and refresh token rotation settings');
-                    console.log('5. Verify SSL/TLS settings for API and database connections');
-                    console.log('6. Review audit logs for any suspicious activities');
-                    console.log('7. Ensure proper CORS settings are in place');
-                    throw new Error(error.message);
+                if (insertError) {
+                    console.error('Error inserting default config:', insertError);
+                    throw new Error(insertError.message);
                 }
+
+                console.log('Default config created:', newConfig);
+                return newConfig;
             }
 
             console.log('Site config fetched:', data);
@@ -64,6 +52,8 @@ export const useSiteConfig = () => useQuery({
             throw error;
         }
     },
+    retry: 3,
+    retryDelay: 1000,
 });
 
 export const useSiteConfigItem = (id) => useQuery({
