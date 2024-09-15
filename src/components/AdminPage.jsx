@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import { useSupabaseAuth } from '../integrations/supabase';
+import { SupabaseAuthUI } from '../integrations/supabase';
 
 const AdminPage = () => {
   const [headerText, setHeaderText] = useState('');
@@ -24,29 +25,9 @@ const AdminPage = () => {
       const { data, error } = await supabase
         .from('site_config')
         .select('*')
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
-
-      if (!data) {
-        // If no configuration exists, create a default one
-        const defaultConfig = {
-          header_text: 'Welcome to Impact Profile Checker',
-          footer_text: 'Copyright © 2023 Impact Profile Checker',
-          logo_url: null
-        };
-
-        const { data: newConfig, error: insertError } = await supabase
-          .from('site_config')
-          .insert([defaultConfig])
-          .select()
-          .single();
-
-        if (insertError) throw insertError;
-
-        return newConfig;
-      }
-
       return data;
     },
     enabled: !!session,
@@ -125,7 +106,12 @@ const AdminPage = () => {
   };
 
   if (!session) {
-    return <div>Please log in to access the admin page.</div>;
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <h1 className="text-3xl font-bold mb-6">Admin Login</h1>
+        <SupabaseAuthUI />
+      </div>
+    );
   }
 
   if (isLoading) return <div>Loading...</div>;
