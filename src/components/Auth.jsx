@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,17 +6,33 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from 'sonner';
 
-const Auth = () => {
+const Auth = ({ onAuthStateChange }) => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session);
+      if (onAuthStateChange) {
+        onAuthStateChange(event, session);
+      }
+    });
+
+    return () => {
+      if (authListener && authListener.subscription) {
+        authListener.subscription.unsubscribe();
+      }
+    };
+  }, [onAuthStateChange]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
+      console.log('Attempting login with email:', email);
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email, 
         password,
@@ -24,7 +40,9 @@ const Auth = () => {
       
       if (error) throw error;
       
+      console.log('Login response:', data);
       if (data.user) {
+        console.log('User logged in successfully:', data.user);
         toast.success('Logged in successfully');
         // Redirect or update UI as needed
       } else {
@@ -48,6 +66,7 @@ const Auth = () => {
     setLoading(true);
     setError('');
     try {
+      console.log('Attempting signup with email:', email);
       const { data, error } = await supabase.auth.signUp({ 
         email, 
         password,
@@ -55,7 +74,9 @@ const Auth = () => {
       
       if (error) throw error;
       
+      console.log('Signup response:', data);
       if (data.user) {
+        console.log('User signed up successfully:', data.user);
         toast.success('Signed up successfully. Please check your email for verification.');
       } else {
         setError('Sign up failed. Please try again.');
