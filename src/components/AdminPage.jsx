@@ -23,6 +23,7 @@ const AdminPage = () => {
       if (error) throw error;
       return data[0] || null; // Return null if no rows are found
     },
+    retry: 1, // Retry once in case of network issues
   });
 
   useEffect(() => {
