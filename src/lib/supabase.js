@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_PROJECT_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_API_KEY
+const redirectUrl = import.meta.env.VITE_SUPABASE_REDIRECT_URL
 
 let supabase = null
 
@@ -15,6 +16,8 @@ try {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
+      flowType: 'pkce',
+      redirectTo: redirectUrl,
     },
     global: {
       fetch: (...args) => fetch(...args).then(async (res) => {
