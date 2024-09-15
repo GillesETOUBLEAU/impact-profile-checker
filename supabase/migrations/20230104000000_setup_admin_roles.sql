@@ -1,4 +1,4 @@
--- Create the user_roles table
+-- Create the user_roles table if it doesn't exist
 CREATE TABLE IF NOT EXISTS user_roles (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -9,19 +9,6 @@ CREATE TABLE IF NOT EXISTS user_roles (
 
 -- Enable Row Level Security (RLS) on the user_roles table
 ALTER TABLE user_roles ENABLE ROW LEVEL SECURITY;
-
--- Create a policy that allows only superusers to insert into the user_roles table
-CREATE POLICY "Allow superusers to insert user_roles" ON user_roles
-    FOR INSERT
-    TO authenticated
-    WITH CHECK (auth.jwt() ->> 'role' = 'service_role');
-
--- Create a policy that allows only superusers to update the user_roles table
-CREATE POLICY "Allow superusers to update user_roles" ON user_roles
-    FOR UPDATE
-    TO authenticated
-    USING (auth.jwt() ->> 'role' = 'service_role')
-    WITH CHECK (auth.jwt() ->> 'role' = 'service_role');
 
 -- Create a policy that allows authenticated users to read their own role
 CREATE POLICY "Allow users to read their own role" ON user_roles
@@ -51,6 +38,21 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Grant execute permission on the function to authenticated users
 GRANT EXECUTE ON FUNCTION assign_admin_role TO authenticated;
+
+-- Function to check if a user is an admin
+CREATE OR REPLACE FUNCTION is_admin(check_user_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1
+    FROM user_roles
+    WHERE user_id = check_user_id AND role = 'admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission on the function to authenticated users
+GRANT EXECUTE ON FUNCTION is_admin TO authenticated;
 
 -- Update RLS policy for site_config table to allow admin access
 DROP POLICY IF EXISTS "Allow admins to update site_config" ON site_config;
