@@ -42,13 +42,15 @@ try {
     } else {
       console.log('Supabase client initialized successfully')
       // Test email sending
-      supabase.auth.resetPasswordForEmail('test@example.com', {
-        redirectTo: redirectUrl,
+      supabase.auth.signUp({
+        email: 'test@example.com',
+        password: 'testpassword123',
       }).then(({ data, error }) => {
         if (error) {
           console.error('Error testing email sending:', error.message)
         } else {
-          console.log('Test email sent successfully')
+          console.log('Test signup successful, verification email should be sent')
+          console.log('Signup response:', data)
         }
       })
     }
