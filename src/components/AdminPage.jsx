@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
-import { useSupabaseAuth } from '../integrations/supabase';
-import { SupabaseAuthUI } from '../integrations/supabase';
+import { checkAdminRole } from '../utils/auth';
+import Auth from './Auth';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const AdminPage = () => {
@@ -14,21 +14,29 @@ const AdminPage = () => {
   const [footerText, setFooterText] = useState('');
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState('');
-  const [authError, setAuthError] = useState(null);
-  const { session } = useSupabaseAuth() || {};
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const adminStatus = await checkAdminRole();
+      setIsAdmin(adminStatus);
+      setLoading(false);
+    };
+    checkAdmin();
+  }, []);
 
   const { data: siteConfig, isLoading, error, refetch } = useQuery({
     queryKey: ['siteConfig'],
     queryFn: async () => {
-      if (!session) return null;
       const { data, error } = await supabase
         .from('site_config')
         .select('*')
-        .maybeSingle();
+        .single();
       if (error) throw error;
       return data;
     },
-    enabled: !!session,
+    enabled: isAdmin,
   });
 
   useEffect(() => {
@@ -41,7 +49,6 @@ const AdminPage = () => {
 
   const updateConfig = useMutation({
     mutationFn: async (newConfig) => {
-      if (!session) throw new Error('Not authenticated');
       const { data, error } = await supabase
         .from('site_config')
         .upsert(newConfig)
@@ -101,26 +108,21 @@ const AdminPage = () => {
     });
   };
 
-  const handleAuthError = (error) => {
-    setAuthError(error.message);
-    toast.error(`Authentication error: ${error.message}`);
-  };
+  if (loading) return <div>Loading...</div>;
 
-  if (!session) {
+  if (!isAdmin) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <h1 className="text-3xl font-bold mb-6">Admin Login</h1>
-        {authError && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{authError}</AlertDescription>
-          </Alert>
-        )}
-        <SupabaseAuthUI onError={handleAuthError} />
+        <Auth />
+        <Alert variant="destructive" className="mt-4">
+          <AlertDescription>You need admin privileges to access this page.</AlertDescription>
+        </Alert>
       </div>
     );
   }
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>Loading configuration...</div>;
   if (error) return <div>Error loading configuration: {error.message}</div>;
 
   return (
