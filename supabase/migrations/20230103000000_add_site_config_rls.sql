@@ -12,7 +12,7 @@ ALTER TABLE site_config ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist
 DROP POLICY IF EXISTS "Allow authenticated users to read site_config" ON site_config;
-DROP POLICY IF EXISTS "Allow admins to modify site_config" ON site_config;
+DROP POLICY IF EXISTS "Allow admins to update site_config" ON site_config;
 
 -- Create a policy that allows all authenticated users to select from the site_config table
 CREATE POLICY "Allow authenticated users to read site_config" ON site_config
@@ -20,12 +20,11 @@ CREATE POLICY "Allow authenticated users to read site_config" ON site_config
     TO authenticated
     USING (true);
 
--- Create a policy that allows only authenticated users with the 'admin' role to insert, update, or delete from the site_config table
-CREATE POLICY "Allow admins to modify site_config" ON site_config
-    FOR ALL
+-- Create a policy that allows only authenticated users with the 'admin' role to update the site_config table
+CREATE POLICY "Allow admins to update site_config" ON site_config
+    FOR UPDATE
     TO authenticated
-    USING ((auth.jwt() ->> 'role'::text) = 'admin'::text)
-    WITH CHECK ((auth.jwt() ->> 'role'::text) = 'admin'::text);
+    USING ((auth.jwt() ->> 'role'::text) = 'admin'::text);
 
 -- Grant usage on the site_config table to the authenticated role
 GRANT USAGE ON SCHEMA public TO authenticated;
