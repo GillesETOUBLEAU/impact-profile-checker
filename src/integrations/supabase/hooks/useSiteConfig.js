@@ -16,8 +16,7 @@ export const useSiteConfig = () => useQuery({
             const { data, error } = await supabase
                 .from('site_config')
                 .select('*')
-                .limit(1)
-                .single();
+                .maybeSingle();
             
             if (error) {
                 console.error('Error fetching site config:', error);
