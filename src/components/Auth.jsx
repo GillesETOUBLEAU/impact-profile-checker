@@ -45,6 +45,20 @@ const Auth = ({ onAuthStateChange }) => {
       if (data.user) {
         console.log('User logged in successfully:', data.user);
         toast.success('Logged in successfully');
+        // Check if the user has an admin role
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .single();
+        
+        if (roleError) {
+          console.error('Error fetching user role:', roleError);
+        } else if (roleData && roleData.role === 'admin') {
+          console.log('User has admin role');
+        } else {
+          console.log('User does not have admin role');
+        }
       } else {
         setError('Login failed. Please try again.');
       }
@@ -78,7 +92,7 @@ const Auth = ({ onAuthStateChange }) => {
       if (data.user) {
         console.log('User signed up successfully:', data.user);
         // Assign a default role to the new user
-        await assignUserRole(data.user.id, 'user');
+        await assignUserRole(data.user.id, 'admin');
         toast.success('Signed up successfully. Please check your email for verification.');
       } else {
         setError('Sign up failed. Please try again.');

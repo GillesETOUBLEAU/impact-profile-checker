@@ -31,6 +31,7 @@ const AdminPage = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         const adminStatus = await checkAdminRole();
+        console.log('Admin status:', adminStatus);
         setIsAdmin(adminStatus);
         setAuthState(adminStatus ? 'admin' : 'authenticated');
       } else {
@@ -51,21 +52,26 @@ const AdminPage = () => {
     }
   };
 
+  const handleAuthStateChange = async (event, session) => {
+    if (event === 'SIGNED_IN') {
+      setAuthState('checking');
+      const adminStatus = await checkAdminRole();
+      console.log('Admin status after sign in:', adminStatus);
+      setIsAdmin(adminStatus);
+      setAuthState(adminStatus ? 'admin' : 'authenticated');
+    } else if (event === 'SIGNED_OUT') {
+      setAuthState('unauthenticated');
+      setIsAdmin(false);
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
 
   if (authState === 'unauthenticated') {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <h1 className="text-3xl font-bold mb-6">Admin Login</h1>
-        <Auth onAuthStateChange={(event) => {
-          if (event === 'SIGNED_IN') {
-            setAuthState('checking');
-            checkAdminRole().then(isAdmin => {
-              setIsAdmin(isAdmin);
-              setAuthState(isAdmin ? 'admin' : 'authenticated');
-            });
-          }
-        }} />
+        <Auth onAuthStateChange={handleAuthStateChange} />
       </div>
     );
   }
