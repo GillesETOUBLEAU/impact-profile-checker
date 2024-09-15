@@ -15,7 +15,7 @@ const AdminPage = () => {
   const [loading, setLoading] = useState(true);
   const [newAdminEmail, setNewAdminEmail] = useState('');
 
-  const { data: siteConfig, isLoading: configLoading } = useSiteConfig();
+  const { data: siteConfig, isLoading: configLoading, refetch } = useSiteConfig();
   const addSiteConfig = useAddSiteConfig();
   const updateSiteConfig = useUpdateSiteConfig();
 
@@ -58,29 +58,34 @@ const AdminPage = () => {
     };
 
     if (siteConfig?.id) {
-      updateSiteConfig.mutate({ id: siteConfig.id, ...configData });
+      updateSiteConfig.mutate({ id: siteConfig.id, ...configData }, {
+        onSuccess: () => {
+          toast.success('Configuration updated successfully');
+          refetch();
+        },
+        onError: (error) => {
+          toast.error(`Error updating configuration: ${error.message}`);
+        }
+      });
     } else {
-      addSiteConfig.mutate(configData);
+      addSiteConfig.mutate(configData, {
+        onSuccess: () => {
+          toast.success('Configuration added successfully');
+          refetch();
+        },
+        onError: (error) => {
+          toast.error(`Error adding configuration: ${error.message}`);
+        }
+      });
     }
   };
 
   const createAdminUser = useMutation({
     mutationFn: async (email) => {
-      // First, create a new user
-      const { data: userData, error: userError } = await supabase.auth.signUp({
-        email,
-        password: Math.random().toString(36).slice(-8), // Generate a random password
+      const { data, error } = await supabase.functions.invoke('assign-admin-role', {
+        body: { email }
       });
-
-      if (userError) throw userError;
-
-      // Then, assign the admin role
-      const { data, error } = await supabase
-        .from('user_roles')
-        .insert({ user_id: userData.user.id, role: 'admin' });
-
       if (error) throw error;
-
       return data;
     },
     onSuccess: () => {
@@ -97,7 +102,7 @@ const AdminPage = () => {
     createAdminUser.mutate(newAdminEmail);
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading || configLoading) return <div>Loading...</div>;
 
   if (!isAdmin) {
     return (
