@@ -11,8 +11,29 @@ CREATE TABLE IF NOT EXISTS site_config (
 ALTER TABLE site_config ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist
-DROP POLICY IF EXISTS "Allow authenticated users to read site_config" ON site_config;
-DROP POLICY IF EXISTS "Allow admins to update site_config" ON site_config;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'site_config'
+      AND policyname = 'Allow authenticated users to read site_config'
+  ) THEN
+    DROP POLICY "Allow authenticated users to read site_config" ON site_config;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'site_config'
+      AND policyname = 'Allow admins to update site_config'
+  ) THEN
+    DROP POLICY "Allow admins to update site_config" ON site_config;
+  END IF;
+END
+$$;
 
 -- Create a policy that allows all authenticated users to select from the site_config table
 CREATE POLICY "Allow authenticated users to read site_config" ON site_config
