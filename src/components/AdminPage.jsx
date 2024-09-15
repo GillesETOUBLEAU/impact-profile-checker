@@ -21,7 +21,7 @@ const AdminPage = () => {
         .select('*')
         .limit(1);
       if (error) throw error;
-      return data[0] || {}; // Return the first row or an empty object if no rows
+      return data[0] || null; // Return null if no rows are found
     },
   });
 
@@ -87,7 +87,7 @@ const AdminPage = () => {
     }
 
     updateConfig.mutate({
-      id: siteConfig?.id, // Include the id for upsert
+      id: siteConfig?.id || undefined, // Include the id for upsert if it exists
       header_text: headerText,
       footer_text: footerText,
       logo_url: logoUrl,
