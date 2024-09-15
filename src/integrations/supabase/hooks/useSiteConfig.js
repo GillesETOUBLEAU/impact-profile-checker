@@ -45,10 +45,14 @@ export const useSiteConfig = () => useQuery({
                     console.error('Unexpected error:', error);
                     console.log('Supabase project URL:', import.meta.env.VITE_SUPABASE_PROJECT_URL);
                     console.log('Supabase API key (first 5 chars):', import.meta.env.VITE_SUPABASE_API_KEY.substring(0, 5));
-                    console.log('Check Supabase settings:');
+                    console.log('Check Supabase security settings:');
                     console.log('1. Verify "Authentication" settings and API keys');
                     console.log('2. Review RLS policies for site_config table in "Database" section');
                     console.log('3. Ensure site_config table exists and has correct structure');
+                    console.log('4. Check JWT token expiration and refresh token rotation settings');
+                    console.log('5. Verify SSL/TLS settings for API and database connections');
+                    console.log('6. Review audit logs for any suspicious activities');
+                    console.log('7. Ensure proper CORS settings are in place');
                     throw new Error(error.message);
                 }
             }
