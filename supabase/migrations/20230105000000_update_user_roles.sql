@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION assign_default_role()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO user_roles (user_id, role)
-  VALUES (NEW.id, 'user')
+  VALUES (NEW.id, 'admin')  -- Changed from 'user' to 'admin'
   ON CONFLICT (user_id) DO NOTHING;
   RETURN NEW;
 END;
@@ -21,7 +21,7 @@ EXECUTE FUNCTION assign_default_role();
 
 -- Populate user_roles for existing users
 INSERT INTO user_roles (user_id, role)
-SELECT id, 'user'
+SELECT id, 'admin'  -- Changed from 'user' to 'admin'
 FROM auth.users
 WHERE id NOT IN (SELECT user_id FROM user_roles)
 ON CONFLICT (user_id) DO NOTHING;
