@@ -10,36 +10,48 @@ const fromSupabase = async (query) => {
 export const useSiteConfig = () => useQuery({
     queryKey: ['site_config'],
     queryFn: async () => {
-        const { data, error } = await supabase
-            .from('site_config')
-            .select('*')
-            .limit(1)
-            .single();
-        
-        if (error) {
-            if (error.code === 'PGRST116') {
-                // No rows found, create a default config
-                const defaultConfig = {
-                    header_text: 'Welcome to Impact Profile Checker',
-                    footer_text: 'Copyright © 2023 Impact Profile Checker',
-                    logo_url: 'https://tqvrsvdphejiwmtgxdvg.supabase.co/storage/v1/object/public/site-assets/default-logo.png'
-                };
+        console.log('Fetching site config...');
+        try {
+            const { data, error } = await supabase
+                .from('site_config')
+                .select('*')
+                .limit(1)
+                .single();
+            
+            if (error) {
+                console.error('Error fetching site config:', error);
+                if (error.code === 'PGRST116') {
+                    console.log('No site config found. Creating default config...');
+                    const defaultConfig = {
+                        header_text: 'Welcome to Impact Profile Checker',
+                        footer_text: 'Copyright © 2023 Impact Profile Checker',
+                        logo_url: 'https://tqvrsvdphejiwmtgxdvg.supabase.co/storage/v1/object/public/site-assets/default-logo.png'
+                    };
 
-                const { data: newConfig, error: insertError } = await supabase
-                    .from('site_config')
-                    .insert([defaultConfig])
-                    .select()
-                    .single();
+                    const { data: newConfig, error: insertError } = await supabase
+                        .from('site_config')
+                        .insert([defaultConfig])
+                        .select()
+                        .single();
 
-                if (insertError) throw new Error(insertError.message);
+                    if (insertError) {
+                        console.error('Error inserting default config:', insertError);
+                        throw new Error(insertError.message);
+                    }
 
-                return newConfig;
-            } else {
-                throw new Error(error.message);
+                    console.log('Default config created:', newConfig);
+                    return newConfig;
+                } else {
+                    throw new Error(error.message);
+                }
             }
-        }
 
-        return data;
+            console.log('Site config fetched:', data);
+            return data;
+        } catch (error) {
+            console.error('Unexpected error in useSiteConfig:', error);
+            throw error;
+        }
     },
 });
 
