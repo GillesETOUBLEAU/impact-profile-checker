@@ -38,14 +38,27 @@ CREATE POLICY "Allow authenticated users to insert impact_profile_tests" ON impa
     TO authenticated
     WITH CHECK (true);
 
--- Create a policy that allows all authenticated users to select from the impact_profile_tests table
-CREATE POLICY "Allow authenticated users to read impact_profile_tests" ON impact_profile_tests
+-- Create a policy that allows all authenticated users to select their own records from the impact_profile_tests table
+CREATE POLICY "Allow users to read their own impact_profile_tests" ON impact_profile_tests
     FOR SELECT
     TO authenticated
-    USING (true);
+    USING (auth.uid() = id::text::uuid);
 
--- Create a policy that allows only users with the 'admin' role to update the impact_profile_tests table
-CREATE POLICY "Allow admins to update impact_profile_tests" ON impact_profile_tests
+-- Create a policy that allows only users with the 'admin' role to select all records
+CREATE POLICY "Allow admins to read all impact_profile_tests" ON impact_profile_tests
+    FOR SELECT
+    TO authenticated
+    USING (auth.jwt() ->> 'role' = 'admin');
+
+-- Create a policy that allows users to update their own records
+CREATE POLICY "Allow users to update their own impact_profile_tests" ON impact_profile_tests
+    FOR UPDATE
+    TO authenticated
+    USING (auth.uid() = id::text::uuid)
+    WITH CHECK (auth.uid() = id::text::uuid);
+
+-- Create a policy that allows only users with the 'admin' role to update all records
+CREATE POLICY "Allow admins to update all impact_profile_tests" ON impact_profile_tests
     FOR UPDATE
     TO authenticated
     USING (auth.jwt() ->> 'role' = 'admin');

@@ -22,6 +22,12 @@ CREATE POLICY "Allow admins to update site_config" ON site_config
     TO authenticated
     USING (auth.jwt() ->> 'role' = 'admin');
 
+-- Create a policy that allows only users with the 'admin' role to insert into the site_config table
+CREATE POLICY "Allow admins to insert site_config" ON site_config
+    FOR INSERT
+    TO authenticated
+    WITH CHECK (auth.jwt() ->> 'role' = 'admin');
+
 -- Grant usage on the site_config table to the authenticated role
 GRANT USAGE ON SCHEMA public TO authenticated;
 GRANT ALL ON site_config TO authenticated;
@@ -42,11 +48,3 @@ SELECT
   'Copyright © 2023 Impact Profile Checker',
   'https://tqvrsvdphejiwmtgxdvg.supabase.co/storage/v1/object/public/site-assets/default-logo.png'
 WHERE NOT EXISTS (SELECT 1 FROM site_config);
-
--- Create the storage bucket for site assets (this is a placeholder, as it's not standard SQL)
--- You'll need to create this bucket manually in the Supabase dashboard or using their API
--- CREATE BUCKET site_assets;
-
--- Set up storage permissions (this is also not standard SQL and would be done in the Supabase dashboard)
--- GRANT READ ON BUCKET site_assets TO public;
--- GRANT ALL ON BUCKET site_assets TO authenticated;
