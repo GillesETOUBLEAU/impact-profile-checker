@@ -15,8 +15,7 @@ export const useSiteConfig = () => useQuery({
         try {
             const { data, error } = await supabase
                 .from('site_config')
-                .select('*')
-                .maybeSingle();
+                .select('*');
             
             if (error) {
                 console.error('Error fetching site config:', error);
@@ -28,8 +27,8 @@ export const useSiteConfig = () => useQuery({
                 throw error;
             }
 
-            if (!data) {
-                console.log('No site config found or access denied. Using default config...');
+            if (!data || data.length === 0) {
+                console.log('No site config found. Using default config...');
                 return {
                     header_text: 'Welcome to Impact Profile Checker',
                     footer_text: 'Copyright © 2023 Impact Profile Checker',
@@ -37,8 +36,8 @@ export const useSiteConfig = () => useQuery({
                 };
             }
 
-            console.log('Site config fetched:', data);
-            return data;
+            console.log('Site config fetched:', data[0]);
+            return data[0]; // Return the first config object
         } catch (error) {
             console.error('Unexpected error in useSiteConfig:', error);
             toast.error('Une erreur inattendue est survenue lors de la récupération de la configuration.');
