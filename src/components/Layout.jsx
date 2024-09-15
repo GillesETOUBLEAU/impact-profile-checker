@@ -2,8 +2,8 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
-import { useSupabaseAuth } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
+import { useSupabaseAuth } from '../integrations/supabase';
 
 const Layout = ({ children }) => {
   const { data: siteConfig } = useQuery({
@@ -18,10 +18,12 @@ const Layout = ({ children }) => {
     },
   });
 
-  const { session, logout } = useSupabaseAuth();
+  const { session, logout } = useSupabaseAuth() || {};
 
   const handleLogout = async () => {
-    await logout();
+    if (logout) {
+      await logout();
+    }
   };
 
   return (
