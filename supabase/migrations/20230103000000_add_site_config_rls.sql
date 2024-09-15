@@ -1,3 +1,12 @@
+-- Create the site_config table if it doesn't exist
+CREATE TABLE IF NOT EXISTS site_config (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  header_text TEXT,
+  footer_text TEXT,
+  logo_url TEXT,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Enable Row Level Security (RLS) on the site_config table
 ALTER TABLE site_config ENABLE ROW LEVEL SECURITY;
 
@@ -35,6 +44,12 @@ $$;
 GRANT admin TO authenticated;
 
 -- Insert a default row if the table is empty
-INSERT INTO site_config (header_text, footer_text)
-SELECT 'Welcome to Impact Profile Checker', 'Copyright © 2023 Impact Profile Checker'
+INSERT INTO site_config (header_text, footer_text, logo_url)
+SELECT 
+  'Welcome to Impact Profile Checker', 
+  'Copyright © 2023 Impact Profile Checker',
+  'https://tqvrsvdphejiwmtgxdvg.supabase.co/storage/v1/object/public/site-assets/default-logo.png'
 WHERE NOT EXISTS (SELECT 1 FROM site_config);
+
+-- Update the updated_at column to use CURRENT_TIMESTAMP as default
+ALTER TABLE site_config ALTER COLUMN updated_at SET DEFAULT CURRENT_TIMESTAMP;
