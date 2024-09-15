@@ -24,8 +24,8 @@ CREATE POLICY "Allow authenticated users to read site_config" ON site_config
 CREATE POLICY "Allow admins to modify site_config" ON site_config
     FOR ALL
     TO authenticated
-    USING (auth.jwt() ->> 'role' = 'admin')
-    WITH CHECK (auth.jwt() ->> 'role' = 'admin');
+    USING ((auth.jwt() ->> 'role'::text) = 'admin'::text)
+    WITH CHECK ((auth.jwt() ->> 'role'::text) = 'admin'::text);
 
 -- Grant usage on the site_config table to the authenticated role
 GRANT USAGE ON SCHEMA public TO authenticated;
