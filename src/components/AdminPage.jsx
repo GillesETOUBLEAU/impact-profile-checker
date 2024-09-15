@@ -13,15 +13,15 @@ const AdminPage = () => {
   const [logoPreview, setLogoPreview] = useState('');
   const queryClient = useQueryClient();
 
-  const { data: siteConfig, isLoading } = useQuery({
+  const { data: siteConfig, isLoading, error } = useQuery({
     queryKey: ['siteConfig'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('site_config')
         .select('*')
-        .single();
+        .limit(1);
       if (error) throw error;
-      return data;
+      return data[0] || {}; // Return the first row or an empty object if no rows
     },
   });
 
@@ -35,12 +35,12 @@ const AdminPage = () => {
 
   const updateConfig = useMutation({
     mutationFn: async (newConfig) => {
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('site_config')
-        .update(newConfig)
-        .eq('id', siteConfig.id);
+        .upsert(newConfig, { onConflict: 'id' })
+        .select();
       if (error) throw error;
-      return data;
+      return data[0];
     },
     onSuccess: () => {
       queryClient.invalidateQueries('siteConfig');
@@ -61,7 +61,7 @@ const AdminPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let logoUrl = siteConfig.logo_url;
+    let logoUrl = siteConfig?.logo_url;
 
     if (logoFile) {
       try {
@@ -87,6 +87,7 @@ const AdminPage = () => {
     }
 
     updateConfig.mutate({
+      id: siteConfig?.id, // Include the id for upsert
       header_text: headerText,
       footer_text: footerText,
       logo_url: logoUrl,
@@ -94,6 +95,7 @@ const AdminPage = () => {
   };
 
   if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading configuration: {error.message}</div>;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
