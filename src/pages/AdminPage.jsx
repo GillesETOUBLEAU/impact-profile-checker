@@ -109,6 +109,17 @@ const AdminPage = () => {
     createAdminUser.mutate(newAdminEmail);
   };
 
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error(`Error signing out: ${error.message}`);
+    } else {
+      setAuthState('unauthenticated');
+      setIsAdmin(false);
+      toast.success('Logged out successfully');
+    }
+  };
+
   if (loading || configLoading) return <div>Loading...</div>;
 
   if (authState === 'unauthenticated') {
@@ -134,6 +145,7 @@ const AdminPage = () => {
         <Alert variant="destructive">
           <AlertDescription>You are logged in, but you don't have admin privileges. Please contact an administrator to grant you access.</AlertDescription>
         </Alert>
+        <Button onClick={handleLogout} className="mt-4">Logout</Button>
       </div>
     );
   }
@@ -186,6 +198,8 @@ const AdminPage = () => {
         </div>
         <Button type="submit">Create Admin User</Button>
       </form>
+
+      <Button onClick={handleLogout} className="mt-8">Logout</Button>
     </div>
   );
 };
