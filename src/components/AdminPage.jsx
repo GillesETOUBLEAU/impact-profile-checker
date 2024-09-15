@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
+import { useSupabaseAuth } from '../integrations/supabase';
 
 const AdminPage = () => {
   const [headerText, setHeaderText] = useState('');
@@ -12,10 +13,14 @@ const AdminPage = () => {
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState('');
   const queryClient = useQueryClient();
+  const { session } = useSupabaseAuth();
 
   const { data: siteConfig, isLoading, error } = useQuery({
     queryKey: ['siteConfig'],
     queryFn: async () => {
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
       const { data, error } = await supabase
         .from('site_config')
         .select('*')
@@ -44,6 +49,7 @@ const AdminPage = () => {
 
       return data;
     },
+    enabled: !!session,
   });
 
   useEffect(() => {
@@ -56,6 +62,9 @@ const AdminPage = () => {
 
   const updateConfig = useMutation({
     mutationFn: async (newConfig) => {
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
       const { data, error } = await supabase
         .from('site_config')
         .upsert(newConfig)
@@ -114,6 +123,10 @@ const AdminPage = () => {
       logo_url: logoUrl,
     });
   };
+
+  if (!session) {
+    return <div>Please log in to access the admin page.</div>;
+  }
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading configuration: {error.message}</div>;
