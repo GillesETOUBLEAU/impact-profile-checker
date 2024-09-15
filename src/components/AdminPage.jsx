@@ -59,8 +59,7 @@ const AdminPage = () => {
     mutationFn: async (newConfig) => {
       const { data, error } = await supabase
         .from('site_config')
-        .update(newConfig)
-        .eq('id', siteConfig.id)
+        .upsert(newConfig)
         .select();
       if (error) throw error;
       return data[0];
