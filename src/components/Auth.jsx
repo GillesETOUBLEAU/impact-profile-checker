@@ -22,7 +22,11 @@ const Auth = () => {
       toast.success('Logged in successfully');
     } catch (error) {
       console.error('Login error:', error);
-      setError(error.message || 'An error occurred during login');
+      if (error.message === 'Invalid login credentials') {
+        setError('Invalid email or password. Please try again.');
+      } else {
+        setError(error.message || 'An error occurred during login');
+      }
       toast.error(error.message || 'Login failed');
     } finally {
       setLoading(false);
