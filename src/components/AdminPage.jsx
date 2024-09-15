@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,20 +15,16 @@ const AdminPage = () => {
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState('');
   const [authError, setAuthError] = useState(null);
-  const queryClient = useQueryClient();
   const { session } = useSupabaseAuth() || {};
 
-  const { data: siteConfig, isLoading, error } = useQuery({
+  const { data: siteConfig, isLoading, error, refetch } = useQuery({
     queryKey: ['siteConfig'],
     queryFn: async () => {
-      if (!session) {
-        return null;
-      }
+      if (!session) return null;
       const { data, error } = await supabase
         .from('site_config')
         .select('*')
         .maybeSingle();
-
       if (error) throw error;
       return data;
     },
@@ -45,9 +41,7 @@ const AdminPage = () => {
 
   const updateConfig = useMutation({
     mutationFn: async (newConfig) => {
-      if (!session) {
-        throw new Error('Not authenticated');
-      }
+      if (!session) throw new Error('Not authenticated');
       const { data, error } = await supabase
         .from('site_config')
         .upsert(newConfig)
@@ -56,7 +50,7 @@ const AdminPage = () => {
       return data[0];
     },
     onSuccess: () => {
-      queryClient.invalidateQueries('siteConfig');
+      refetch();
       toast.success('Configuration updated successfully');
     },
     onError: (error) => {

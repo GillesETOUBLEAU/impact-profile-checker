@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import UserInfoForm from '../components/UserInfoForm';
 import QuestionSlider from '../components/QuestionSlider';
 import ResultsDisplay from '../components/ResultsDisplay';
@@ -124,6 +125,7 @@ const Index = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <h1 className="text-3xl font-bold mb-6">Test de Profil d'Impacteur</h1>
+      <Link to="/admin" className="text-blue-500 hover:underline mb-4 inline-block">Admin Page</Link>
       {step === 'userInfo' && <UserInfoForm onSubmit={handleUserInfoSubmit} />}
       {step === 'questions' && (
         <div className="space-y-6">
