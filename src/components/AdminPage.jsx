@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import { useSupabaseAuth } from '../integrations/supabase';
 import { SupabaseAuthUI } from '../integrations/supabase';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const AdminPage = () => {
   const [headerText, setHeaderText] = useState('');
   const [footerText, setFooterText] = useState('');
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState('');
+  const [authError, setAuthError] = useState(null);
   const queryClient = useQueryClient();
   const { session } = useSupabaseAuth() || {};
 
@@ -105,11 +107,21 @@ const AdminPage = () => {
     });
   };
 
+  const handleAuthError = (error) => {
+    setAuthError(error.message);
+    toast.error(`Authentication error: ${error.message}`);
+  };
+
   if (!session) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <h1 className="text-3xl font-bold mb-6">Admin Login</h1>
-        <SupabaseAuthUI />
+        {authError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{authError}</AlertDescription>
+          </Alert>
+        )}
+        <SupabaseAuthUI onError={handleAuthError} />
       </div>
     );
   }
