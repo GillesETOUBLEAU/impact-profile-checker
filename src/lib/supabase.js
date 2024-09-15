@@ -35,12 +35,22 @@ try {
     },
   })
 
-  // Test the connection
+  // Test the connection and email sending
   supabase.auth.getSession().then(({ data, error }) => {
     if (error) {
       console.error('Error initializing Supabase client:', error.message)
     } else {
       console.log('Supabase client initialized successfully')
+      // Test email sending
+      supabase.auth.resetPasswordForEmail('test@example.com', {
+        redirectTo: redirectUrl,
+      }).then(({ data, error }) => {
+        if (error) {
+          console.error('Error testing email sending:', error.message)
+        } else {
+          console.log('Test email sent successfully')
+        }
+      })
     }
   }).catch(err => {
     console.error('Unexpected error during Supabase initialization:', err.message)
