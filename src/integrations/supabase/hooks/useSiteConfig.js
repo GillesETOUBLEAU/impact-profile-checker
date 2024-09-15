@@ -24,7 +24,35 @@ Foreign Key Relationships:
 
 export const useSiteConfig = () => useQuery({
     queryKey: ['site_config'],
-    queryFn: () => fromSupabase(supabase.from('site_config').select('*')),
+    queryFn: async () => {
+        const { data, error } = await supabase
+            .from('site_config')
+            .select('*')
+            .maybeSingle();
+        
+        if (error) throw new Error(error.message);
+        
+        if (!data) {
+            // If no configuration exists, create a default one
+            const defaultConfig = {
+                header_text: 'Welcome to Impact Profile Checker',
+                footer_text: 'Copyright © 2023 Impact Profile Checker',
+                logo_url: 'https://tqvrsvdphejiwmtgxdvg.supabase.co/storage/v1/object/public/site-assets/Untitled.png'
+            };
+
+            const { data: newConfig, error: insertError } = await supabase
+                .from('site_config')
+                .insert([defaultConfig])
+                .select()
+                .single();
+
+            if (insertError) throw new Error(insertError.message);
+
+            return newConfig;
+        }
+
+        return data;
+    },
 });
 
 export const useSiteConfigItem = (id) => useQuery({
