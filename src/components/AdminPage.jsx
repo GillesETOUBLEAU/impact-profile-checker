@@ -13,12 +13,15 @@ const AdminPage = () => {
   const [logoPreview, setLogoPreview] = useState('');
   const queryClient = useQueryClient();
 
-  const { data: siteConfigs, isLoading, error } = useQuery({
+  const { data: siteConfig, isLoading, error } = useQuery({
     queryKey: ['siteConfig'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('site_config')
-        .select('*');
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single();
       if (error) throw error;
       return data;
     },
@@ -26,13 +29,12 @@ const AdminPage = () => {
   });
 
   useEffect(() => {
-    if (siteConfigs && siteConfigs.length > 0) {
-      const config = siteConfigs[0];
-      setHeaderText(config.header_text || '');
-      setFooterText(config.footer_text || '');
-      setLogoPreview(config.logo_url || '');
+    if (siteConfig) {
+      setHeaderText(siteConfig.header_text || '');
+      setFooterText(siteConfig.footer_text || '');
+      setLogoPreview(siteConfig.logo_url || '');
     }
-  }, [siteConfigs]);
+  }, [siteConfig]);
 
   const updateConfig = useMutation({
     mutationFn: async (newConfig) => {
@@ -62,7 +64,7 @@ const AdminPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let logoUrl = siteConfigs && siteConfigs.length > 0 ? siteConfigs[0].logo_url : null;
+    let logoUrl = siteConfig ? siteConfig.logo_url : null;
 
     if (logoFile) {
       try {
@@ -88,7 +90,7 @@ const AdminPage = () => {
     }
 
     updateConfig.mutate({
-      id: siteConfigs && siteConfigs.length > 0 ? siteConfigs[0].id : undefined,
+      id: siteConfig ? siteConfig.id : undefined,
       header_text: headerText,
       footer_text: footerText,
       logo_url: logoUrl,
