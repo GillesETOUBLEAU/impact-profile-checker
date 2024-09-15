@@ -16,6 +16,20 @@ try {
       autoRefreshToken: true,
       detectSessionInUrl: true,
     },
+    global: {
+      fetch: (...args) => fetch(...args).then(async (res) => {
+        if (!res.ok) {
+          const errorBody = await res.text();
+          console.error('Supabase API Error:', {
+            status: res.status,
+            statusText: res.statusText,
+            body: errorBody,
+          });
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res;
+      }),
+    },
   })
 
   // Test the connection
