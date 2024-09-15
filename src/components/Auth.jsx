@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from 'sonner';
+import { assignUserRole } from '../utils/supabaseUtils';
 
 const Auth = ({ onAuthStateChange }) => {
   const [loading, setLoading] = useState(false);
@@ -44,7 +45,6 @@ const Auth = ({ onAuthStateChange }) => {
       if (data.user) {
         console.log('User logged in successfully:', data.user);
         toast.success('Logged in successfully');
-        // Redirect or update UI as needed
       } else {
         setError('Login failed. Please try again.');
       }
@@ -77,6 +77,8 @@ const Auth = ({ onAuthStateChange }) => {
       console.log('Signup response:', data);
       if (data.user) {
         console.log('User signed up successfully:', data.user);
+        // Assign a default role to the new user
+        await assignUserRole(data.user.id, 'user');
         toast.success('Signed up successfully. Please check your email for verification.');
       } else {
         setError('Sign up failed. Please try again.');
