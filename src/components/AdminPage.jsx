@@ -64,21 +64,26 @@ const AdminPage = () => {
     let logoUrl = siteConfig.logo_url;
 
     if (logoFile) {
-      const fileName = `logo_${Date.now()}.${logoFile.name.split('.').pop()}`;
-      const { data, error } = await supabase.storage
-        .from('site-assets')
-        .upload(fileName, logoFile);
+      try {
+        const fileName = `logo_${Date.now()}.${logoFile.name.split('.').pop()}`;
+        const { error: uploadError, data } = await supabase.storage
+          .from('site-assets')
+          .upload(fileName, logoFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-      if (error) {
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('site-assets')
+          .getPublicUrl(fileName);
+
+        logoUrl = publicUrl;
+      } catch (error) {
         toast.error(`Error uploading logo: ${error.message}`);
         return;
       }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('site-assets')
-        .getPublicUrl(fileName);
-
-      logoUrl = publicUrl;
     }
 
     updateConfig.mutate({
