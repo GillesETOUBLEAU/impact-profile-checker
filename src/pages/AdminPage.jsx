@@ -64,26 +64,37 @@ const AdminPage = () => {
     }
   };
 
-  const assignAdminRole = useMutation({
+  const createAdminUser = useMutation({
     mutationFn: async (email) => {
-      const { data, error } = await supabase.functions.invoke('assign-admin-role', {
-        body: { email }
+      // First, create a new user
+      const { data: userData, error: userError } = await supabase.auth.signUp({
+        email,
+        password: Math.random().toString(36).slice(-8), // Generate a random password
       });
+
+      if (userError) throw userError;
+
+      // Then, assign the admin role
+      const { data, error } = await supabase
+        .from('user_roles')
+        .insert({ user_id: userData.user.id, role: 'admin' });
+
       if (error) throw error;
+
       return data;
     },
     onSuccess: () => {
-      toast.success('Admin role assigned successfully');
+      toast.success('Admin user created successfully. Check email for verification.');
       setNewAdminEmail('');
     },
     onError: (error) => {
-      toast.error(`Error assigning admin role: ${error.message}`);
+      toast.error(`Error creating admin user: ${error.message}`);
     }
   });
 
-  const handleAssignAdmin = (e) => {
+  const handleCreateAdmin = (e) => {
     e.preventDefault();
-    assignAdminRole.mutate(newAdminEmail);
+    createAdminUser.mutate(newAdminEmail);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -134,10 +145,10 @@ const AdminPage = () => {
         <Button type="submit">Save Configuration</Button>
       </form>
 
-      <h2 className="text-2xl font-bold mb-4">Assign Admin Role</h2>
-      <form onSubmit={handleAssignAdmin} className="space-y-4">
+      <h2 className="text-2xl font-bold mb-4">Create Admin User</h2>
+      <form onSubmit={handleCreateAdmin} className="space-y-4">
         <div>
-          <Label htmlFor="newAdminEmail">User Email</Label>
+          <Label htmlFor="newAdminEmail">New Admin Email</Label>
           <Input
             id="newAdminEmail"
             type="email"
@@ -146,7 +157,7 @@ const AdminPage = () => {
             required
           />
         </div>
-        <Button type="submit">Assign Admin Role</Button>
+        <Button type="submit">Create Admin User</Button>
       </form>
     </div>
   );
