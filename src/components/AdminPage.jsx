@@ -19,7 +19,7 @@ const AdminPage = () => {
       const { data, error } = await supabase
         .from('site_config')
         .select('*')
-        .eq('id', 'ce334410-17eb-4fa1-9c46-1d1f0d35a2c4')
+        .limit(1)
         .single();
       if (error) throw error;
       return data;
@@ -37,9 +37,10 @@ const AdminPage = () => {
 
   const updateConfig = useMutation({
     mutationFn: async (newConfig) => {
-      let { data, error } = await supabase
+      const { data, error } = await supabase
         .from('site_config')
-        .upsert({ ...newConfig, id: 'ce334410-17eb-4fa1-9c46-1d1f0d35a2c4' })
+        .update(newConfig)
+        .eq('id', siteConfig.id)
         .select();
       if (error) throw error;
       return data[0];
