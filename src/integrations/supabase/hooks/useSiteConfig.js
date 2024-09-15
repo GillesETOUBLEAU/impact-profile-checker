@@ -42,6 +42,13 @@ export const useSiteConfig = () => useQuery({
                     console.log('Default config created:', newConfig);
                     return newConfig;
                 } else {
+                    console.error('Unexpected error:', error);
+                    console.log('Supabase project URL:', import.meta.env.VITE_SUPABASE_PROJECT_URL);
+                    console.log('Supabase API key (first 5 chars):', import.meta.env.VITE_SUPABASE_API_KEY.substring(0, 5));
+                    console.log('Check Supabase settings:');
+                    console.log('1. Verify "Authentication" settings and API keys');
+                    console.log('2. Review RLS policies for site_config table in "Database" section');
+                    console.log('3. Ensure site_config table exists and has correct structure');
                     throw new Error(error.message);
                 }
             }
