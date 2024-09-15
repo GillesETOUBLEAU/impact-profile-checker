@@ -20,9 +20,6 @@ const Auth = () => {
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email, 
         password,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
       });
       
       if (error) throw error;
