@@ -25,7 +25,7 @@ try {
             statusText: res.statusText,
             body: errorBody,
           });
-          throw new Error(`HTTP error! status: ${res.status}`);
+          throw new Error(`HTTP error! status: ${res.status}, body: ${errorBody}`);
         }
         return res;
       }),
