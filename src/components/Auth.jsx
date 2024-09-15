@@ -3,39 +3,56 @@ import { supabase } from '../lib/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from 'sonner';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      toast.error(error.message);
-    } else {
+    setError('');
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
       toast.success('Logged in successfully');
+    } catch (error) {
+      console.error('Login error:', error);
+      setError(error.message || 'An error occurred during login');
+      toast.error(error.message || 'Login failed');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      toast.error(error.message);
-    } else {
+    setError('');
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
       toast.success('Signed up successfully. Please check your email for verification.');
+    } catch (error) {
+      console.error('Signup error:', error);
+      setError(error.message || 'An error occurred during sign up');
+      toast.error(error.message || 'Sign up failed');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <div className="space-y-4">
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       <form onSubmit={handleLogin} className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
