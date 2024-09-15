@@ -20,32 +20,21 @@ export const useSiteConfig = () => useQuery({
             
             if (error) {
                 console.error('Error fetching site config:', error);
+                if (error.code === 'PGRST301') {
+                    toast.error('Accès non autorisé à la configuration du site. Veuillez vérifier vos permissions.');
+                    return null;
+                }
                 toast.error('Erreur lors de la récupération de la configuration du site.');
                 throw error;
             }
 
             if (!data) {
-                console.log('No site config found. Creating default config...');
-                const defaultConfig = {
+                console.log('No site config found or access denied. Using default config...');
+                return {
                     header_text: 'Welcome to Impact Profile Checker',
                     footer_text: 'Copyright © 2023 Impact Profile Checker',
                     logo_url: 'https://tqvrsvdphejiwmtgxdvg.supabase.co/storage/v1/object/public/site-assets/default-logo.png'
                 };
-
-                const { data: newConfig, error: insertError } = await supabase
-                    .from('site_config')
-                    .insert([defaultConfig])
-                    .select()
-                    .single();
-
-                if (insertError) {
-                    console.error('Error inserting default config:', insertError);
-                    toast.error('Erreur lors de la création de la configuration par défaut.');
-                    throw insertError;
-                }
-
-                console.log('Default config created:', newConfig);
-                return newConfig;
             }
 
             console.log('Site config fetched:', data);
@@ -53,10 +42,10 @@ export const useSiteConfig = () => useQuery({
         } catch (error) {
             console.error('Unexpected error in useSiteConfig:', error);
             toast.error('Une erreur inattendue est survenue lors de la récupération de la configuration.');
-            throw error;
+            return null;
         }
     },
-    retry: 3,
+    retry: 1,
     retryDelay: 1000,
     onError: (error) => {
         console.error('Error in useSiteConfig query:', error);
@@ -75,7 +64,12 @@ export const useUpdateSiteConfig = () => {
                 .select()
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                if (error.code === 'PGRST301') {
+                    throw new Error('Accès non autorisé pour mettre à jour la configuration du site.');
+                }
+                throw error;
+            }
             return data;
         },
         onSuccess: () => {
@@ -84,7 +78,7 @@ export const useUpdateSiteConfig = () => {
         },
         onError: (error) => {
             console.error('Error updating site config:', error);
-            toast.error('Erreur lors de la mise à jour de la configuration du site.');
+            toast.error(`Erreur lors de la mise à jour de la configuration du site: ${error.message}`);
         }
     });
 };
@@ -92,14 +86,27 @@ export const useUpdateSiteConfig = () => {
 export const useDeleteSiteConfig = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id) => fromSupabase(supabase.from('site_config').delete().eq('id', id)),
+        mutationFn: async (id) => {
+            const { data, error } = await supabase
+                .from('site_config')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                if (error.code === 'PGRST301') {
+                    throw new Error('Accès non autorisé pour supprimer la configuration du site.');
+                }
+                throw error;
+            }
+            return data;
+        },
         onSuccess: () => {
             queryClient.invalidateQueries('site_config');
             toast.success('Configuration du site supprimée avec succès.');
         },
         onError: (error) => {
             console.error('Error deleting site config:', error);
-            toast.error('Erreur lors de la suppression de la configuration du site.');
+            toast.error(`Erreur lors de la suppression de la configuration du site: ${error.message}`);
         }
     });
 };
