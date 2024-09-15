@@ -17,9 +17,22 @@ const Auth = () => {
     setLoading(true);
     setError('');
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      
       if (error) throw error;
-      toast.success('Logged in successfully');
+      
+      if (data.user) {
+        toast.success('Logged in successfully');
+        // Redirect or update UI as needed
+      } else {
+        setError('Login failed. Please try again.');
+      }
     } catch (error) {
       console.error('Login error:', error);
       if (error.message === 'Invalid login credentials') {
@@ -45,8 +58,14 @@ const Auth = () => {
           emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       });
+      
       if (error) throw error;
-      toast.success('Signed up successfully. Please check your email for verification.');
+      
+      if (data.user) {
+        toast.success('Signed up successfully. Please check your email for verification.');
+      } else {
+        setError('Sign up failed. Please try again.');
+      }
     } catch (error) {
       console.error('Signup error:', error);
       setError(error.message || 'An error occurred during sign up');
