@@ -13,27 +13,30 @@ export const useSiteConfig = () => useQuery({
         const { data, error } = await supabase
             .from('site_config')
             .select('*')
-            .maybeSingle();
+            .limit(1)
+            .single();
         
-        if (error) throw new Error(error.message);
-        
-        if (!data) {
-            // If no configuration exists, create a default one
-            const defaultConfig = {
-                header_text: 'Welcome to Impact Profile Checker',
-                footer_text: 'Copyright © 2023 Impact Profile Checker',
-                logo_url: 'https://tqvrsvdphejiwmtgxdvg.supabase.co/storage/v1/object/public/site-assets/Untitled.png'
-            };
+        if (error) {
+            if (error.code === 'PGRST116') {
+                // No rows found, create a default config
+                const defaultConfig = {
+                    header_text: 'Welcome to Impact Profile Checker',
+                    footer_text: 'Copyright © 2023 Impact Profile Checker',
+                    logo_url: 'https://tqvrsvdphejiwmtgxdvg.supabase.co/storage/v1/object/public/site-assets/default-logo.png'
+                };
 
-            const { data: newConfig, error: insertError } = await supabase
-                .from('site_config')
-                .insert([defaultConfig])
-                .select()
-                .single();
+                const { data: newConfig, error: insertError } = await supabase
+                    .from('site_config')
+                    .insert([defaultConfig])
+                    .select()
+                    .single();
 
-            if (insertError) throw new Error(insertError.message);
+                if (insertError) throw new Error(insertError.message);
 
-            return newConfig;
+                return newConfig;
+            } else {
+                throw new Error(error.message);
+            }
         }
 
         return data;
