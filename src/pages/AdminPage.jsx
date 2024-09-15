@@ -14,6 +14,7 @@ const AdminPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [authState, setAuthState] = useState('checking');
 
   const { data: siteConfig, isLoading: configLoading, refetch } = useSiteConfig();
   const addSiteConfig = useAddSiteConfig();
@@ -26,12 +27,18 @@ const AdminPage = () => {
   });
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      const adminStatus = await checkAdminRole();
-      setIsAdmin(adminStatus);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const adminStatus = await checkAdminRole();
+        setIsAdmin(adminStatus);
+        setAuthState(adminStatus ? 'admin' : 'authenticated');
+      } else {
+        setAuthState('unauthenticated');
+      }
       setLoading(false);
     };
-    checkAdmin();
+    checkAuth();
   }, []);
 
   useEffect(() => {
@@ -104,13 +111,28 @@ const AdminPage = () => {
 
   if (loading || configLoading) return <div>Loading...</div>;
 
-  if (!isAdmin) {
+  if (authState === 'unauthenticated') {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <h1 className="text-3xl font-bold mb-6">Admin Login</h1>
-        <Auth />
-        <Alert variant="destructive" className="mt-4">
-          <AlertDescription>You need admin privileges to access this page.</AlertDescription>
+        <Auth onAuthStateChange={(event) => {
+          if (event === 'SIGNED_IN') {
+            setAuthState('checking');
+            checkAdminRole().then(isAdmin => {
+              setIsAdmin(isAdmin);
+              setAuthState(isAdmin ? 'admin' : 'authenticated');
+            });
+          }
+        }} />
+      </div>
+    );
+  }
+
+  if (authState === 'authenticated' && !isAdmin) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <Alert variant="destructive">
+          <AlertDescription>You are logged in, but you don't have admin privileges. Please contact an administrator to grant you access.</AlertDescription>
         </Alert>
       </div>
     );
