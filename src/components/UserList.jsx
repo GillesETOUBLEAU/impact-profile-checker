@@ -30,24 +30,27 @@ const UserList = () => {
   if (error) return <div>Error loading users: {error.message}</div>;
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Email</TableHead>
-          <TableHead>Created At</TableHead>
-          <TableHead>Admin Status</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {users.map((user) => (
-          <TableRow key={user.id}>
-            <TableCell>{user.email}</TableCell>
-            <TableCell>{new Date(user.created_at).toLocaleString()}</TableCell>
-            <TableCell>{user.isAdmin ? 'Admin' : 'User'}</TableCell>
+    <div className="mt-8">
+      <h2 className="text-2xl font-bold mb-4">User List</h2>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Email</TableHead>
+            <TableHead>Created At</TableHead>
+            <TableHead>Admin Status</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {users.map((user) => (
+            <TableRow key={user.id}>
+              <TableCell>{user.email}</TableCell>
+              <TableCell>{new Date(user.created_at).toLocaleString()}</TableCell>
+              <TableCell>{user.isAdmin ? 'Admin' : 'User'}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 
