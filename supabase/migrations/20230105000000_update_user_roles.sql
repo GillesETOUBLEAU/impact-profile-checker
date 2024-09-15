@@ -1,3 +1,6 @@
+-- Add a unique constraint to the user_id column in the user_roles table
+ALTER TABLE user_roles ADD CONSTRAINT user_roles_user_id_key UNIQUE (user_id);
+
 -- Function to assign a default role to a user
 CREATE OR REPLACE FUNCTION assign_default_role()
 RETURNS TRIGGER AS $$
