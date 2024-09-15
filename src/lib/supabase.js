@@ -35,43 +35,45 @@ try {
     },
   })
 
-  // Test the connection and email sending
+  // Test the connection
   supabase.auth.getSession().then(({ data, error }) => {
     if (error) {
       console.error('Error initializing Supabase client:', error.message)
+      console.error('Full error object:', error)
     } else {
       console.log('Supabase client initialized successfully')
-      
-      // Test email sending with signUp
-      const testEmail = `test${Date.now()}@example.com`
-      const testPassword = 'testpassword123'
-      
-      supabase.auth.signUp({
-        email: testEmail,
-        password: testPassword,
-      }).then(({ data, error }) => {
-        if (error) {
-          console.error('Error testing email sending:', error.message)
-          console.error('Full error object:', error)
-        } else {
-          console.log('Test signup successful, verification email should be sent')
-          console.log('Signup response:', data)
-          
-          // Check if email confirmation is required
-          if (data.user && data.user.identities && data.user.identities.length === 0) {
-            console.log('Email confirmation is required. Check your Supabase Email settings.')
-          } else {
-            console.log('User created without email confirmation. Check your Supabase Email settings if this is not intended.')
-          }
-        }
-      })
+      console.log('Session data:', data)
     }
   }).catch(err => {
     console.error('Unexpected error during Supabase initialization:', err.message)
+    console.error('Full error object:', err)
   })
+
+  // Log the current URL
+  console.log('Current URL:', window.location.href)
+
+  // Check for authentication code in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const authCode = urlParams.get('code');
+  if (authCode) {
+    console.log('Authentication code detected:', authCode)
+    supabase.auth.exchangeCodeForSession(authCode).then(({ data, error }) => {
+      if (error) {
+        console.error('Error exchanging code for session:', error.message)
+        console.error('Full error object:', error)
+      } else {
+        console.log('Session created successfully')
+        console.log('Session data:', data)
+      }
+    }).catch(err => {
+      console.error('Unexpected error during code exchange:', err.message)
+      console.error('Full error object:', err)
+    })
+  }
 
 } catch (error) {
   console.error('Failed to initialize Supabase client:', error.message)
+  console.error('Full error object:', error)
 }
 
 export { supabase }
