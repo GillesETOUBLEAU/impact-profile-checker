@@ -10,17 +10,31 @@ CREATE TABLE IF NOT EXISTS site_config (
 -- Enable Row Level Security (RLS) on the site_config table
 ALTER TABLE site_config ENABLE ROW LEVEL SECURITY;
 
--- Create a policy that allows all authenticated users to select from the site_config table
-CREATE POLICY "Allow authenticated users to read site_config" ON site_config
-    FOR SELECT
-    TO authenticated
-    USING (true);
+-- Check if the policy already exists before creating it
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Allow authenticated users to read site_config') THEN
+    -- Create a policy that allows all authenticated users to select from the site_config table
+    CREATE POLICY "Allow authenticated users to read site_config" ON site_config
+        FOR SELECT
+        TO authenticated
+        USING (true);
+  END IF;
+END
+$$;
 
--- Create a policy that allows only users with the 'admin' role to update the site_config table
-CREATE POLICY "Allow admins to update site_config" ON site_config
-    FOR UPDATE
-    TO authenticated
-    USING (auth.jwt() ->> 'role' = 'admin');
+-- Check if the policy already exists before creating it
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Allow admins to update site_config') THEN
+    -- Create a policy that allows only users with the 'admin' role to update the site_config table
+    CREATE POLICY "Allow admins to update site_config" ON site_config
+        FOR UPDATE
+        TO authenticated
+        USING (auth.jwt() ->> 'role' = 'admin');
+  END IF;
+END
+$$;
 
 -- Grant usage on the site_config table to the authenticated role
 GRANT USAGE ON SCHEMA public TO authenticated;
