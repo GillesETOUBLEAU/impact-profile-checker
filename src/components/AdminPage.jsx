@@ -16,12 +16,32 @@ const AdminPage = () => {
   const { data: siteConfig, isLoading, error } = useQuery({
     queryKey: ['siteConfig'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('site_config')
         .select('*')
-        .limit(1)
-        .single();
+        .maybeSingle();
+
       if (error) throw error;
+
+      if (!data) {
+        // If no configuration exists, create a default one
+        const defaultConfig = {
+          header_text: 'Welcome to Impact Profile Checker',
+          footer_text: 'Copyright © 2023 Impact Profile Checker',
+          logo_url: null
+        };
+
+        const { data: newConfig, error: insertError } = await supabase
+          .from('site_config')
+          .insert([defaultConfig])
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+
+        data = newConfig;
+      }
+
       return data;
     },
     retry: 1,
