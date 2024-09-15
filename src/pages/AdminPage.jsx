@@ -9,6 +9,7 @@ import { checkAdminRole } from '../utils/auth';
 import Auth from '../components/Auth';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAddSiteConfig, useUpdateSiteConfig, useSiteConfig } from '../integrations/supabase/hooks/useSiteConfig';
+import UserList from '../components/UserList';
 
 const AdminPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -185,7 +186,7 @@ const AdminPage = () => {
       </form>
 
       <h2 className="text-2xl font-bold mb-4">Create Admin User</h2>
-      <form onSubmit={handleCreateAdmin} className="space-y-4">
+      <form onSubmit={handleCreateAdmin} className="space-y-4 mb-8">
         <div>
           <Label htmlFor="newAdminEmail">New Admin Email</Label>
           <Input
@@ -198,6 +199,9 @@ const AdminPage = () => {
         </div>
         <Button type="submit">Create Admin User</Button>
       </form>
+
+      <h2 className="text-2xl font-bold mb-4">User List</h2>
+      <UserList />
 
       <Button onClick={handleLogout} className="mt-8">Logout</Button>
     </div>
