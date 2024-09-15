@@ -3,6 +3,7 @@ import { supabase } from './supabase.js';
 import { useQueryClient } from '@tanstack/react-query';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { toast } from 'sonner';
 
 const SupabaseAuthContext = createContext();
 
@@ -22,8 +23,13 @@ export const SupabaseAuthProviderInner = ({ children }) => {
   useEffect(() => {
     const getSession = async () => {
       setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error getting session:', error);
+        toast.error('Erreur lors de la récupération de la session.');
+      } else {
+        setSession(session);
+      }
       setLoading(false);
     };
 
@@ -41,9 +47,15 @@ export const SupabaseAuthProviderInner = ({ children }) => {
   }, [queryClient]);
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    setSession(null);
-    queryClient.invalidateQueries('user');
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error signing out:', error);
+      toast.error('Erreur lors de la déconnexion.');
+    } else {
+      setSession(null);
+      queryClient.invalidateQueries('user');
+      toast.success('Déconnexion réussie.');
+    }
     setLoading(false);
   };
 
@@ -58,11 +70,16 @@ export const useSupabaseAuth = () => {
   return useContext(SupabaseAuthContext);
 };
 
-export const SupabaseAuthUI = () => (
+export const SupabaseAuthUI = ({ onError }) => (
   <Auth
     supabaseClient={supabase}
     appearance={{ theme: ThemeSupa }}
     theme="default"
     providers={[]}
+    onError={(error) => {
+      console.error('Auth error:', error);
+      toast.error(`Erreur d'authentification: ${error.message}`);
+      if (onError) onError(error);
+    }}
   />
 );
