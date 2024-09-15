@@ -32,6 +32,7 @@ const fromSupabase = async (query) => {
 | curious_score    | numeric                 | number                 | true     |
 | profiles         | text[]                  | array of strings       | true     |
 | created_at       | timestamp with time zone| string                 | false    |
+| selected_profile | text                    | string                 | false    |
 
 Foreign Key Relationships:
 - None identified
