@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../supabase';
+import { toast } from 'sonner';
 
 const fromSupabase = async (query) => {
     const { data, error } = await query;
@@ -19,7 +20,8 @@ export const useSiteConfig = () => useQuery({
             
             if (error) {
                 console.error('Error fetching site config:', error);
-                throw new Error(error.message);
+                toast.error('Erreur lors de la récupération de la configuration du site.');
+                throw error;
             }
 
             if (!data) {
@@ -38,7 +40,8 @@ export const useSiteConfig = () => useQuery({
 
                 if (insertError) {
                     console.error('Error inserting default config:', insertError);
-                    throw new Error(insertError.message);
+                    toast.error('Erreur lors de la création de la configuration par défaut.');
+                    throw insertError;
                 }
 
                 console.log('Default config created:', newConfig);
@@ -49,35 +52,40 @@ export const useSiteConfig = () => useQuery({
             return data;
         } catch (error) {
             console.error('Unexpected error in useSiteConfig:', error);
+            toast.error('Une erreur inattendue est survenue lors de la récupération de la configuration.');
             throw error;
         }
     },
     retry: 3,
     retryDelay: 1000,
+    onError: (error) => {
+        console.error('Error in useSiteConfig query:', error);
+        toast.error('Erreur de connexion à la base de données. Veuillez réessayer plus tard.');
+    }
 });
-
-export const useSiteConfigItem = (id) => useQuery({
-    queryKey: ['site_config', id],
-    queryFn: () => fromSupabase(supabase.from('site_config').select('*').eq('id', id).single()),
-});
-
-export const useAddSiteConfig = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (newConfig) => fromSupabase(supabase.from('site_config').insert([newConfig])),
-        onSuccess: () => {
-            queryClient.invalidateQueries('site_config');
-        },
-    });
-};
 
 export const useUpdateSiteConfig = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, ...updateData }) => fromSupabase(supabase.from('site_config').update(updateData).eq('id', id)),
+        mutationFn: async (updateData) => {
+            const { data, error } = await supabase
+                .from('site_config')
+                .update(updateData)
+                .eq('id', updateData.id)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        },
         onSuccess: () => {
             queryClient.invalidateQueries('site_config');
+            toast.success('Configuration du site mise à jour avec succès.');
         },
+        onError: (error) => {
+            console.error('Error updating site config:', error);
+            toast.error('Erreur lors de la mise à jour de la configuration du site.');
+        }
     });
 };
 
@@ -87,6 +95,11 @@ export const useDeleteSiteConfig = () => {
         mutationFn: (id) => fromSupabase(supabase.from('site_config').delete().eq('id', id)),
         onSuccess: () => {
             queryClient.invalidateQueries('site_config');
+            toast.success('Configuration du site supprimée avec succès.');
         },
+        onError: (error) => {
+            console.error('Error deleting site config:', error);
+            toast.error('Erreur lors de la suppression de la configuration du site.');
+        }
     });
 };
