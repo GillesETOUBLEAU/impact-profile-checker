@@ -41,16 +41,28 @@ try {
       console.error('Error initializing Supabase client:', error.message)
     } else {
       console.log('Supabase client initialized successfully')
-      // Test email sending
+      
+      // Test email sending with signUp
+      const testEmail = `test${Date.now()}@example.com`
+      const testPassword = 'testpassword123'
+      
       supabase.auth.signUp({
-        email: 'test@example.com',
-        password: 'testpassword123',
+        email: testEmail,
+        password: testPassword,
       }).then(({ data, error }) => {
         if (error) {
           console.error('Error testing email sending:', error.message)
+          console.error('Full error object:', error)
         } else {
           console.log('Test signup successful, verification email should be sent')
           console.log('Signup response:', data)
+          
+          // Check if email confirmation is required
+          if (data.user && data.user.identities && data.user.identities.length === 0) {
+            console.log('Email confirmation is required. Check your Supabase Email settings.')
+          } else {
+            console.log('User created without email confirmation. Check your Supabase Email settings if this is not intended.')
+          }
         }
       })
     }
