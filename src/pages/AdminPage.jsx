@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { checkAdminRole } from '../utils/auth';
+import { checkAdminRole } from '../utils/supabaseUtils';
 import Auth from '../components/Auth';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AdminConfigForm from '../components/AdminConfigForm';
@@ -53,6 +53,7 @@ const AdminPage = () => {
   };
 
   const handleAuthStateChange = async (event, session) => {
+    console.log('Auth state change in AdminPage:', event, session);
     if (event === 'SIGNED_IN') {
       setAuthState('checking');
       const adminStatus = await checkAdminRole();

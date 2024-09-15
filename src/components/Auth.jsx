@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from 'sonner';
-import { assignUserRole } from '../utils/supabaseUtils';
+import { assignUserRole, checkAdminRole } from '../utils/supabaseUtils';
 
 const Auth = ({ onAuthStateChange }) => {
   const [loading, setLoading] = useState(false);
@@ -14,8 +14,12 @@ const Auth = ({ onAuthStateChange }) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session);
+      if (event === 'SIGNED_IN') {
+        const isAdmin = await checkAdminRole();
+        console.log('Is user admin?', isAdmin);
+      }
       if (onAuthStateChange) {
         onAuthStateChange(event, session);
       }
@@ -44,17 +48,10 @@ const Auth = ({ onAuthStateChange }) => {
       console.log('Login response:', data);
       if (data.user) {
         console.log('User logged in successfully:', data.user);
+        const isAdmin = await checkAdminRole();
+        console.log('Is user admin?', isAdmin);
         toast.success('Logged in successfully');
-        // Check if the user has an admin role
-        const { data: roleData, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', data.user.id)
-          .single();
-        
-        if (roleError) {
-          console.error('Error fetching user role:', roleError);
-        } else if (roleData && roleData.role === 'admin') {
+        if (isAdmin) {
           console.log('User has admin role');
         } else {
           console.log('User does not have admin role');
@@ -91,7 +88,6 @@ const Auth = ({ onAuthStateChange }) => {
       console.log('Signup response:', data);
       if (data.user) {
         console.log('User signed up successfully:', data.user);
-        // Assign a default role to the new user
         await assignUserRole(data.user.id, 'admin');
         toast.success('Signed up successfully. Please check your email for verification.');
       } else {

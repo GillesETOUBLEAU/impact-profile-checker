@@ -19,7 +19,12 @@ export const assignUserRole = async (userId, role) => {
 export const checkAdminRole = async () => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
+    if (!user) {
+      console.log('No user found');
+      return false;
+    }
+
+    console.log('Checking admin role for user:', user.id);
 
     const { data, error } = await supabase
       .from('user_roles')
@@ -32,6 +37,7 @@ export const checkAdminRole = async () => {
       return false;
     }
 
+    console.log('User role data:', data);
     return data && data.role === 'admin';
   } catch (error) {
     console.error('Unexpected error checking admin role:', error);
