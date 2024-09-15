@@ -7,21 +7,6 @@ const fromSupabase = async (query) => {
     return data;
 };
 
-/*
-### site_config
-
-| name        | type                    | format                 | required |
-|-------------|-------------------------|------------------------|----------|
-| id          | uuid                    | uuid                   | true     |
-| header_text | text                    | string                 | false    |
-| footer_text | text                    | string                 | false    |
-| logo_url    | text                    | string                 | false    |
-| updated_at  | timestamp with time zone| string                 | false    |
-
-Foreign Key Relationships:
-- None identified
-*/
-
 export const useSiteConfig = () => useQuery({
     queryKey: ['site_config'],
     queryFn: async () => {

@@ -14,18 +14,18 @@ const AdminPage = () => {
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState('');
   const queryClient = useQueryClient();
-  const { session } = useSupabaseAuth();
+  const { session } = useSupabaseAuth() || {};
 
   const { data: siteConfig, isLoading, error } = useQuery({
     queryKey: ['siteConfig'],
     queryFn: async () => {
       if (!session) {
-        throw new Error('Not authenticated');
+        return null;
       }
       const { data, error } = await supabase
         .from('site_config')
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
