@@ -19,27 +19,30 @@ const AdminPage = () => {
       let { data, error } = await supabase
         .from('site_config')
         .select('*')
-        .maybeSingle();
+        .limit(1)
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows found, create a default config
+          const defaultConfig = {
+            header_text: 'Welcome to Impact Profile Checker',
+            footer_text: 'Copyright © 2023 Impact Profile Checker',
+            logo_url: null
+          };
 
-      if (!data) {
-        // If no configuration exists, create a default one
-        const defaultConfig = {
-          header_text: 'Welcome to Impact Profile Checker',
-          footer_text: 'Copyright © 2023 Impact Profile Checker',
-          logo_url: null
-        };
+          const { data: newConfig, error: insertError } = await supabase
+            .from('site_config')
+            .insert([defaultConfig])
+            .select()
+            .single();
 
-        const { data: newConfig, error: insertError } = await supabase
-          .from('site_config')
-          .insert([defaultConfig])
-          .select()
-          .single();
+          if (insertError) throw insertError;
 
-        if (insertError) throw insertError;
-
-        data = newConfig;
+          return newConfig;
+        } else {
+          throw error;
+        }
       }
 
       return data;
@@ -109,6 +112,7 @@ const AdminPage = () => {
     }
 
     updateConfig.mutate({
+      id: siteConfig?.id, // Include the id for upsert
       header_text: headerText,
       footer_text: footerText,
       logo_url: logoUrl,
