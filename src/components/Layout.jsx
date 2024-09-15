@@ -18,11 +18,12 @@ const Layout = ({ children }) => {
     },
   });
 
-  const { session, logout } = useSupabaseAuth() || {};
+  const auth = useSupabaseAuth();
+  const session = auth?.session;
 
   const handleLogout = async () => {
-    if (logout) {
-      await logout();
+    if (auth?.logout) {
+      await auth.logout();
     }
   };
 
