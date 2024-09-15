@@ -20,11 +20,11 @@ CREATE POLICY "Allow authenticated users to read site_config" ON site_config
     TO authenticated
     USING (true);
 
--- Create a policy that allows only authenticated users with the 'admin' role to update the site_config table
+-- Create a policy that allows only users with the 'admin' role to update the site_config table
 CREATE POLICY "Allow admins to update site_config" ON site_config
     FOR UPDATE
     TO authenticated
-    USING ((auth.jwt() ->> 'role'::text) = 'admin'::text);
+    USING (auth.jwt() ->> 'role' = 'admin');
 
 -- Grant usage on the site_config table to the authenticated role
 GRANT USAGE ON SCHEMA public TO authenticated;
@@ -38,9 +38,6 @@ BEGIN
   END IF;
 END
 $$;
-
--- Grant the admin role to the 'authenticated' role
-GRANT admin TO authenticated;
 
 -- Insert a default row if the table is empty
 INSERT INTO site_config (header_text, footer_text, logo_url)
