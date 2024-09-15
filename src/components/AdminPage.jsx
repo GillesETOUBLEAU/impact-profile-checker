@@ -13,26 +13,26 @@ const AdminPage = () => {
   const [logoPreview, setLogoPreview] = useState('');
   const queryClient = useQueryClient();
 
-  const { data: siteConfig, isLoading, error } = useQuery({
+  const { data: siteConfigs, isLoading, error } = useQuery({
     queryKey: ['siteConfig'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('site_config')
-        .select('*')
-        .limit(1);
+        .select('*');
       if (error) throw error;
-      return data[0] || null; // Return null if no rows are found
+      return data;
     },
-    retry: 1, // Retry once in case of network issues
+    retry: 1,
   });
 
   useEffect(() => {
-    if (siteConfig) {
-      setHeaderText(siteConfig.header_text || '');
-      setFooterText(siteConfig.footer_text || '');
-      setLogoPreview(siteConfig.logo_url || '');
+    if (siteConfigs && siteConfigs.length > 0) {
+      const config = siteConfigs[0];
+      setHeaderText(config.header_text || '');
+      setFooterText(config.footer_text || '');
+      setLogoPreview(config.logo_url || '');
     }
-  }, [siteConfig]);
+  }, [siteConfigs]);
 
   const updateConfig = useMutation({
     mutationFn: async (newConfig) => {
@@ -62,7 +62,7 @@ const AdminPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let logoUrl = siteConfig?.logo_url;
+    let logoUrl = siteConfigs && siteConfigs.length > 0 ? siteConfigs[0].logo_url : null;
 
     if (logoFile) {
       try {
@@ -88,7 +88,7 @@ const AdminPage = () => {
     }
 
     updateConfig.mutate({
-      id: siteConfig?.id || undefined, // Include the id for upsert if it exists
+      id: siteConfigs && siteConfigs.length > 0 ? siteConfigs[0].id : undefined,
       header_text: headerText,
       footer_text: footerText,
       logo_url: logoUrl,
