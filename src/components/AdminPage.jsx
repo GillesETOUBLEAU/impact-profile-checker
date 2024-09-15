@@ -19,8 +19,7 @@ const AdminPage = () => {
       const { data, error } = await supabase
         .from('site_config')
         .select('*')
-        .order('updated_at', { ascending: false })
-        .limit(1)
+        .eq('id', 'ce334410-17eb-4fa1-9c46-1d1f0d35a2c4')
         .single();
       if (error) throw error;
       return data;
@@ -40,7 +39,7 @@ const AdminPage = () => {
     mutationFn: async (newConfig) => {
       let { data, error } = await supabase
         .from('site_config')
-        .upsert(newConfig, { onConflict: 'id' })
+        .upsert({ ...newConfig, id: 'ce334410-17eb-4fa1-9c46-1d1f0d35a2c4' })
         .select();
       if (error) throw error;
       return data[0];
@@ -90,7 +89,6 @@ const AdminPage = () => {
     }
 
     updateConfig.mutate({
-      id: siteConfig ? siteConfig.id : undefined,
       header_text: headerText,
       footer_text: footerText,
       logo_url: logoUrl,
