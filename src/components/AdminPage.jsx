@@ -16,38 +16,34 @@ const AdminPage = () => {
   const { data: siteConfig, isLoading, error } = useQuery({
     queryKey: ['siteConfig'],
     queryFn: async () => {
-      let { data, error } = await supabase
+      const { data, error } = await supabase
         .from('site_config')
         .select('*')
-        .limit(1)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No rows found, create a default config
-          const defaultConfig = {
-            header_text: 'Welcome to Impact Profile Checker',
-            footer_text: 'Copyright © 2023 Impact Profile Checker',
-            logo_url: null
-          };
+      if (error) throw error;
 
-          const { data: newConfig, error: insertError } = await supabase
-            .from('site_config')
-            .insert([defaultConfig])
-            .select()
-            .single();
+      if (!data) {
+        // If no configuration exists, create a default one
+        const defaultConfig = {
+          header_text: 'Welcome to Impact Profile Checker',
+          footer_text: 'Copyright © 2023 Impact Profile Checker',
+          logo_url: null
+        };
 
-          if (insertError) throw insertError;
+        const { data: newConfig, error: insertError } = await supabase
+          .from('site_config')
+          .insert([defaultConfig])
+          .select()
+          .single();
 
-          return newConfig;
-        } else {
-          throw error;
-        }
+        if (insertError) throw insertError;
+
+        return newConfig;
       }
 
       return data;
     },
-    retry: 1,
   });
 
   useEffect(() => {
@@ -112,7 +108,7 @@ const AdminPage = () => {
     }
 
     updateConfig.mutate({
-      id: siteConfig?.id, // Include the id for upsert
+      id: siteConfig?.id,
       header_text: headerText,
       footer_text: footerText,
       logo_url: logoUrl,

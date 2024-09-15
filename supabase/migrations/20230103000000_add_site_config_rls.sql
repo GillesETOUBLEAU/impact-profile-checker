@@ -1,6 +1,10 @@
 -- Enable Row Level Security (RLS) on the site_config table
 ALTER TABLE site_config ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Allow authenticated users to read site_config" ON site_config;
+DROP POLICY IF EXISTS "Allow admins to modify site_config" ON site_config;
+
 -- Create a policy that allows all authenticated users to select from the site_config table
 CREATE POLICY "Allow authenticated users to read site_config" ON site_config
     FOR SELECT
@@ -29,3 +33,8 @@ $$;
 
 -- Grant the admin role to the 'authenticated' role
 GRANT admin TO authenticated;
+
+-- Insert a default row if the table is empty
+INSERT INTO site_config (header_text, footer_text)
+SELECT 'Welcome to Impact Profile Checker', 'Copyright © 2023 Impact Profile Checker'
+WHERE NOT EXISTS (SELECT 1 FROM site_config);
