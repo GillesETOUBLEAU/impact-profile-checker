@@ -38,7 +38,6 @@ export const SupabaseAuthProviderInner = ({ children }) => {
       setSession(session);
       queryClient.invalidateQueries('user');
       if (event === 'SIGNED_OUT') {
-        // Clear any application-specific stored data
         localStorage.removeItem('supabase.auth.token');
       }
     });
@@ -65,6 +64,10 @@ export const SupabaseAuthProviderInner = ({ children }) => {
   const logout = async () => {
     try {
       setLoading(true);
+      // Clear local storage first
+      localStorage.removeItem('supabase.auth.token');
+      
+      // Attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Error signing out:', error);
@@ -73,13 +76,14 @@ export const SupabaseAuthProviderInner = ({ children }) => {
         setSession(null);
         queryClient.invalidateQueries('user');
         toast.success('Déconnexion réussie.');
-        // Clear any application-specific stored data
-        localStorage.removeItem('supabase.auth.token');
       }
     } catch (error) {
       console.error('Unexpected error during logout:', error);
       toast.error('Une erreur inattendue est survenue lors de la déconnexion.');
     } finally {
+      // Ensure the session is cleared locally even if the server request fails
+      setSession(null);
+      queryClient.invalidateQueries('user');
       setLoading(false);
     }
   };
