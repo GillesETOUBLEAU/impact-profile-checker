@@ -64,17 +64,18 @@ export const SupabaseAuthProviderInner = ({ children }) => {
   const logout = async () => {
     try {
       setLoading(true);
+      
       // Clear local storage first
       localStorage.removeItem('supabase.auth.token');
       
       // Attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
         console.error('Error signing out:', error);
-        toast.error('Erreur lors de la déconnexion: ' + error.message);
+        // Even if there's an error, we'll continue with the local logout process
+        toast.error('Erreur lors de la déconnexion du serveur, mais la session locale a été fermée.');
       } else {
-        setSession(null);
-        queryClient.invalidateQueries('user');
         toast.success('Déconnexion réussie.');
       }
     } catch (error) {
