@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../integrations/supabase';
 import AdminConfigForm from '../components/AdminConfigForm';
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabase';
+import Auth from '../components/Auth';
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -54,11 +55,8 @@ const AdminPage = () => {
   if (!session) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-md">
-        <h1 className="text-3xl font-bold mb-6">Admin Login Required</h1>
-        <Alert>
-          <AlertDescription>Please log in to access the admin page.</AlertDescription>
-        </Alert>
-        <Button onClick={() => navigate('/admin/login')} className="mt-4">Go to Login</Button>
+        <h1 className="text-3xl font-bold mb-6">Admin Login</h1>
+        <Auth />
       </div>
     );
   }
