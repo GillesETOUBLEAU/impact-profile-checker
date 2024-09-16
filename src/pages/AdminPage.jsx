@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { checkAdminRole } from '../utils/supabaseUtils';
 import Auth from '../components/Auth';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AdminConfigForm from '../components/AdminConfigForm';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
+import { useSupabaseAuth } from '../integrations/supabase';
+import { useNavigate } from 'react-router-dom';
 
 const AdminPage = () => {
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [authState, setAuthState] = useState('checking');
+  const { session, isAdmin, logout } = useSupabaseAuth();
+  const navigate = useNavigate();
 
   const { data: adminCount } = useQuery({
     queryKey: ['adminCount'],
@@ -26,57 +27,31 @@ const AdminPage = () => {
   });
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const adminStatus = await checkAdminRole();
-        setIsAdmin(adminStatus);
-        setAuthState(adminStatus ? 'admin' : 'authenticated');
-      } else {
-        setAuthState('unauthenticated');
-      }
-      setLoading(false);
-    };
-    checkAuth();
-  }, []);
+    setLoading(false);
+  }, [session, isAdmin]);
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      setAuthState('unauthenticated');
-      setIsAdmin(false);
-      toast.success('Logged out successfully');
+      await logout();
+      navigate('/admin/login');
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Error logging out:', error);
       toast.error('Error logging out');
-    }
-  };
-
-  const handleAuthStateChange = async (event, session) => {
-    if (event === 'SIGNED_IN') {
-      setAuthState('checking');
-      const adminStatus = await checkAdminRole();
-      setIsAdmin(adminStatus);
-      setAuthState(adminStatus ? 'admin' : 'authenticated');
-    } else if (event === 'SIGNED_OUT') {
-      setAuthState('unauthenticated');
-      setIsAdmin(false);
     }
   };
 
   if (loading) return <div>Loading...</div>;
 
-  if (authState === 'unauthenticated') {
+  if (!session) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <h1 className="text-3xl font-bold mb-6">Admin Login</h1>
-        <Auth onAuthStateChange={handleAuthStateChange} />
+        <Auth />
       </div>
     );
   }
 
-  if (authState === 'authenticated' && !isAdmin) {
+  if (!isAdmin) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <Alert variant="destructive">

@@ -18,6 +18,7 @@ export const SupabaseAuthProvider = ({ children }) => {
 export const SupabaseAuthProviderInner = ({ children }) => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -29,6 +30,9 @@ export const SupabaseAuthProviderInner = ({ children }) => {
         toast.error('Erreur lors de la récupération de la session.');
       } else {
         setSession(session);
+        if (session) {
+          checkAdminStatus(session.user.id);
+        }
       }
       setLoading(false);
     };
@@ -36,6 +40,11 @@ export const SupabaseAuthProviderInner = ({ children }) => {
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event);
       setSession(session);
+      if (session) {
+        checkAdminStatus(session.user.id);
+      } else {
+        setIsAdmin(false);
+      }
       queryClient.invalidateQueries('user');
       if (event === 'SIGNED_OUT') {
         localStorage.removeItem('supabase.auth.token');
@@ -49,9 +58,28 @@ export const SupabaseAuthProviderInner = ({ children }) => {
     };
   }, [queryClient]);
 
+  const checkAdminStatus = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) throw error;
+      setIsAdmin(data.role === 'admin');
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      setIsAdmin(false);
+    }
+  };
+
   const signIn = async ({ email, password }) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    if (data.user) {
+      await checkAdminStatus(data.user.id);
+    }
     return data;
   };
 
@@ -84,13 +112,14 @@ export const SupabaseAuthProviderInner = ({ children }) => {
     } finally {
       // Ensure the session is cleared locally even if the server request fails
       setSession(null);
+      setIsAdmin(false);
       queryClient.invalidateQueries('user');
       setLoading(false);
     }
   };
 
   return (
-    <SupabaseAuthContext.Provider value={{ session, loading, signIn, signUp, logout }}>
+    <SupabaseAuthContext.Provider value={{ session, loading, signIn, signUp, logout, isAdmin }}>
       {children}
     </SupabaseAuthContext.Provider>
   );
