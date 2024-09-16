@@ -8,7 +8,7 @@ import { useSupabaseAuth } from '../integrations/supabase';
 import { supabase } from '../lib/supabase';
 
 const AdminConfigForm = () => {
-  const { data: siteConfig, isLoading: configLoading, error: configError, refetch } = useSiteConfig();
+  const { data: siteConfig, isLoading, error, refetch } = useSiteConfig();
   const addSiteConfig = useAddSiteConfig();
   const updateSiteConfig = useUpdateSiteConfig();
   const { session } = useSupabaseAuth();
@@ -99,8 +99,8 @@ const AdminConfigForm = () => {
     }
   };
 
-  if (configLoading) return <div>Loading configuration...</div>;
-  if (configError) return <div>Error loading configuration: {configError.message}</div>;
+  if (isLoading) return <div>Loading configuration...</div>;
+  if (error) return <div>Error loading configuration: {error.message}</div>;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 mb-8">
