@@ -1,21 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../integrations/supabase';
 import AdminConfigForm from '../components/AdminConfigForm';
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from 'sonner';
 import Auth from '../components/Auth';
 
 const AdminPage = () => {
   const navigate = useNavigate();
   const { session, logout } = useSupabaseAuth();
-
-  useEffect(() => {
-    if (!session) {
-      navigate('/admin/login');
-    }
-  }, [session, navigate]);
 
   const handleLogout = async () => {
     try {
