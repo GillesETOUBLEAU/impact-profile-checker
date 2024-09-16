@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../integrations/supabase';
 import { checkAdminRole } from '../utils/auth';
@@ -11,17 +11,15 @@ import { toast } from 'sonner';
 const AdminPage = () => {
   const navigate = useNavigate();
   const { session, logout } = useSupabaseAuth();
-  const [isAdmin, setIsAdmin] = React.useState(false);
-  const [loading, setLoading] = React.useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (!session) {
-        setLoading(false);
-        return;
+      if (session) {
+        const adminStatus = await checkAdminRole();
+        setIsAdmin(adminStatus);
       }
-      const adminStatus = await checkAdminRole();
-      setIsAdmin(adminStatus);
       setLoading(false);
     };
     checkAuth();
@@ -30,6 +28,7 @@ const AdminPage = () => {
   const handleLogout = async () => {
     try {
       await logout();
+      toast.success('Logged out successfully');
       navigate('/admin');
     } catch (error) {
       console.error('Error logging out:', error);
