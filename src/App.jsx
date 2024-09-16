@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { navItems } from "./nav-items";
 import Layout from "./components/Layout";
-import AdminPage from "./components/AdminPage";
+import AdminPage from "./pages/AdminPage";
 import AdminLoginPage from "./components/AdminLoginPage";
 import { SupabaseAuthProvider } from "./integrations/supabase";
 
