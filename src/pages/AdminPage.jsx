@@ -1,30 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
+import { useSupabaseAuth } from '../integrations/supabase';
 import Auth from '../components/Auth';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AdminConfigForm from '../components/AdminConfigForm';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
-import { useSupabaseAuth } from '../integrations/supabase';
-import { useNavigate } from 'react-router-dom';
 
 const AdminPage = () => {
   const [loading, setLoading] = useState(true);
   const { session, isAdmin, logout } = useSupabaseAuth();
   const navigate = useNavigate();
-
-  const { data: adminCount } = useQuery({
-    queryKey: ['adminCount'],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from('user_roles')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'admin');
-      if (error) throw error;
-      return count;
-    },
-  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -33,7 +19,7 @@ const AdminPage = () => {
         setLoading(false);
         return;
       }
-      // Additional check for admin status if needed
+      // The isAdmin check is now handled by the useSupabaseAuth hook
       setLoading(false);
     };
     checkAuth();
@@ -66,7 +52,6 @@ const AdminPage = () => {
         <Alert variant="destructive">
           <AlertDescription>You are logged in, but you don't have admin privileges. Please contact an administrator to grant you access.</AlertDescription>
         </Alert>
-        <Button onClick={handleLogout} className="mt-4">Logout</Button>
       </div>
     );
   }
