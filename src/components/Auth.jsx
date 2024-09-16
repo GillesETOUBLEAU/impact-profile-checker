@@ -11,7 +11,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { signIn } = useSupabaseAuth();
+  const { signIn, signUp } = useSupabaseAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -24,6 +24,22 @@ const Auth = () => {
     } catch (error) {
       setError(error.message);
       toast.error(error.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const { error } = await signUp({ email, password });
+      if (error) throw error;
+      toast.success('Sign up successful. Please check your email for verification.');
+    } catch (error) {
+      setError(error.message);
+      toast.error(error.message || 'Sign up failed');
     } finally {
       setLoading(false);
     }
@@ -53,9 +69,14 @@ const Auth = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <Button type="submit" disabled={loading}>
-          {loading ? 'Loading...' : 'Sign In'}
-        </Button>
+        <div className="flex space-x-2">
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Loading...' : 'Sign In'}
+          </Button>
+          <Button type="button" onClick={handleSignUp} disabled={loading} variant="outline">
+            {loading ? 'Loading...' : 'Sign Up'}
+          </Button>
+        </div>
       </form>
     </div>
   );
