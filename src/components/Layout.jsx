@@ -4,20 +4,28 @@ import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useSupabaseAuth } from '../integrations/supabase';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Layout = ({ children }) => {
   const { data: siteConfig, isLoading, error } = useQuery({
     queryKey: ['siteConfig'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('site_config')
-        .select('*')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('site_config')
+          .select('*')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .single();
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        console.error('Error fetching site configuration:', error);
+        throw error;
+      }
     },
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const auth = useSupabaseAuth();
@@ -30,7 +38,6 @@ const Layout = ({ children }) => {
   };
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading site configuration: {error.message}</div>;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -56,11 +63,18 @@ const Layout = ({ children }) => {
         </div>
       </header>
       <main className="flex-grow">
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>
+              An error occurred while loading the site configuration. Please try refreshing the page.
+            </AlertDescription>
+          </Alert>
+        )}
         {children}
       </main>
       <footer className="bg-secondary text-secondary-foreground p-4 mt-8">
         <div className="container mx-auto text-center">
-          {siteConfig?.footer_text || '© 2023 Impact Profile Checker'}
+          {siteConfig?.footer_text || '© 2024 Impact Profile Checker'}
         </div>
       </footer>
     </div>
