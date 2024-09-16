@@ -31,7 +31,7 @@ export const SupabaseAuthProviderInner = ({ children }) => {
       } else {
         setSession(session);
         if (session) {
-          checkAdminStatus(session.user.id);
+          await checkAdminStatus(session.user.id);
         }
       }
       setLoading(false);
@@ -41,7 +41,7 @@ export const SupabaseAuthProviderInner = ({ children }) => {
       console.log('Auth state changed:', event);
       setSession(session);
       if (session) {
-        checkAdminStatus(session.user.id);
+        await checkAdminStatus(session.user.id);
       } else {
         setIsAdmin(false);
       }
@@ -67,20 +67,33 @@ export const SupabaseAuthProviderInner = ({ children }) => {
         .single();
 
       if (error) throw error;
-      setIsAdmin(data.role === 'admin');
+      const adminStatus = data.role === 'admin';
+      setIsAdmin(adminStatus);
+      return adminStatus;
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
+      return false;
     }
   };
 
   const signIn = async ({ email, password }) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    if (data.user) {
-      await checkAdminStatus(data.user.id);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      
+      if (data.user) {
+        const isAdminUser = await checkAdminStatus(data.user.id);
+        if (!isAdminUser) {
+          throw new Error("You don't have admin access.");
+        }
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Sign in error:', error);
+      throw error;
     }
-    return data;
   };
 
   const signUp = async ({ email, password }) => {
@@ -101,7 +114,6 @@ export const SupabaseAuthProviderInner = ({ children }) => {
       
       if (error) {
         console.error('Error signing out:', error);
-        // Even if there's an error, we'll continue with the local logout process
         toast.error('Erreur lors de la déconnexion du serveur, mais la session locale a été fermée.');
       } else {
         toast.success('Déconnexion réussie.');
