@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserInfoForm from '../components/UserInfoForm';
 import QuestionSlider from '../components/QuestionSlider';
 import ResultsDisplay from '../components/ResultsDisplay';
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from '../lib/supabase';
 import { questions, calculateProfiles } from '../utils/profileUtils';
 import { toast } from 'sonner';
+import { useSupabaseAuth } from '../integrations/supabase';
 
 const Index = () => {
   const [step, setStep] = useState('userInfo');
@@ -16,6 +17,7 @@ const Index = () => {
   const [finalProfile, setFinalProfile] = useState(null);
   const [testId, setTestId] = useState(null);
   const [showAllResults, setShowAllResults] = useState(false);
+  const { session } = useSupabaseAuth();
 
   const handleUserInfoSubmit = (info) => {
     setUserInfo(info);
@@ -33,10 +35,18 @@ const Index = () => {
   const saveTestResults = async (profileData) => {
     try {
       console.log('Saving test results:', profileData);
+      const userId = session?.user?.id;
+      if (!userId) {
+        console.error('User ID not available');
+        toast.error('Une erreur est survenue: ID utilisateur non disponible');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('impact_profile_tests')
         .insert([
           {
+            user_id: userId,
             first_name: userInfo.firstName,
             last_name: userInfo.lastName,
             email: userInfo.email,
