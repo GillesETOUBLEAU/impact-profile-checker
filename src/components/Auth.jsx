@@ -11,12 +11,16 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { signIn } = useSupabaseAuth();
+  const { signIn, logout } = useSupabaseAuth();
 
   useEffect(() => {
-    // Clear local storage on component mount
-    localStorage.removeItem('supabase.auth.token');
-  }, []);
+    // Clear local storage and logout on component mount
+    const clearSession = async () => {
+      localStorage.removeItem('supabase.auth.token');
+      await logout();
+    };
+    clearSession();
+  }, [logout]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
