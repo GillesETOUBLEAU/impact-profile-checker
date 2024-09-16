@@ -6,11 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import { useAddSiteConfig, useUpdateSiteConfig, useSiteConfig } from '../integrations/supabase/hooks/useSiteConfig';
+import { useSupabaseAuth } from '../integrations/supabase';
 
 const AdminConfigForm = () => {
   const { data: siteConfig, isLoading: configLoading, refetch } = useSiteConfig();
   const addSiteConfig = useAddSiteConfig();
   const updateSiteConfig = useUpdateSiteConfig();
+  const { session } = useSupabaseAuth();
 
   const [formData, setFormData] = useState({
     headerText: '',
