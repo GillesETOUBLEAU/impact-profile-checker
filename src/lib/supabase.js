@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { toast } from 'sonner'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_PROJECT_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_API_KEY
@@ -17,63 +18,40 @@ try {
       autoRefreshToken: true,
       detectSessionInUrl: true,
       flowType: 'pkce',
-      redirectTo: redirectUrl,
-    },
-    global: {
-      fetch: (...args) => fetch(...args).then(async (res) => {
-        if (!res.ok) {
-          const errorBody = await res.text();
-          console.error('Supabase API Error:', {
-            status: res.status,
-            statusText: res.statusText,
-            body: errorBody,
-          });
-          throw new Error(`HTTP error! status: ${res.status}, body: ${errorBody}`);
-        }
-        return res;
-      }),
+      storage: window.localStorage,
+      storageKey: 'supabase-auth-token',
     },
   })
 
-  // Test the connection
+  // Test the connection and session
   supabase.auth.getSession().then(({ data, error }) => {
     if (error) {
-      console.error('Error initializing Supabase client:', error.message)
-      console.error('Full error object:', error)
+      console.error('Error getting session:', error.message)
+      toast.error('Error connecting to Supabase. Please try refreshing the page.')
+    } else if (data.session) {
+      console.log('Session found:', data.session)
     } else {
-      console.log('Supabase client initialized successfully')
-      console.log('Session data:', data)
+      console.log('No active session')
     }
   }).catch(err => {
     console.error('Unexpected error during Supabase initialization:', err.message)
-    console.error('Full error object:', err)
+    toast.error('Unexpected error. Please try refreshing the page.')
   })
 
-  // Log the current URL
-  console.log('Current URL:', window.location.href)
-
-  // Check for authentication code in URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const authCode = urlParams.get('code');
-  if (authCode) {
-    console.log('Authentication code detected:', authCode)
-    supabase.auth.exchangeCodeForSession(authCode).then(({ data, error }) => {
-      if (error) {
-        console.error('Error exchanging code for session:', error.message)
-        console.error('Full error object:', error)
-      } else {
-        console.log('Session created successfully')
-        console.log('Session data:', data)
-      }
-    }).catch(err => {
-      console.error('Unexpected error during code exchange:', err.message)
-      console.error('Full error object:', err)
-    })
-  }
+  // Set up auth state change listener
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN') {
+      console.log('User signed in:', session)
+    } else if (event === 'SIGNED_OUT') {
+      console.log('User signed out')
+    } else if (event === 'TOKEN_REFRESHED') {
+      console.log('Token refreshed')
+    }
+  })
 
 } catch (error) {
   console.error('Failed to initialize Supabase client:', error.message)
-  console.error('Full error object:', error)
+  toast.error('Failed to initialize Supabase client. Please check your configuration.')
 }
 
 export { supabase }
