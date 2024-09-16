@@ -24,11 +24,10 @@ const AdminPage = () => {
       setIsLoading(false);
       if (!adminStatus) {
         toast.error("You don't have admin privileges.");
-        navigate('/');
       }
     };
     checkAuth();
-  }, [session, navigate]);
+  }, [session]);
 
   const handleLogout = async () => {
     try {
@@ -48,7 +47,13 @@ const AdminPage = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <h1 className="text-3xl font-bold mb-6">Admin Page</h1>
-      <Auth />
+      {!session && <Auth />}
+      {session && !isAdmin && (
+        <div>
+          <p>You are logged in, but you don't have admin privileges.</p>
+          <Button onClick={handleLogout} className="mt-4">Logout</Button>
+        </div>
+      )}
       {session && isAdmin && (
         <>
           <div className="mt-8">
