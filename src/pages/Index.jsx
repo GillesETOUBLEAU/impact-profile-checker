@@ -33,7 +33,6 @@ const Index = () => {
   const saveTestResults = async (profileData) => {
     try {
       console.log('Saving test results:', profileData);
-      const selectedProfile = profileData.profiles.length === 1 ? profileData.profiles[0] : null;
       const { data, error } = await supabase
         .from('impact_profile_tests')
         .insert([
@@ -47,7 +46,6 @@ const Index = () => {
             eco_guide_score: profileData.scores.ecoGuideScore,
             curious_score: profileData.scores.curiousScore,
             profiles: profileData.profiles,
-            selected_profile: selectedProfile
           }
         ])
         .select();
@@ -60,9 +58,6 @@ const Index = () => {
       console.log('Test results saved successfully:', data);
       toast.success('Résultats enregistrés avec succès!');
       setTestId(data[0].id);
-      if (selectedProfile) {
-        setFinalProfile(selectedProfile);
-      }
     } catch (error) {
       console.error('Unexpected error saving test results:', error);
       toast.error('Une erreur inattendue est survenue.');
