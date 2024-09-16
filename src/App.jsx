@@ -8,7 +8,14 @@ import AdminPage from "./pages/AdminPage";
 import AdminLoginPage from "./components/AdminLoginPage";
 import { SupabaseAuthProvider } from "./integrations/supabase";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -23,7 +30,7 @@ const App = () => (
               ))}
               <Route path="/admin/login" element={<AdminLoginPage />} />
               <Route path="/admin" element={<AdminPage />} />
-              <Route path="/admin/*" element={<Navigate to="/admin/login" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Layout>
         </BrowserRouter>

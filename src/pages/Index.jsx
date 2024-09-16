@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import UserInfoForm from '../components/UserInfoForm';
 import QuestionSlider from '../components/QuestionSlider';
 import ResultsDisplay from '../components/ResultsDisplay';
@@ -34,7 +34,6 @@ const Index = () => {
 
   const saveTestResults = async (profileData) => {
     try {
-      console.log('Saving test results:', profileData);
       const { data, error } = await supabase
         .from('impact_profile_tests')
         .insert([
@@ -52,18 +51,12 @@ const Index = () => {
         ])
         .select();
 
-      if (error) {
-        console.error('Error saving test results:', error);
-        toast.error('Une erreur est survenue lors de l\'enregistrement des résultats.');
-        throw error;
-      }
-      console.log('Test results saved successfully:', data);
+      if (error) throw error;
       toast.success('Résultats enregistrés avec succès!');
       setTestId(data[0].id);
-      console.log('Test ID set:', data[0].id);
     } catch (error) {
-      console.error('Unexpected error saving test results:', error);
-      toast.error('Une erreur inattendue est survenue.');
+      console.error('Error saving test results:', error);
+      toast.error('Une erreur est survenue lors de l\'enregistrement des résultats.');
     }
   };
 
@@ -80,32 +73,20 @@ const Index = () => {
   };
 
   const handleProfileSelect = async (profile) => {
-    console.log('Profile selected:', profile);
-    console.log('Current test ID:', testId);
     setFinalProfile(profile);
     if (testId) {
       try {
-        console.log('Updating selected profile:', profile, 'for test ID:', testId);
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('impact_profile_tests')
           .update({ selected_profile: profile })
-          .eq('id', testId)
-          .select();
+          .eq('id', testId);
 
-        if (error) {
-          console.error('Error updating selected profile:', error);
-          toast.error('Erreur lors de la mise à jour du profil sélectionné.');
-          throw error;
-        }
-        console.log('Selected profile updated successfully:', data);
+        if (error) throw error;
         toast.success('Profil sélectionné mis à jour avec succès!');
       } catch (error) {
-        console.error('Unexpected error updating selected profile:', error);
-        toast.error('Une erreur inattendue est survenue lors de la mise à jour du profil.');
+        console.error('Error updating selected profile:', error);
+        toast.error('Une erreur est survenue lors de la mise à jour du profil.');
       }
-    } else {
-      console.error('Test ID is not available. Cannot update selected profile.');
-      toast.error('Impossible de mettre à jour le profil sélectionné. ID de test manquant.');
     }
   };
 
@@ -148,11 +129,13 @@ const Index = () => {
             onProfileSelect={handleProfileSelect}
             onReset={resetTest}
           />
-          <div className="mt-4 space-x-4">
-            <Button onClick={toggleAllResults}>
-              {showAllResults ? 'Masquer tous les résultats' : 'Voir tous les résultats'}
-            </Button>
-          </div>
+          {session && (
+            <div className="mt-4 space-x-4">
+              <Button onClick={toggleAllResults}>
+                {showAllResults ? 'Masquer tous les résultats' : 'Voir tous les résultats'}
+              </Button>
+            </div>
+          )}
           {showAllResults && <AllResultsDisplay />}
         </>
       )}

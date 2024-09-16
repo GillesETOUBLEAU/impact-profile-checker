@@ -21,11 +21,10 @@ const Layout = ({ children }) => {
         return data;
       } catch (error) {
         console.error('Error fetching site configuration:', error);
-        throw error;
+        return null; // Return null instead of throwing to prevent query from retrying indefinitely
       }
     },
-    retry: 3,
-    retryDelay: 1000,
+    retry: false, // Disable retries
   });
 
   const { session, logout } = useSupabaseAuth();
@@ -40,16 +39,16 @@ const Layout = ({ children }) => {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
-
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-primary text-primary-foreground p-4">
         <div className="container mx-auto flex justify-between items-center">
-          {siteConfig?.logo_url && (
+          {!isLoading && siteConfig?.logo_url && (
             <img src={siteConfig.logo_url} alt="Logo" className="h-10" />
           )}
-          <h1 className="text-2xl font-bold">{siteConfig?.header_text || 'Impact Profile Checker'}</h1>
+          <h1 className="text-2xl font-bold">
+            {isLoading ? 'Loading...' : (siteConfig?.header_text || 'Impact Profile Checker')}
+          </h1>
           <nav className="flex items-center space-x-4">
             <Link to="/" className="hover:underline">Home</Link>
             {session ? (
@@ -69,7 +68,7 @@ const Layout = ({ children }) => {
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertDescription>
-              An error occurred while loading the site configuration. Please try refreshing the page.
+              An error occurred while loading the site configuration. The application will continue to function.
             </AlertDescription>
           </Alert>
         )}
@@ -77,7 +76,7 @@ const Layout = ({ children }) => {
       </main>
       <footer className="bg-secondary text-secondary-foreground p-4 mt-8">
         <div className="container mx-auto text-center">
-          {siteConfig?.footer_text || '© 2024 Impact Profile Checker'}
+          {isLoading ? 'Loading...' : (siteConfig?.footer_text || '© 2024 Impact Profile Checker')}
         </div>
       </footer>
     </div>
