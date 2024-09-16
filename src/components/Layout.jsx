@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useSupabaseAuth } from '../integrations/supabase';
 
 const Layout = ({ children }) => {
-  const { data: siteConfig } = useQuery({
+  const { data: siteConfig, isLoading, error } = useQuery({
     queryKey: ['siteConfig'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -27,6 +27,9 @@ const Layout = ({ children }) => {
       await auth.logout();
     }
   };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading site configuration</div>;
 
   return (
     <div className="flex flex-col min-h-screen">
