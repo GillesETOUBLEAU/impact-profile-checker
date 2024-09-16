@@ -11,29 +11,9 @@ CREATE TABLE IF NOT EXISTS site_config (
 ALTER TABLE site_config ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1
-    FROM pg_policies
-    WHERE schemaname = 'public'
-      AND tablename = 'site_config'
-      AND policyname = 'Allow authenticated users to read site_config'
-  ) THEN
-    DROP POLICY "Allow authenticated users to read site_config" ON site_config;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1
-    FROM pg_policies
-    WHERE schemaname = 'public'
-      AND tablename = 'site_config'
-      AND policyname = 'Allow admins to update site_config'
-  ) THEN
-    DROP POLICY "Allow admins to update site_config" ON site_config;
-  END IF;
-END
-$$;
+DROP POLICY IF EXISTS "Allow authenticated users to read site_config" ON site_config;
+DROP POLICY IF EXISTS "Allow admins to update site_config" ON site_config;
+DROP POLICY IF EXISTS "Allow admins to insert site_config" ON site_config;
 
 -- Create a policy that allows all authenticated users to select from the site_config table
 CREATE POLICY "Allow authenticated users to read site_config" ON site_config
@@ -45,26 +25,29 @@ CREATE POLICY "Allow authenticated users to read site_config" ON site_config
 CREATE POLICY "Allow admins to update site_config" ON site_config
     FOR UPDATE
     TO authenticated
-    USING (auth.jwt() ->> 'role' = 'admin');
+    USING (EXISTS (
+      SELECT 1 FROM public.user_roles
+      WHERE user_id = auth.uid() AND role = 'admin'
+    ));
+
+-- Create a policy that allows only users with the 'admin' role to insert into the site_config table
+CREATE POLICY "Allow admins to insert site_config" ON site_config
+    FOR INSERT
+    TO authenticated
+    WITH CHECK (EXISTS (
+      SELECT 1 FROM public.user_roles
+      WHERE user_id = auth.uid() AND role = 'admin'
+    ));
 
 -- Grant usage on the site_config table to the authenticated role
 GRANT USAGE ON SCHEMA public TO authenticated;
 GRANT ALL ON site_config TO authenticated;
 
--- Create an admin role if it doesn't exist
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'admin') THEN
-    CREATE ROLE admin;
-  END IF;
-END
-$$;
-
 -- Insert a default row if the table is empty
 INSERT INTO site_config (header_text, footer_text, logo_url)
 SELECT 
   'Welcome to Impact Profile Checker', 
-  'Copyright © 2023 Impact Profile Checker',
+  'Copyright © 2024 Impact Profile Checker',
   'https://tqvrsvdphejiwmtgxdvg.supabase.co/storage/v1/object/public/site-assets/default-logo.png'
 WHERE NOT EXISTS (SELECT 1 FROM site_config);
 
