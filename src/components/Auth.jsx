@@ -11,18 +11,16 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { signIn, signUp } = useSupabaseAuth();
+  const { signIn, signUp, logout, session } = useSupabaseAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      const { user, session } = await signIn({ email, password });
-      if (user) {
-        toast.success('Logged in successfully');
-        // You might want to redirect the user or update the UI here
-      }
+      const { error } = await signIn({ email, password });
+      if (error) throw error;
+      toast.success('Logged in successfully');
     } catch (error) {
       setError(error.message);
       toast.error(error.message || 'Login failed');
@@ -36,11 +34,9 @@ const Auth = () => {
     setLoading(true);
     setError('');
     try {
-      const { user, session } = await signUp({ email, password });
-      if (user) {
-        toast.success('Sign up successful. Please check your email for verification.');
-        // You might want to redirect the user or update the UI here
-      }
+      const { error } = await signUp({ email, password });
+      if (error) throw error;
+      toast.success('Sign up successful. Please check your email for verification.');
     } catch (error) {
       setError(error.message);
       toast.error(error.message || 'Sign up failed');
@@ -48,6 +44,30 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+    } catch (error) {
+      setError(error.message);
+      toast.error(error.message || 'Logout failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (session) {
+    return (
+      <div className="space-y-4">
+        <p>Logged in as: {session.user.email}</p>
+        <Button onClick={handleLogout} disabled={loading}>
+          {loading ? 'Loading...' : 'Log Out'}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

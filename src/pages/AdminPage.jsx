@@ -45,26 +45,19 @@ const AdminPage = () => {
     return <div>Checking authentication...</div>;
   }
 
-  if (!session) {
-    return (
-      <div className="container mx-auto px-4 py-8 max-w-md">
-        <h1 className="text-3xl font-bold mb-6">Admin Login</h1>
-        <Auth />
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return <div>You don't have permission to access this page.</div>;
-  }
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Admin Configuration</h1>
-        <Button onClick={handleLogout}>Logout</Button>
-      </div>
-      <AdminConfigForm />
+      <h1 className="text-3xl font-bold mb-6">Admin Page</h1>
+      <Auth />
+      {session && isAdmin && (
+        <>
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-4">Admin Configuration</h2>
+            <AdminConfigForm />
+          </div>
+          <Button onClick={handleLogout} className="mt-4">Logout</Button>
+        </>
+      )}
     </div>
   );
 };
