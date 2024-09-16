@@ -18,9 +18,11 @@ const Auth = () => {
     setLoading(true);
     setError('');
     try {
-      const { error } = await signIn({ email, password });
-      if (error) throw error;
-      toast.success('Logged in successfully');
+      const { user, session } = await signIn({ email, password });
+      if (user) {
+        toast.success('Logged in successfully');
+        // You might want to redirect the user or update the UI here
+      }
     } catch (error) {
       setError(error.message);
       toast.error(error.message || 'Login failed');
@@ -34,9 +36,11 @@ const Auth = () => {
     setLoading(true);
     setError('');
     try {
-      const { error } = await signUp({ email, password });
-      if (error) throw error;
-      toast.success('Sign up successful. Please check your email for verification.');
+      const { user, session } = await signUp({ email, password });
+      if (user) {
+        toast.success('Sign up successful. Please check your email for verification.');
+        // You might want to redirect the user or update the UI here
+      }
     } catch (error) {
       setError(error.message);
       toast.error(error.message || 'Sign up failed');
