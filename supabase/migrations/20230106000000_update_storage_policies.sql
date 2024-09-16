@@ -45,3 +45,8 @@ GRANT USAGE ON SCHEMA storage TO authenticated;
 
 -- Grant all privileges on the site-assets bucket to authenticated users
 GRANT ALL ON storage.objects TO authenticated;
+
+-- Ensure the site-assets bucket exists
+INSERT INTO storage.buckets (id, name)
+VALUES ('site-assets', 'site-assets')
+ON CONFLICT (id) DO NOTHING;
