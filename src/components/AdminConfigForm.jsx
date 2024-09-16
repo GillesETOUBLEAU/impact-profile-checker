@@ -50,7 +50,10 @@ const AdminConfigForm = () => {
         upsert: false
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error uploading logo:', error);
+      throw error;
+    }
 
     const { data: { publicUrl } } = supabase.storage
       .from('site-assets')
@@ -79,28 +82,18 @@ const AdminConfigForm = () => {
       logo_url: logoUrl
     };
 
-    if (siteConfig?.id) {
-      updateSiteConfig.mutate({ id: siteConfig.id, ...configData }, {
-        onSuccess: () => {
-          toast.success('Configuration updated successfully');
-          refetch();
-        },
-        onError: (error) => {
-          console.error('Error updating configuration:', error);
-          toast.error(`Error updating configuration: ${error.message}`);
-        }
-      });
-    } else {
-      addSiteConfig.mutate(configData, {
-        onSuccess: () => {
-          toast.success('Configuration added successfully');
-          refetch();
-        },
-        onError: (error) => {
-          console.error('Error adding configuration:', error);
-          toast.error(`Error adding configuration: ${error.message}`);
-        }
-      });
+    try {
+      if (siteConfig?.id) {
+        await updateSiteConfig.mutateAsync({ id: siteConfig.id, ...configData });
+        toast.success('Configuration updated successfully');
+      } else {
+        await addSiteConfig.mutateAsync(configData);
+        toast.success('Configuration added successfully');
+      }
+      refetch();
+    } catch (error) {
+      console.error('Error updating/adding configuration:', error);
+      toast.error(`Error updating/adding configuration: ${error.message}`);
     }
   };
 
