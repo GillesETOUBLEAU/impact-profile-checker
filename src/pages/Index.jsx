@@ -35,18 +35,10 @@ const Index = () => {
   const saveTestResults = async (profileData) => {
     try {
       console.log('Saving test results:', profileData);
-      const userId = session?.user?.id;
-      if (!userId) {
-        console.error('User ID not available');
-        toast.error('Une erreur est survenue: ID utilisateur non disponible');
-        return;
-      }
-
       const { data, error } = await supabase
         .from('impact_profile_tests')
         .insert([
           {
-            user_id: userId,
             first_name: userInfo.firstName,
             last_name: userInfo.lastName,
             email: userInfo.email,
