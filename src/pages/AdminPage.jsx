@@ -19,7 +19,6 @@ const AdminPage = () => {
         setLoading(false);
         return;
       }
-      // The isAdmin check is now handled by the useSupabaseAuth hook
       setLoading(false);
     };
     checkAuth();
