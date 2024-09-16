@@ -52,16 +52,15 @@ const Layout = ({ children }) => {
           <h1 className="text-2xl font-bold">{siteConfig?.header_text || 'Impact Profile Checker'}</h1>
           <nav className="flex items-center space-x-4">
             <Link to="/" className="hover:underline">Home</Link>
-            {session && (
+            {session ? (
               <>
                 <Link to="/admin" className="hover:underline">Admin</Link>
                 <Button onClick={handleLogout} variant="outline" size="sm">
                   Logout
                 </Button>
               </>
-            )}
-            {!session && (
-              <Link to="/admin/login" className="hover:underline">Login</Link>
+            ) : (
+              <Link to="/admin" className="hover:underline">Login</Link>
             )}
           </nav>
         </div>
