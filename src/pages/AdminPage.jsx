@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../integrations/supabase';
 import AdminConfigForm from '../components/AdminConfigForm';
@@ -9,6 +9,17 @@ import Auth from '../components/Auth';
 const AdminPage = () => {
   const navigate = useNavigate();
   const { session, logout } = useSupabaseAuth();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      setIsLoading(true);
+      // Wait for the session to be checked
+      await new Promise(resolve => setTimeout(resolve, 100));
+      setIsLoading(false);
+    };
+    checkSession();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -20,6 +31,10 @@ const AdminPage = () => {
       toast.error('Error logging out');
     }
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (!session) {
     return (
