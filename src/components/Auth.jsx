@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,11 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { signIn } = useSupabaseAuth();
+
+  useEffect(() => {
+    // Clear local storage on component mount
+    localStorage.removeItem('supabase.auth.token');
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();

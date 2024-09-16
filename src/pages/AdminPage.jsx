@@ -14,17 +14,23 @@ const AdminPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      if (!session) {
-        setIsLoading(false);
-        return;
-      }
-      const adminStatus = await checkAdminRole();
-      setIsAdmin(adminStatus);
+    const clearSession = async () => {
+      await logout();
       setIsLoading(false);
-      if (!adminStatus) {
-        toast.error("You don't have admin privileges.");
+    };
+    clearSession();
+  }, [logout]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (session) {
+        const adminStatus = await checkAdminRole();
+        setIsAdmin(adminStatus);
+        if (!adminStatus) {
+          toast.error("You don't have admin privileges.");
+        }
       }
+      setIsLoading(false);
     };
     checkAuth();
   }, [session]);
@@ -41,7 +47,7 @@ const AdminPage = () => {
   };
 
   if (isLoading) {
-    return <div>Checking authentication...</div>;
+    return <div>Loading...</div>;
   }
 
   return (
