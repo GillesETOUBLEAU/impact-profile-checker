@@ -80,17 +80,19 @@ const Index = () => {
     setFinalProfile(profile);
     if (testId) {
       try {
-        const { error } = await supabase
+        console.log('Updating selected profile:', profile, 'for test ID:', testId);
+        const { data, error } = await supabase
           .from('impact_profile_tests')
           .update({ selected_profile: profile })
-          .eq('id', testId);
+          .eq('id', testId)
+          .select();
 
         if (error) {
           console.error('Error updating selected profile:', error);
           toast.error('Erreur lors de la mise à jour du profil sélectionné.');
           throw error;
         }
-        console.log('Selected profile updated successfully');
+        console.log('Selected profile updated successfully:', data);
         toast.success('Profil sélectionné mis à jour avec succès!');
       } catch (error) {
         console.error('Unexpected error updating selected profile:', error);
