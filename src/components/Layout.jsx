@@ -12,6 +12,7 @@ const Layout = ({ children }) => {
       const { data, error } = await supabase
         .from('site_config')
         .select('*')
+        .limit(1)
         .single();
       if (error) throw error;
       return data;
