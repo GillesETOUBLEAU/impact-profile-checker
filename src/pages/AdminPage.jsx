@@ -13,7 +13,6 @@ const AdminPage = () => {
 
   useEffect(() => {
     const checkSession = async () => {
-      setIsLoading(true);
       // Wait for the session to be checked
       await new Promise(resolve => setTimeout(resolve, 100));
       setIsLoading(false);
@@ -33,7 +32,7 @@ const AdminPage = () => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Checking authentication...</div>;
   }
 
   if (!session) {
