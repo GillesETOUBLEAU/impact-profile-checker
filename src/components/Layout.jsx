@@ -12,6 +12,7 @@ const Layout = ({ children }) => {
       const { data, error } = await supabase
         .from('site_config')
         .select('*')
+        .order('updated_at', { ascending: false })
         .limit(1)
         .single();
       if (error) throw error;
@@ -29,7 +30,7 @@ const Layout = ({ children }) => {
   };
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading site configuration</div>;
+  if (error) return <div>Error loading site configuration: {error.message}</div>;
 
   return (
     <div className="flex flex-col min-h-screen">
