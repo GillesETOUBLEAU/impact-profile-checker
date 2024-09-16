@@ -58,6 +58,7 @@ const Index = () => {
       console.log('Test results saved successfully:', data);
       toast.success('Résultats enregistrés avec succès!');
       setTestId(data[0].id);
+      console.log('Test ID set:', data[0].id);
     } catch (error) {
       console.error('Unexpected error saving test results:', error);
       toast.error('Une erreur inattendue est survenue.');
@@ -77,6 +78,8 @@ const Index = () => {
   };
 
   const handleProfileSelect = async (profile) => {
+    console.log('Profile selected:', profile);
+    console.log('Current test ID:', testId);
     setFinalProfile(profile);
     if (testId) {
       try {
