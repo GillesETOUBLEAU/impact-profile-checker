@@ -1,44 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../integrations/supabase';
-import Auth from '../components/Auth';
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { checkAdminRole } from '../utils/auth';
 import AdminConfigForm from '../components/AdminConfigForm';
+import Auth from '../components/Auth';
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from 'sonner';
 
 const AdminPage = () => {
-  const [loading, setLoading] = useState(true);
-  const { session, isAdmin, logout } = useSupabaseAuth();
   const navigate = useNavigate();
+  const { session, logout } = useSupabaseAuth();
+  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
-      setLoading(true);
       if (!session) {
         setLoading(false);
         return;
       }
+      const adminStatus = await checkAdminRole();
+      setIsAdmin(adminStatus);
       setLoading(false);
     };
     checkAuth();
-  }, [session, isAdmin]);
+  }, [session]);
 
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/admin/login');
+      navigate('/admin');
     } catch (error) {
       console.error('Error logging out:', error);
       toast.error('Error logging out');
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   if (!session) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="container mx-auto px-4 py-8 max-w-md">
         <h1 className="text-3xl font-bold mb-6">Admin Login</h1>
         <Auth />
       </div>
@@ -47,10 +52,11 @@ const AdminPage = () => {
 
   if (!isAdmin) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="container mx-auto px-4 py-8 max-w-md">
         <Alert variant="destructive">
-          <AlertDescription>You are logged in, but you don't have admin privileges. Please contact an administrator to grant you access.</AlertDescription>
+          <AlertDescription>You don't have admin privileges. Please contact an administrator for access.</AlertDescription>
         </Alert>
+        <Button onClick={handleLogout} className="mt-4">Logout</Button>
       </div>
     );
   }
