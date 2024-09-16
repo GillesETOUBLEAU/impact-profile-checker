@@ -27,7 +27,16 @@ const AdminPage = () => {
   });
 
   useEffect(() => {
-    setLoading(false);
+    const checkAuth = async () => {
+      setLoading(true);
+      if (!session) {
+        setLoading(false);
+        return;
+      }
+      // Additional check for admin status if needed
+      setLoading(false);
+    };
+    checkAuth();
   }, [session, isAdmin]);
 
   const handleLogout = async () => {
