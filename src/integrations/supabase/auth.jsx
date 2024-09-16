@@ -33,16 +33,20 @@ export const SupabaseAuthProviderInner = ({ children }) => {
       setLoading(false);
     };
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event);
       setSession(session);
       queryClient.invalidateQueries('user');
+      if (event === 'SIGNED_OUT') {
+        // Clear any application-specific stored data
+        localStorage.removeItem('supabase.auth.token');
+      }
     });
 
     getSession();
 
     return () => {
       authListener.subscription.unsubscribe();
-      setLoading(false);
     };
   }, [queryClient]);
 
@@ -59,16 +63,25 @@ export const SupabaseAuthProviderInner = ({ children }) => {
   };
 
   const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Error signing out:', error);
-      toast.error('Erreur lors de la déconnexion.');
-    } else {
-      setSession(null);
-      queryClient.invalidateQueries('user');
-      toast.success('Déconnexion réussie.');
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error);
+        toast.error('Erreur lors de la déconnexion: ' + error.message);
+      } else {
+        setSession(null);
+        queryClient.invalidateQueries('user');
+        toast.success('Déconnexion réussie.');
+        // Clear any application-specific stored data
+        localStorage.removeItem('supabase.auth.token');
+      }
+    } catch (error) {
+      console.error('Unexpected error during logout:', error);
+      toast.error('Une erreur inattendue est survenue lors de la déconnexion.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
