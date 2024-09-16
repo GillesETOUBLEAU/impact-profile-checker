@@ -15,16 +15,18 @@ const AdminConfigForm = () => {
   const [formData, setFormData] = useState({
     headerText: '',
     footerText: '',
-    logoUrl: ''
+    logoFile: null
   });
+  const [previewLogo, setPreviewLogo] = useState('');
 
   useEffect(() => {
     if (siteConfig) {
       setFormData({
         headerText: siteConfig.header_text || '',
         footerText: siteConfig.footer_text || '',
-        logoUrl: siteConfig.logo_url || ''
+        logoFile: null
       });
+      setPreviewLogo(siteConfig.logo_url || '');
     }
   }, [siteConfig]);
 
@@ -33,12 +35,44 @@ const AdminConfigForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData(prev => ({ ...prev, logoFile: file }));
+    setPreviewLogo(URL.createObjectURL(file));
+  };
+
+  const uploadLogo = async (file) => {
+    const fileName = `logo-${Date.now()}.${file.name.split('.').pop()}`;
+    const { data, error } = await supabase.storage
+      .from('site-assets')
+      .upload(fileName, file);
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('site-assets')
+      .getPublicUrl(fileName);
+
+    return publicUrl;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    let logoUrl = siteConfig?.logo_url;
+
+    if (formData.logoFile) {
+      try {
+        logoUrl = await uploadLogo(formData.logoFile);
+      } catch (error) {
+        toast.error(`Error uploading logo: ${error.message}`);
+        return;
+      }
+    }
+
     const configData = {
       header_text: formData.headerText,
       footer_text: formData.footerText,
-      logo_url: formData.logoUrl
+      logo_url: logoUrl
     };
 
     if (siteConfig?.id) {
@@ -87,13 +121,17 @@ const AdminConfigForm = () => {
         />
       </div>
       <div>
-        <Label htmlFor="logoUrl">Logo URL</Label>
+        <Label htmlFor="logoFile">Logo</Label>
         <Input
-          id="logoUrl"
-          name="logoUrl"
-          value={formData.logoUrl}
-          onChange={handleInputChange}
+          id="logoFile"
+          name="logoFile"
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
         />
+        {previewLogo && (
+          <img src={previewLogo} alt="Logo preview" className="mt-2 max-w-xs" />
+        )}
       </div>
       <Button type="submit">Save Configuration</Button>
     </form>
