@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS impact_profile_tests (
   curious_score NUMERIC(3,2) NOT NULL,
   profiles TEXT[] NOT NULL,
   selected_profile TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  user_id UUID
 );
 
 -- Create an index on the email column for faster lookups
@@ -42,26 +43,34 @@ CREATE POLICY "Allow authenticated users to insert impact_profile_tests" ON impa
 CREATE POLICY "Allow users to read their own impact_profile_tests" ON impact_profile_tests
     FOR SELECT
     TO authenticated
-    USING (auth.uid() = id::text::uuid);
+    USING (auth.uid() = user_id);
 
 -- Create a policy that allows only users with the 'admin' role to select all records
 CREATE POLICY "Allow admins to read all impact_profile_tests" ON impact_profile_tests
     FOR SELECT
     TO authenticated
-    USING (auth.jwt() ->> 'role' = 'admin');
+    USING (EXISTS (
+      SELECT 1 FROM user_roles
+      WHERE user_roles.user_id = auth.uid()
+      AND user_roles.role = 'admin'
+    ));
 
 -- Create a policy that allows users to update their own records
 CREATE POLICY "Allow users to update their own impact_profile_tests" ON impact_profile_tests
     FOR UPDATE
     TO authenticated
-    USING (auth.uid() = id::text::uuid)
-    WITH CHECK (auth.uid() = id::text::uuid);
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
 
 -- Create a policy that allows only users with the 'admin' role to update all records
 CREATE POLICY "Allow admins to update all impact_profile_tests" ON impact_profile_tests
     FOR UPDATE
     TO authenticated
-    USING (auth.jwt() ->> 'role' = 'admin');
+    USING (EXISTS (
+      SELECT 1 FROM user_roles
+      WHERE user_roles.user_id = auth.uid()
+      AND user_roles.role = 'admin'
+    ));
 
 -- Grant usage on the impact_profile_tests table to the authenticated role
 GRANT USAGE ON SCHEMA public TO authenticated;
