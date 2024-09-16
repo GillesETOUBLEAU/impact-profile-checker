@@ -1,7 +1,7 @@
 -- Create the impact_profile_tests table
 CREATE TABLE IF NOT EXISTS impact_profile_tests (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_id UUID REFERENCES auth.users(id),
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
   email TEXT NOT NULL,
