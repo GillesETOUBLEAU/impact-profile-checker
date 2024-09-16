@@ -5,20 +5,30 @@ import AdminConfigForm from '../components/AdminConfigForm';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import Auth from '../components/Auth';
+import { checkAdminRole } from '../utils/auth';
 
 const AdminPage = () => {
   const navigate = useNavigate();
   const { session, logout } = useSupabaseAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const checkSession = async () => {
-      // Wait for the session to be checked
-      await new Promise(resolve => setTimeout(resolve, 100));
+    const checkAuth = async () => {
+      if (!session) {
+        setIsLoading(false);
+        return;
+      }
+      const adminStatus = await checkAdminRole();
+      setIsAdmin(adminStatus);
       setIsLoading(false);
+      if (!adminStatus) {
+        toast.error("You don't have admin privileges.");
+        navigate('/');
+      }
     };
-    checkSession();
-  }, []);
+    checkAuth();
+  }, [session, navigate]);
 
   const handleLogout = async () => {
     try {
@@ -42,6 +52,10 @@ const AdminPage = () => {
         <Auth />
       </div>
     );
+  }
+
+  if (!isAdmin) {
+    return <div>You don't have permission to access this page.</div>;
   }
 
   return (
