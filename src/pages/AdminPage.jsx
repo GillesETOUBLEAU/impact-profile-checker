@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../integrations/supabase';
-import { checkAdminRole } from '../utils/auth';
 import AdminConfigForm from '../components/AdminConfigForm';
-import Auth from '../components/Auth';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from 'sonner';
+import { supabase } from '../lib/supabase';
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -15,21 +14,33 @@ const AdminPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      if (session) {
-        const adminStatus = await checkAdminRole();
-        setIsAdmin(adminStatus);
+    const checkAdminStatus = async () => {
+      if (session?.user) {
+        try {
+          const { data, error } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .single();
+
+          if (error) throw error;
+          setIsAdmin(data.role === 'admin');
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          toast.error('Error verifying admin status');
+        }
       }
       setLoading(false);
     };
-    checkAuth();
+
+    checkAdminStatus();
   }, [session]);
 
   const handleLogout = async () => {
     try {
       await logout();
       toast.success('Logged out successfully');
-      navigate('/admin');
+      navigate('/');
     } catch (error) {
       console.error('Error logging out:', error);
       toast.error('Error logging out');
@@ -43,8 +54,11 @@ const AdminPage = () => {
   if (!session) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-md">
-        <h1 className="text-3xl font-bold mb-6">Admin Login</h1>
-        <Auth />
+        <h1 className="text-3xl font-bold mb-6">Admin Login Required</h1>
+        <Alert>
+          <AlertDescription>Please log in to access the admin page.</AlertDescription>
+        </Alert>
+        <Button onClick={() => navigate('/admin/login')} className="mt-4">Go to Login</Button>
       </div>
     );
   }
