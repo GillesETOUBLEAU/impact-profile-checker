@@ -13,6 +13,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Create a policy to allow public access to read objects from the site-assets bucket
+CREATE POLICY "Allow public read access to site-assets"
+ON storage.objects FOR SELECT
+TO public
+USING (bucket_id = 'site-assets');
+
 -- Create a policy to allow admins to insert objects into the site-assets bucket
 CREATE POLICY "Allow admins to upload to site-assets"
 ON storage.objects FOR INSERT
@@ -21,12 +27,6 @@ WITH CHECK (
   bucket_id = 'site-assets' AND
   public.is_admin()
 );
-
--- Create a policy to allow authenticated users to select objects from the site-assets bucket
-CREATE POLICY "Allow authenticated users to view site-assets"
-ON storage.objects FOR SELECT
-TO authenticated
-USING (bucket_id = 'site-assets');
 
 -- Create a policy to allow admins to update objects in the site-assets bucket
 CREATE POLICY "Allow admins to update site-assets"
@@ -47,6 +47,9 @@ GRANT USAGE ON SCHEMA storage TO authenticated;
 GRANT ALL ON storage.objects TO authenticated;
 
 -- Ensure the site-assets bucket exists
-INSERT INTO storage.buckets (id, name)
-VALUES ('site-assets', 'site-assets')
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('site-assets', 'site-assets', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- Grant public read access to the site-assets bucket
+GRANT SELECT ON storage.objects TO anon;
