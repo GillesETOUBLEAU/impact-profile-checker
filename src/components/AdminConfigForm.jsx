@@ -45,7 +45,10 @@ const AdminConfigForm = () => {
     const fileName = `logo-${Date.now()}.${file.name.split('.').pop()}`;
     const { data, error } = await supabase.storage
       .from('site-assets')
-      .upload(fileName, file);
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
     if (error) throw error;
 
@@ -64,6 +67,7 @@ const AdminConfigForm = () => {
       try {
         logoUrl = await uploadLogo(formData.logoFile);
       } catch (error) {
+        console.error('Error uploading logo:', error);
         toast.error(`Error uploading logo: ${error.message}`);
         return;
       }
@@ -82,6 +86,7 @@ const AdminConfigForm = () => {
           refetch();
         },
         onError: (error) => {
+          console.error('Error updating configuration:', error);
           toast.error(`Error updating configuration: ${error.message}`);
         }
       });
@@ -92,6 +97,7 @@ const AdminConfigForm = () => {
           refetch();
         },
         onError: (error) => {
+          console.error('Error adding configuration:', error);
           toast.error(`Error adding configuration: ${error.message}`);
         }
       });
