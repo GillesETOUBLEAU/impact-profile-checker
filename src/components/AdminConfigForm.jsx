@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../lib/supabase';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import { useAddSiteConfig, useUpdateSiteConfig, useSiteConfig } from '../integrations/supabase/hooks/useSiteConfig';
 import { useSupabaseAuth } from '../integrations/supabase';
+import { supabase } from '../lib/supabase';
 
 const AdminConfigForm = () => {
-  const { data: siteConfig, isLoading: configLoading, refetch } = useSiteConfig();
+  const { data: siteConfig, isLoading: configLoading, error: configError, refetch } = useSiteConfig();
   const addSiteConfig = useAddSiteConfig();
   const updateSiteConfig = useUpdateSiteConfig();
   const { session } = useSupabaseAuth();
@@ -22,13 +21,14 @@ const AdminConfigForm = () => {
   const [previewLogo, setPreviewLogo] = useState('');
 
   useEffect(() => {
-    if (siteConfig) {
+    if (siteConfig && siteConfig.length > 0) {
+      const config = siteConfig[0];
       setFormData({
-        headerText: siteConfig.header_text || '',
-        footerText: siteConfig.footer_text || '',
+        headerText: config.header_text || '',
+        footerText: config.footer_text || '',
         logoFile: null
       });
-      setPreviewLogo(siteConfig.logo_url || '');
+      setPreviewLogo(config.logo_url || '');
     }
   }, [siteConfig]);
 
@@ -66,7 +66,7 @@ const AdminConfigForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let logoUrl = siteConfig?.logo_url;
+    let logoUrl = siteConfig && siteConfig.length > 0 ? siteConfig[0].logo_url : null;
 
     if (formData.logoFile) {
       try {
@@ -85,8 +85,8 @@ const AdminConfigForm = () => {
     };
 
     try {
-      if (siteConfig?.id) {
-        await updateSiteConfig.mutateAsync({ id: siteConfig.id, ...configData });
+      if (siteConfig && siteConfig.length > 0) {
+        await updateSiteConfig.mutateAsync({ id: siteConfig[0].id, ...configData });
         toast.success('Configuration updated successfully');
       } else {
         await addSiteConfig.mutateAsync(configData);
@@ -100,6 +100,7 @@ const AdminConfigForm = () => {
   };
 
   if (configLoading) return <div>Loading configuration...</div>;
+  if (configError) return <div>Error loading configuration: {configError.message}</div>;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 mb-8">
