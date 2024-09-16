@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useSupabaseAuth } from '../integrations/supabase';
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -28,12 +28,15 @@ const Layout = ({ children }) => {
     retryDelay: 1000,
   });
 
-  const auth = useSupabaseAuth();
-  const session = auth?.session;
+  const { session, logout } = useSupabaseAuth();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
-    if (auth?.logout) {
-      await auth.logout();
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Error logging out:', error);
     }
   };
 
@@ -47,17 +50,18 @@ const Layout = ({ children }) => {
             <img src={siteConfig.logo_url} alt="Logo" className="h-10" />
           )}
           <h1 className="text-2xl font-bold">{siteConfig?.header_text || 'Impact Profile Checker'}</h1>
-          <nav className="flex items-center">
-            <Link to="/" className="mr-4">Home</Link>
-            {session ? (
+          <nav className="flex items-center space-x-4">
+            <Link to="/" className="hover:underline">Home</Link>
+            {session && (
               <>
-                <Link to="/admin" className="mr-4">Admin</Link>
+                <Link to="/admin" className="hover:underline">Admin</Link>
                 <Button onClick={handleLogout} variant="outline" size="sm">
                   Logout
                 </Button>
               </>
-            ) : (
-              <Link to="/admin">Login</Link>
+            )}
+            {!session && (
+              <Link to="/admin/login" className="hover:underline">Login</Link>
             )}
           </nav>
         </div>
