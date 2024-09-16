@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useSupabaseAuth } from '../integrations/supabase';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Layout = ({ children }) => {
   const { data: siteConfig, isLoading, error } = useQuery({
@@ -21,10 +22,11 @@ const Layout = ({ children }) => {
         return data;
       } catch (error) {
         console.error('Error fetching site configuration:', error);
-        return null; // Return null instead of throwing to prevent query from retrying indefinitely
+        return null;
       }
     },
-    retry: false, // Disable retries
+    retry: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const { session, logout } = useSupabaseAuth();
@@ -43,11 +45,13 @@ const Layout = ({ children }) => {
     <div className="flex flex-col min-h-screen">
       <header className="bg-primary text-primary-foreground p-4">
         <div className="container mx-auto flex justify-between items-center">
-          {!isLoading && siteConfig?.logo_url && (
+          {isLoading ? (
+            <Skeleton className="h-10 w-40" />
+          ) : siteConfig?.logo_url ? (
             <img src={siteConfig.logo_url} alt="Logo" className="h-10" />
-          )}
+          ) : null}
           <h1 className="text-2xl font-bold">
-            {isLoading ? 'Loading...' : (siteConfig?.header_text || 'Impact Profile Checker')}
+            {isLoading ? <Skeleton className="h-8 w-64" /> : (siteConfig?.header_text || 'Impact Profile Checker')}
           </h1>
           <nav className="flex items-center space-x-4">
             <Link to="/" className="hover:underline">Home</Link>
@@ -76,7 +80,11 @@ const Layout = ({ children }) => {
       </main>
       <footer className="bg-secondary text-secondary-foreground p-4 mt-8">
         <div className="container mx-auto text-center">
-          {isLoading ? 'Loading...' : (siteConfig?.footer_text || '© 2024 Impact Profile Checker')}
+          {isLoading ? (
+            <Skeleton className="h-6 w-64 mx-auto" />
+          ) : (
+            siteConfig?.footer_text || '© 2024 Impact Profile Checker'
+          )}
         </div>
       </footer>
     </div>
