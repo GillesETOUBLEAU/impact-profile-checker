@@ -6,6 +6,7 @@ import Auth from '../components/Auth';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AdminConfigForm from '../components/AdminConfigForm';
 import { Button } from "@/components/ui/button";
+import { toast } from 'sonner';
 
 const AdminPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -40,12 +41,15 @@ const AdminPage = () => {
   }, []);
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Error signing out:', error);
-    } else {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       setAuthState('unauthenticated');
       setIsAdmin(false);
+      toast.success('Logged out successfully');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast.error('Error logging out');
     }
   };
 
@@ -85,9 +89,11 @@ const AdminPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-6">Admin Configuration</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Admin Configuration</h1>
+        <Button onClick={handleLogout}>Logout</Button>
+      </div>
       <AdminConfigForm />
-      <Button onClick={handleLogout} className="mt-8">Logout</Button>
     </div>
   );
 };
