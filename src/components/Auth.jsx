@@ -1,43 +1,28 @@
 import React, { useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { useSupabaseAuth } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from 'sonner';
 
-const Auth = ({ onAuthStateChange }) => {
+const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { signIn } = useSupabaseAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ 
-        email, 
-        password,
-      });
-      
+      const { error } = await signIn({ email, password });
       if (error) throw error;
-      
-      if (data.user) {
-        toast.success('Logged in successfully');
-        if (onAuthStateChange) {
-          onAuthStateChange('SIGNED_IN', data.session);
-        }
-      } else {
-        setError('Login failed. Please try again.');
-      }
+      toast.success('Logged in successfully');
     } catch (error) {
-      if (error.message === 'Invalid login credentials') {
-        setError('Invalid email or password. Please try again.');
-      } else {
-        setError(error.message || 'An error occurred during login');
-      }
+      setError(error.message);
       toast.error(error.message || 'Login failed');
     } finally {
       setLoading(false);
