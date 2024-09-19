@@ -14,7 +14,6 @@ const Auth = () => {
   const { signIn, logout } = useSupabaseAuth();
 
   useEffect(() => {
-    // Clear local storage and logout on component mount
     const clearSession = async () => {
       localStorage.removeItem('supabase.auth.token');
       await logout();
@@ -31,7 +30,8 @@ const Auth = () => {
       if (error) throw error;
       toast.success('Logged in successfully');
     } catch (error) {
-      setError(error.message);
+      console.error('Login error:', error);
+      setError(error.message || 'An error occurred during login');
       toast.error(error.message || 'Login failed');
     } finally {
       setLoading(false);
