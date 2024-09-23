@@ -25,6 +25,8 @@ const Auth = () => {
       console.error('Login error:', error);
       if (error.message === 'Invalid login credentials') {
         setError('Invalid email or password. Please try again.');
+      } else if (error.message.includes('failed to call url')) {
+        setError('Network error. Please check your internet connection and try again.');
       } else {
         setError(error.message || 'An error occurred during login');
       }
