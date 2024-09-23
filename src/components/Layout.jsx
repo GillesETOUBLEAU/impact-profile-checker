@@ -39,7 +39,7 @@ const Layout = ({ children }) => {
                 </Button>
               </>
             ) : (
-              <Link to="/admin" className="hover:underline">Admin Login</Link>
+              <Link to="/admin/login" className="hover:underline">Admin Login</Link>
             )}
           </nav>
         </div>
