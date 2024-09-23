@@ -1,10 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useSupabaseAuth } from '../integrations/supabase';
 import { toast } from 'sonner';
 
 const Layout = ({ children }) => {
+  const navigate = useNavigate();
   const auth = useSupabaseAuth();
   const session = auth?.session;
   const logout = auth?.logout;
@@ -14,6 +15,7 @@ const Layout = ({ children }) => {
       try {
         await logout();
         toast.success('Déconnexion réussie');
+        navigate('/');
       } catch (error) {
         console.error('Error logging out:', error);
         toast.error('Erreur lors de la déconnexion');
