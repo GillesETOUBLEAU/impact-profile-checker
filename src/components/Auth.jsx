@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSupabaseAuth } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,15 +11,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { signIn, logout } = useSupabaseAuth();
-
-  useEffect(() => {
-    const clearSession = async () => {
-      localStorage.removeItem('supabase.auth.token');
-      await logout();
-    };
-    clearSession();
-  }, [logout]);
+  const { signIn } = useSupabaseAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -31,7 +23,11 @@ const Auth = () => {
       toast.success('Logged in successfully');
     } catch (error) {
       console.error('Login error:', error);
-      setError(error.message || 'An error occurred during login');
+      if (error.message === 'Invalid login credentials') {
+        setError('Invalid email or password. Please try again.');
+      } else {
+        setError(error.message || 'An error occurred during login');
+      }
       toast.error(error.message || 'Login failed');
     } finally {
       setLoading(false);
@@ -46,22 +42,26 @@ const Auth = () => {
         </Alert>
       )}
       <form onSubmit={handleLogin} className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
         <Button type="submit" disabled={loading}>
           {loading ? 'Loading...' : 'Sign In'}
         </Button>
