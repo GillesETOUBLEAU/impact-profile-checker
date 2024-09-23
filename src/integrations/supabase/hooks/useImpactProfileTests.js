@@ -10,42 +10,42 @@ const fromSupabase = async (query) => {
 /*
 ### impact_profile_tests
 
-| name             | type                    | format                 | required |
-|------------------|-------------------------|------------------------|----------|
-| id               | uuid                    | uuid                   | true     |
-| first_name       | text                    | string                 | true     |
-| last_name        | text                    | string                 | true     |
-| email            | text                    | string                 | true     |
-| question_1       | integer                 | integer                | true     |
-| question_2       | integer                 | integer                | true     |
-| question_3       | integer                 | integer                | true     |
-| question_4       | integer                 | integer                | true     |
-| question_5       | integer                 | integer                | true     |
-| question_6       | integer                 | integer                | true     |
-| question_7       | integer                 | integer                | true     |
-| question_8       | integer                 | integer                | true     |
-| question_9       | integer                 | integer                | true     |
-| question_10      | integer                 | integer                | true     |
-| humanist_score   | numeric                 | number                 | true     |
-| innovative_score | numeric                 | number                 | true     |
-| eco_guide_score  | numeric                 | number                 | true     |
-| curious_score    | numeric                 | number                 | true     |
-| profiles         | text[]                  | array of strings       | true     |
-| created_at       | timestamp with time zone| string                 | false    |
-| selected_profile | text                    | string                 | false    |
+| name             | type    | format                 | required |
+|------------------|---------|------------------------|----------|
+| id               | string  | uuid                   | true     |
+| first_name       | string  | text                   | true     |
+| last_name        | string  | text                   | true     |
+| email            | string  | text                   | true     |
+| question_1       | integer | integer                | true     |
+| question_2       | integer | integer                | true     |
+| question_3       | integer | integer                | true     |
+| question_4       | integer | integer                | true     |
+| question_5       | integer | integer                | true     |
+| question_6       | integer | integer                | true     |
+| question_7       | integer | integer                | true     |
+| question_8       | integer | integer                | true     |
+| question_9       | integer | integer                | true     |
+| question_10      | integer | integer                | true     |
+| humanist_score   | number  | numeric                | true     |
+| innovative_score | number  | numeric                | true     |
+| eco_guide_score  | number  | numeric                | true     |
+| curious_score    | number  | numeric                | true     |
+| profiles         | array   | text[]                 | true     |
+| created_at       | string  | timestamp with time zone | false    |
+| selected_profile | string  | text                   | false    |
 
 Foreign Key Relationships:
 - None identified
 */
 
-export const useImpactProfileTests = () => useQuery({
-    queryKey: ['impact_profile_tests'],
-    queryFn: () => fromSupabase(supabase.from('impact_profile_tests').select('*')),
-});
-
 export const useImpactProfileTest = (id) => useQuery({
     queryKey: ['impact_profile_tests', id],
     queryFn: () => fromSupabase(supabase.from('impact_profile_tests').select('*').eq('id', id).single()),
+});
+
+export const useImpactProfileTests = () => useQuery({
+    queryKey: ['impact_profile_tests'],
+    queryFn: () => fromSupabase(supabase.from('impact_profile_tests').select('*')),
 });
 
 export const useAddImpactProfileTest = () => {
