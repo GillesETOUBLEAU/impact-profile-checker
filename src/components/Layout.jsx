@@ -5,15 +5,22 @@ import { useSupabaseAuth } from '../integrations/supabase';
 import { toast } from 'sonner';
 
 const Layout = ({ children }) => {
-  const { session, logout } = useSupabaseAuth();
+  const auth = useSupabaseAuth();
+  const session = auth?.session;
+  const logout = auth?.logout;
 
   const handleLogout = async () => {
-    try {
-      await logout();
-      toast.success('Déconnexion réussie');
-    } catch (error) {
-      console.error('Error logging out:', error);
-      toast.error('Erreur lors de la déconnexion');
+    if (logout) {
+      try {
+        await logout();
+        toast.success('Déconnexion réussie');
+      } catch (error) {
+        console.error('Error logging out:', error);
+        toast.error('Erreur lors de la déconnexion');
+      }
+    } else {
+      console.error('Logout function is not available');
+      toast.error('Erreur de configuration de la déconnexion');
     }
   };
 
