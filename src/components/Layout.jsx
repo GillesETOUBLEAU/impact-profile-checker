@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useSupabaseAuth } from '../integrations/supabase';
+import { toast } from 'sonner';
 
 const Layout = ({ children }) => {
   const { session, logout } = useSupabaseAuth();
@@ -9,8 +10,10 @@ const Layout = ({ children }) => {
   const handleLogout = async () => {
     try {
       await logout();
+      toast.success('Déconnexion réussie');
     } catch (error) {
       console.error('Error logging out:', error);
+      toast.error('Erreur lors de la déconnexion');
     }
   };
 

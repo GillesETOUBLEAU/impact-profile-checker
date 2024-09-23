@@ -27,7 +27,6 @@ export const SupabaseAuthProviderInner = ({ children }) => {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
         console.error('Error getting session:', error);
-        toast.error('Erreur lors de la récupération de la session.');
       } else {
         setSession(session);
         if (session) {
@@ -46,9 +45,6 @@ export const SupabaseAuthProviderInner = ({ children }) => {
         setIsAdmin(false);
       }
       queryClient.invalidateQueries('user');
-      if (event === 'SIGNED_OUT') {
-        localStorage.removeItem('supabase.auth.token');
-      }
     });
 
     getSession();
@@ -104,29 +100,14 @@ export const SupabaseAuthProviderInner = ({ children }) => {
 
   const logout = async () => {
     try {
-      setLoading(true);
-      
-      // Clear local storage first
-      localStorage.removeItem('supabase.auth.token');
-      
-      // Attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('Error signing out:', error);
-        toast.error('Erreur lors de la déconnexion du serveur, mais la session locale a été fermée.');
-      } else {
-        toast.success('Déconnexion réussie.');
-      }
-    } catch (error) {
-      console.error('Unexpected error during logout:', error);
-      toast.error('Une erreur inattendue est survenue lors de la déconnexion.');
-    } finally {
-      // Ensure the session is cleared locally even if the server request fails
+      if (error) throw error;
       setSession(null);
       setIsAdmin(false);
       queryClient.invalidateQueries('user');
-      setLoading(false);
+    } catch (error) {
+      console.error('Error signing out:', error);
+      throw error;
     }
   };
 
