@@ -14,34 +14,27 @@ const AdminPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const clearSessionAndCheck = async () => {
-      // Clear any existing session
-      await logout();
-      setIsLoading(false);
-    };
-    clearSessionAndCheck();
-  }, [logout]);
-
-  useEffect(() => {
     const checkAuth = async () => {
       if (session) {
         const adminStatus = await checkAdminRole();
         setIsAdmin(adminStatus);
         if (!adminStatus) {
           toast.error("You don't have admin privileges.");
-          await logout();
+          navigate('/');
         }
+      } else {
+        navigate('/admin/login');
       }
       setIsLoading(false);
     };
     checkAuth();
-  }, [session, logout]);
+  }, [session, navigate]);
 
   const handleLogout = async () => {
     try {
       await logout();
       toast.success('Logged out successfully');
-      navigate('/admin');
+      navigate('/admin/login');
     } catch (error) {
       console.error('Error logging out:', error);
       toast.error('Error logging out');
