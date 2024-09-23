@@ -19,7 +19,7 @@ const AdminPage = () => {
         const adminStatus = await checkAdminRole();
         setIsAdmin(adminStatus);
         if (!adminStatus) {
-          toast.error("You don't have admin privileges.");
+          toast.error("Vous n'avez pas les privilèges d'administrateur.");
           navigate('/');
         }
       } else {
@@ -33,35 +33,35 @@ const AdminPage = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success('Logged out successfully');
+      toast.success('Déconnexion réussie');
       navigate('/admin/login');
     } catch (error) {
-      console.error('Error logging out:', error);
-      toast.error('Error logging out');
+      console.error('Erreur lors de la déconnexion:', error);
+      toast.error('Erreur lors de la déconnexion');
     }
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Chargement...</div>;
   }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-6">Admin Page</h1>
+      <h1 className="text-3xl font-bold mb-6">Page d'administration</h1>
       {!session && <Auth />}
       {session && !isAdmin && (
         <div>
-          <p>You are logged in, but you don't have admin privileges.</p>
-          <Button onClick={handleLogout} className="mt-4">Logout</Button>
+          <p>Vous êtes connecté, mais vous n'avez pas les privilèges d'administrateur.</p>
+          <Button onClick={handleLogout} className="mt-4">Déconnexion</Button>
         </div>
       )}
       {session && isAdmin && (
         <>
           <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Admin Configuration</h2>
+            <h2 className="text-2xl font-bold mb-4">Configuration d'administration</h2>
             <AdminConfigForm />
           </div>
-          <Button onClick={handleLogout} className="mt-4">Logout</Button>
+          <Button onClick={handleLogout} className="mt-4">Déconnexion</Button>
         </>
       )}
     </div>
