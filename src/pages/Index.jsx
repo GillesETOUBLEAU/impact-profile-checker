@@ -3,7 +3,7 @@ import UserInfoForm from '../components/UserInfoForm';
 import QuestionSlider from '../components/QuestionSlider';
 import ResultsDisplay from '../components/ResultsDisplay';
 import { questions, calculateProfiles } from '../utils/profileUtils';
-import { supabase } from '../lib/supabase';
+import { useAddImpactProfileTest, useUpdateImpactProfileTest } from '../integrations/supabase/hooks/useImpactProfileTests';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 
@@ -15,6 +15,9 @@ const Index = () => {
   const [finalProfile, setFinalProfile] = useState(null);
   const [testId, setTestId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const addProfileTest = useAddImpactProfileTest();
+  const updateProfileTest = useUpdateImpactProfileTest();
 
   const handleUserInfoSubmit = (info) => {
     setUserInfo(info);
@@ -32,49 +35,43 @@ const Index = () => {
       setIsSubmitting(true);
       const profileData = calculateProfiles(answers);
       
-      console.log('Calculated profiles:', profileData); // Debug log
+      console.log('Calculated profiles:', profileData);
       
       if (!profileData || !profileData.profiles || profileData.profiles.length === 0) {
         toast.error('Erreur lors du calcul des profils');
         return;
       }
 
-      const { data, error } = await supabase
-        .from('impact_profile_tests')
-        .insert([{
-          first_name: userInfo.firstName,
-          last_name: userInfo.lastName,
-          email: userInfo.email,
-          question_1: answers[0],
-          question_2: answers[1],
-          question_3: answers[2],
-          question_4: answers[3],
-          question_5: answers[4],
-          question_6: answers[5],
-          question_7: answers[6],
-          question_8: answers[7],
-          question_9: answers[8],
-          question_10: answers[9],
-          humanist_score: Math.round(profileData.scores.humanistScore * 100) / 100,
-          innovative_score: Math.round(profileData.scores.innovativeScore * 100) / 100,
-          eco_guide_score: Math.round(profileData.scores.ecoGuideScore * 100) / 100,
-          curious_score: Math.round(profileData.scores.curiousScore * 100) / 100,
-          profiles: profileData.profiles
-        }])
-        .select()
-        .single();
+      const testData = {
+        first_name: userInfo.firstName,
+        last_name: userInfo.lastName,
+        email: userInfo.email,
+        question_1: answers[0],
+        question_2: answers[1],
+        question_3: answers[2],
+        question_4: answers[3],
+        question_5: answers[4],
+        question_6: answers[5],
+        question_7: answers[6],
+        question_8: answers[7],
+        question_9: answers[8],
+        question_10: answers[9],
+        humanist_score: Math.round(profileData.scores.humanistScore * 100) / 100,
+        innovative_score: Math.round(profileData.scores.innovativeScore * 100) / 100,
+        eco_guide_score: Math.round(profileData.scores.ecoGuideScore * 100) / 100,
+        curious_score: Math.round(profileData.scores.curiousScore * 100) / 100,
+        profiles: profileData.profiles
+      };
+
+      const { data, error } = await addProfileTest.mutateAsync(testData);
 
       if (error) {
-        console.error('Supabase error:', error);
+        console.error('Error saving test:', error);
         toast.error('Erreur lors de la sauvegarde: ' + error.message);
         return;
       }
 
-      if (!data) {
-        throw new Error('No data returned from Supabase');
-      }
-
-      console.log('Saved test data:', data); // Debug log
+      console.log('Saved test data:', data);
       setTestId(data.id);
       setProfiles(profileData.profiles);
       setStep('results');
@@ -95,16 +92,10 @@ const Index = () => {
         return;
       }
 
-      const { error } = await supabase
-        .from('impact_profile_tests')
-        .update({ selected_profile: profile })
-        .eq('id', testId);
-
-      if (error) {
-        console.error('Supabase update error:', error);
-        toast.error('Erreur lors de la sélection du profil');
-        return;
-      }
+      await updateProfileTest.mutateAsync({
+        id: testId,
+        selected_profile: profile
+      });
 
       setFinalProfile(profile);
       toast.success('Profil sélectionné avec succès!');

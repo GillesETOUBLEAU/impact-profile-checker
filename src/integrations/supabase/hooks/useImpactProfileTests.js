@@ -3,7 +3,7 @@ import { supabase } from '../supabase';
 
 const fromSupabase = async (query) => {
     const { data, error } = await query;
-    if (error) throw new Error(error.message);
+    if (error) throw error;
     return data;
 };
 
@@ -31,8 +31,8 @@ const fromSupabase = async (query) => {
 | eco_guide_score  | number  | numeric                | true     |
 | curious_score    | number  | numeric                | true     |
 | profiles         | array   | text[]                 | true     |
-| created_at       | string  | timestamp with time zone | false    |
 | selected_profile | string  | text                   | false    |
+| created_at       | string  | timestamp with time zone | false    |
 
 Foreign Key Relationships:
 - None identified
@@ -41,19 +41,20 @@ Foreign Key Relationships:
 export const useImpactProfileTest = (id) => useQuery({
     queryKey: ['impact_profile_tests', id],
     queryFn: () => fromSupabase(supabase.from('impact_profile_tests').select('*').eq('id', id).single()),
+    enabled: !!id
 });
 
 export const useImpactProfileTests = () => useQuery({
     queryKey: ['impact_profile_tests'],
-    queryFn: () => fromSupabase(supabase.from('impact_profile_tests').select('*')),
+    queryFn: () => fromSupabase(supabase.from('impact_profile_tests').select('*').order('created_at', { ascending: false }))
 });
 
 export const useAddImpactProfileTest = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newTest) => fromSupabase(supabase.from('impact_profile_tests').insert([newTest])),
+        mutationFn: (newTest) => fromSupabase(supabase.from('impact_profile_tests').insert([newTest]).select().single()),
         onSuccess: () => {
-            queryClient.invalidateQueries('impact_profile_tests');
+            queryClient.invalidateQueries({ queryKey: ['impact_profile_tests'] });
         },
     });
 };
@@ -61,19 +62,10 @@ export const useAddImpactProfileTest = () => {
 export const useUpdateImpactProfileTest = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, ...updateData }) => fromSupabase(supabase.from('impact_profile_tests').update(updateData).eq('id', id)),
+        mutationFn: ({ id, ...updateData }) => 
+            fromSupabase(supabase.from('impact_profile_tests').update(updateData).eq('id', id).select().single()),
         onSuccess: () => {
-            queryClient.invalidateQueries('impact_profile_tests');
-        },
-    });
-};
-
-export const useDeleteImpactProfileTest = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (id) => fromSupabase(supabase.from('impact_profile_tests').delete().eq('id', id)),
-        onSuccess: () => {
-            queryClient.invalidateQueries('impact_profile_tests');
+            queryClient.invalidateQueries({ queryKey: ['impact_profile_tests'] });
         },
     });
 };
