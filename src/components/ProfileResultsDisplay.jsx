@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const ProfileResultsDisplay = () => {
   const { data: results, isLoading, error, isError } = useProfileResults();
 
+  console.log('Results in component:', results); // Debug log
+
   if (isError) {
     return (
       <div className="text-red-500 p-4 rounded-md bg-red-50 border border-red-200">
@@ -38,6 +40,8 @@ const ProfileResultsDisplay = () => {
         <TableHeader>
           <TableRow>
             <TableHead>First Name</TableHead>
+            <TableHead>Last Name</TableHead>
+            <TableHead>Email</TableHead>
             <TableHead>Selected Profile</TableHead>
           </TableRow>
         </TableHeader>
@@ -45,6 +49,8 @@ const ProfileResultsDisplay = () => {
           {results.map((result, index) => (
             <TableRow key={index}>
               <TableCell>{result.first_name}</TableCell>
+              <TableCell>{result.last_name}</TableCell>
+              <TableCell>{result.email}</TableCell>
               <TableCell>{result.selected_profile || 'Not selected'}</TableCell>
             </TableRow>
           ))}

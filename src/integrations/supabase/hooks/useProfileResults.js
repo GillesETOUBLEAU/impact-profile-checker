@@ -6,7 +6,7 @@ const fetchProfileResults = async () => {
   try {
     const { data, error } = await supabase
       .from('impact_profile_tests')
-      .select('first_name,selected_profile')
+      .select('*')  // Select all columns to ensure we have the data
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -15,6 +15,7 @@ const fetchProfileResults = async () => {
       throw error;
     }
 
+    console.log('Fetched data:', data); // Debug log to see what data we're getting
     return data || [];
   } catch (error) {
     console.error('Fetch error:', error);
