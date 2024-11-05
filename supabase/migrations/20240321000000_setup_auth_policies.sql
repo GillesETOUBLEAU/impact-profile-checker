@@ -69,11 +69,11 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to assign admin role to a user
-CREATE OR REPLACE FUNCTION public.assign_admin_role(user_id UUID)
+CREATE OR REPLACE FUNCTION public.assign_admin_role(p_user_id UUID)
 RETURNS VOID AS $$
 BEGIN
   INSERT INTO public.user_roles (user_id, role)
-  VALUES (user_id, 'admin')
+  VALUES (p_user_id, 'admin')
   ON CONFLICT (user_id, role) DO NOTHING;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -84,7 +84,7 @@ DO $$
 DECLARE
   new_user_id UUID;
 BEGIN
-  -- Create a new user
+  -- Get the current user's ID
   new_user_id := auth.uid();
   
   -- Assign admin role to the new user
