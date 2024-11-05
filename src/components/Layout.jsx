@@ -1,8 +1,31 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import { useSupabaseAuth } from '../integrations/supabase';
+import { toast } from 'sonner';
 
 const Layout = ({ children }) => {
+  const navigate = useNavigate();
+  const auth = useSupabaseAuth();
+  const session = auth?.session;
+  const logout = auth?.logout;
+
+  const handleLogout = async () => {
+    if (logout) {
+      try {
+        await logout();
+        toast.success('Déconnexion réussie');
+        navigate('/');
+      } catch (error) {
+        console.error('Error logging out:', error);
+        toast.error('Erreur lors de la déconnexion');
+      }
+    } else {
+      console.error('Logout function is not available');
+      toast.error('Erreur de configuration de la déconnexion');
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-primary text-primary-foreground p-4">
@@ -14,6 +37,16 @@ const Layout = ({ children }) => {
                 Home
               </Button>
             </Link>
+            {session ? (
+              <>
+                <Link to="/admin" className="hover:underline">Admin</Link>
+                <Button onClick={handleLogout} variant="outline" size="sm">
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <Link to="/admin/login" className="hover:underline">Admin Login</Link>
+            )}
           </nav>
         </div>
       </header>
