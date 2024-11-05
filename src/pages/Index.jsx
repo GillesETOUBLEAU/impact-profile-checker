@@ -60,21 +60,19 @@ const Index = () => {
 
   const handleSubmitAnswers = async () => {
     try {
-      console.log('Calculating profiles...'); // Debug log
+      console.log('Starting handleSubmitAnswers...'); // New debug log
+      console.log('Current answers:', answers); // New debug log
+      
       const profileData = calculateProfiles(answers);
+      console.log('Profile data calculated:', profileData); // New debug log
       
       if (!profileData || !profileData.profiles || profileData.profiles.length === 0) {
         toast.error('Erreur lors du calcul des profils');
         return;
       }
 
-      console.log('Saving test results...'); // Debug log
       await saveTestResults(profileData);
-      
-      console.log('Setting profiles...', profileData.profiles); // Debug log
       setProfiles(profileData.profiles);
-      
-      console.log('Changing step to results...'); // Debug log
       setStep('results');
       
       toast.success('Résultats calculés avec succès!');
@@ -92,7 +90,7 @@ const Index = () => {
 
       const { error: updateError } = await supabase
         .from('impact_profile_tests')
-        .update({ profile_type: profile })
+        .update({ selected_profile: profile })
         .eq('id', testId);
 
       if (updateError) throw updateError;

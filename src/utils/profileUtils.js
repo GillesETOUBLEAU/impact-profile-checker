@@ -12,15 +12,25 @@ export const questions = [
 ];
 
 export const calculateProfiles = (answers) => {
-  console.log('Calculating profiles with answers:', answers); // Debug log
-  
+  console.log('Starting profile calculation with answers:', answers);
+
+  if (!Array.isArray(answers) || answers.length !== 10) {
+    console.error('Invalid answers format:', answers);
+    throw new Error('Invalid answers format');
+  }
+
   // Calculate scores
   const humanistScore = (answers[0] + answers[4]) / 2;
   const innovativeScore = (answers[1] + answers[5] + answers[8]) / 3;
   const ecoGuideScore = (answers[2] + answers[6]) / 2;
   const curiousScore = (answers[3] + answers[7] + answers[9]) / 3;
 
-  console.log('Scores calculated:', { humanistScore, innovativeScore, ecoGuideScore, curiousScore }); // Debug log
+  console.log('Calculated scores:', {
+    humanistScore,
+    innovativeScore,
+    ecoGuideScore,
+    curiousScore
+  });
 
   // Determine which profiles meet the threshold
   const possibleProfiles = [];
@@ -42,7 +52,7 @@ export const calculateProfiles = (answers) => {
     possibleProfiles.push(scores[0].profile);
   }
 
-  console.log('Final profiles:', possibleProfiles); // Debug log
+  console.log('Final profiles determined:', possibleProfiles);
 
   return {
     profiles: possibleProfiles,
