@@ -14,6 +14,7 @@ const Index = () => {
   const [profiles, setProfiles] = useState([]);
   const [finalProfile, setFinalProfile] = useState(null);
   const [testId, setTestId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleUserInfoSubmit = (info) => {
     setUserInfo(info);
@@ -28,7 +29,10 @@ const Index = () => {
 
   const handleSubmitAnswers = async () => {
     try {
+      setIsSubmitting(true);
       const profileData = calculateProfiles(answers);
+      
+      console.log('Calculated profiles:', profileData); // Debug log
       
       if (!profileData || !profileData.profiles || profileData.profiles.length === 0) {
         toast.error('Erreur lors du calcul des profils');
@@ -62,28 +66,33 @@ const Index = () => {
 
       if (error) {
         console.error('Supabase error:', error);
-        throw error;
+        toast.error('Erreur lors de la sauvegarde: ' + error.message);
+        return;
       }
 
       if (!data) {
         throw new Error('No data returned from Supabase');
       }
 
+      console.log('Saved test data:', data); // Debug log
       setTestId(data.id);
       setProfiles(profileData.profiles);
       setStep('results');
-
       toast.success('Résultats calculés avec succès!');
+
     } catch (error) {
       console.error('Error submitting answers:', error);
       toast.error('Une erreur est survenue lors de la soumission des réponses');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleProfileSelect = async (profile) => {
     try {
       if (!testId) {
-        throw new Error('Test ID not found');
+        toast.error('ID du test non trouvé');
+        return;
       }
 
       const { error } = await supabase
@@ -93,16 +102,15 @@ const Index = () => {
 
       if (error) {
         console.error('Supabase update error:', error);
-        throw error;
+        toast.error('Erreur lors de la sélection du profil');
+        return;
       }
 
       setFinalProfile(profile);
       toast.success('Profil sélectionné avec succès!');
-      return true;
     } catch (error) {
       console.error('Error saving profile:', error);
       toast.error('Erreur lors de la sélection du profil');
-      throw error;
     }
   };
 
@@ -135,9 +143,10 @@ const Index = () => {
           ))}
           <Button 
             onClick={handleSubmitAnswers}
+            disabled={isSubmitting}
             className="w-full"
           >
-            Voir les résultats
+            {isSubmitting ? 'Calcul en cours...' : 'Voir les résultats'}
           </Button>
         </div>
       )}

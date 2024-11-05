@@ -7,7 +7,6 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
   const handleProfileSelect = async (profile) => {
     try {
       await onProfileSelect(profile);
-      toast.success('Votre profil a été enregistré avec succès!');
     } catch (error) {
       console.error('Error saving profile:', error);
       toast.error('Une erreur est survenue lors de l\'enregistrement');
@@ -15,14 +14,20 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
   };
 
   if (!profiles || profiles.length === 0) {
-    return <p>Aucun profil n'a été déterminé</p>;
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardContent className="pt-6">
+          <p className="text-center text-red-500">Aucun profil n'a été déterminé</p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Votre profil d'Impacteur</CardTitle>
-        {!finalProfile && profiles.length > 0 && (
+        {!finalProfile && (
           <CardDescription>
             {profiles.length > 1 
               ? "Plusieurs profils correspondent à vos réponses. Veuillez choisir celui qui vous correspond le mieux :"
