@@ -44,6 +44,9 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Grant execute permission on the function to authenticated users
 GRANT EXECUTE ON FUNCTION assign_user_role TO authenticated;
 
+-- Drop existing function before recreating
+DROP FUNCTION IF EXISTS assign_admin_role(UUID);
+
 -- Function to assign admin role to a user
 CREATE OR REPLACE FUNCTION assign_admin_role(user_id UUID)
 RETURNS VOID AS $$
