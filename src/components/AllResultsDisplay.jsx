@@ -13,14 +13,20 @@ const AllResultsDisplay = () => {
   const [sortDirection, setSortDirection] = useState('desc');
 
   useEffect(() => {
-    console.log('Component mounted - starting data fetch...');
+    console.log('Component mounted - checking Supabase connection...');
     const fetchResults = async () => {
       try {
-        console.log('Attempting to fetch results from Supabase...');
+        console.log('Making Supabase query with config:', {
+          url: import.meta.env.VITE_SUPABASE_PROJECT_URL,
+          hasApiKey: !!import.meta.env.VITE_SUPABASE_API_KEY
+        });
+
         const { data, error } = await supabase
           .from('impact_profile_tests')
           .select('*')
           .order('created_at', { ascending: false });
+
+        console.log('Supabase response:', { data, error });
 
         if (error) {
           console.error('Supabase error:', error);
@@ -29,10 +35,11 @@ const AllResultsDisplay = () => {
 
         console.log('Successfully fetched data:', data);
         setResults(data || []);
+        toast.success('Data loaded successfully');
       } catch (error) {
         console.error('Error in fetchResults:', error);
         setError(error.message);
-        toast.error('Error loading results: ' + error.message);
+        toast.error(`Error loading results: ${error.message}`);
       } finally {
         console.log('Fetch operation completed');
         setLoading(false);
