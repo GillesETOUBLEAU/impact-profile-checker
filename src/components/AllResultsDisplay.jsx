@@ -3,20 +3,21 @@ import { supabase } from '../lib/supabase';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
+import { toast } from "sonner";
 
 const AllResultsDisplay = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sortField, setSortField] = useState('first_name');
-  const [sortDirection, setSortDirection] = useState('asc');
+  const [sortField, setSortField] = useState('created_at');
+  const [sortDirection, setSortDirection] = useState('desc');
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
         const { data, error } = await supabase
           .from('impact_profile_tests')
-          .select('first_name, selected_profile')
+          .select('*')
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -24,6 +25,7 @@ const AllResultsDisplay = () => {
       } catch (error) {
         console.error('Error fetching results:', error);
         setError('Une erreur est survenue lors du chargement des résultats.');
+        toast.error('Erreur lors du chargement des résultats');
       } finally {
         setLoading(false);
       }
@@ -42,8 +44,10 @@ const AllResultsDisplay = () => {
   };
 
   const sortedResults = [...results].sort((a, b) => {
-    if (a[sortField] < b[sortField]) return sortDirection === 'asc' ? -1 : 1;
-    if (a[sortField] > b[sortField]) return sortDirection === 'asc' ? 1 : -1;
+    const aValue = a[sortField];
+    const bValue = b[sortField];
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
 
@@ -56,6 +60,11 @@ const AllResultsDisplay = () => {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>
+              <Button variant="ghost" onClick={() => handleSort('created_at')}>
+                Date <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </TableHead>
             <TableHead>
               <Button variant="ghost" onClick={() => handleSort('first_name')}>
                 Prénom <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -71,6 +80,7 @@ const AllResultsDisplay = () => {
         <TableBody>
           {sortedResults.map((result, index) => (
             <TableRow key={index}>
+              <TableCell>{new Date(result.created_at).toLocaleDateString()}</TableCell>
               <TableCell>{result.first_name}</TableCell>
               <TableCell>{result.selected_profile || 'Non sélectionné'}</TableCell>
             </TableRow>

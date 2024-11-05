@@ -32,6 +32,8 @@ const Index = () => {
 
   const saveTestResults = async (profileData) => {
     try {
+      const timestamp = new Date().toISOString();
+      
       const { data, error } = await supabase
         .from('impact_profile_tests')
         .insert([{
@@ -43,14 +45,15 @@ const Index = () => {
           innovative_score: profileData.scores.innovativeScore,
           eco_guide_score: profileData.scores.ecoGuideScore,
           curious_score: profileData.scores.curiousScore,
-          profiles: profileData.profiles
+          profiles: profileData.profiles,
+          created_at: timestamp
         }])
         .select();
 
       if (error) throw error;
       
       setTestId(data[0].id);
-      return data[0].id;
+      return { id: data[0].id, timestamp };
     } catch (error) {
       console.error('Error saving test results:', error);
       toast.error("Une erreur est survenue lors de l'enregistrement des résultats.");
@@ -81,21 +84,26 @@ const Index = () => {
     try {
       setFinalProfile(profile);
       if (testId) {
+        const timestamp = new Date().toISOString();
+
         // Update impact_profile_tests
         const { error: updateError } = await supabase
           .from('impact_profile_tests')
-          .update({ selected_profile: profile })
+          .update({ 
+            selected_profile: profile,
+            updated_at: timestamp 
+          })
           .eq('id', testId);
 
         if (updateError) throw updateError;
 
-        // Insert into profile_results with the same timestamp
+        // Insert into profile_results
         const { error: insertError } = await supabase
           .from('profile_results')
           .insert([{
             profile_type: profile,
-            user_id: session?.user?.id, // This will be null for anonymous users
-            created_at: new Date().toISOString() // Use the same timestamp
+            user_id: session?.user?.id,
+            created_at: timestamp
           }]);
 
         if (insertError) throw insertError;
