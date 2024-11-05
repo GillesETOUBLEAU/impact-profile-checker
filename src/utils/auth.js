@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '../integrations/supabase';
 
 export const checkAdminRole = async () => {
   try {
