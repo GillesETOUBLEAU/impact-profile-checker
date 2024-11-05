@@ -13,19 +13,22 @@ ALTER TABLE user_roles ENABLE ROW LEVEL SECURITY;
 -- Drop existing policies to avoid conflicts
 DROP POLICY IF EXISTS "Allow users to read their own role" ON user_roles;
 DROP POLICY IF EXISTS "Allow superusers to read all roles" ON user_roles;
+DROP POLICY IF EXISTS "Allow authenticated to read roles" ON user_roles;
+DROP POLICY IF EXISTS "Allow service_role to modify roles" ON user_roles;
 
--- Create a simplified policy that allows authenticated users to read roles
-CREATE POLICY "Allow authenticated to read roles"
+-- Create a simplified policy that allows all authenticated users to read roles
+CREATE POLICY "Public read access for authenticated users"
 ON user_roles FOR SELECT
 TO authenticated
 USING (true);
 
 -- Create a policy that allows only service_role to modify roles
-CREATE POLICY "Allow service_role to modify roles"
-ON user_roles FOR ALL
+CREATE POLICY "Service role can modify roles"
+ON user_roles 
+FOR ALL 
 TO authenticated
-USING (auth.jwt() ->> 'role' = 'service_role')
-WITH CHECK (auth.jwt() ->> 'role' = 'service_role');
+USING (current_setting('role') = 'service_role')
+WITH CHECK (current_setting('role') = 'service_role');
 
 -- Grant usage on the user_roles table to the authenticated role
 GRANT USAGE ON SCHEMA public TO authenticated;
