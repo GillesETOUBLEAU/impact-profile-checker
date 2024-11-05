@@ -19,6 +19,7 @@ export const SupabaseAuthProvider = ({ children }) => {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
         console.error('Error getting session:', error);
+        toast.error('Session error: ' + error.message);
       } else {
         setSession(session);
         if (session) {
@@ -60,14 +61,20 @@ export const SupabaseAuthProvider = ({ children }) => {
       return adminStatus;
     } catch (error) {
       console.error('Error checking admin status:', error);
+      toast.error('Error checking admin status: ' + error.message);
       setIsAdmin(false);
       return false;
     }
   };
 
-  const signIn = async ({ email, password }) => {
+  const signIn = async ({ email, password, options }) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        options
+      });
+      
       if (error) throw error;
       
       if (data.user) {
@@ -77,7 +84,7 @@ export const SupabaseAuthProvider = ({ children }) => {
         }
       }
       
-      return data;
+      return { data };
     } catch (error) {
       console.error('Sign in error:', error);
       throw error;
@@ -85,7 +92,13 @@ export const SupabaseAuthProvider = ({ children }) => {
   };
 
   const signUp = async ({ email, password }) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        emailRedirectTo: import.meta.env.VITE_SUPABASE_REDIRECT_URL
+      }
+    });
     if (error) throw error;
     return data;
   };
@@ -97,8 +110,10 @@ export const SupabaseAuthProvider = ({ children }) => {
       setSession(null);
       setIsAdmin(false);
       queryClient.invalidateQueries('user');
+      toast.success('Logged out successfully');
     } catch (error) {
       console.error('Error signing out:', error);
+      toast.error('Error signing out: ' + error.message);
       throw error;
     }
   };
@@ -126,7 +141,7 @@ export const SupabaseAuthUI = ({ onError }) => (
     providers={[]}
     onError={(error) => {
       console.error('Auth error:', error);
-      toast.error(`Erreur d'authentification: ${error.message}`);
+      toast.error(`Authentication error: ${error.message}`);
       if (onError) onError(error);
     }}
   />

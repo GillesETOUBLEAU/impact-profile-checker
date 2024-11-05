@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from 'sonner';
 
-const Auth = () => {
+const Auth = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,9 +17,22 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    
     try {
-      const { error } = await signIn({ email, password });
+      const { data, error } = await signIn({ 
+        email, 
+        password,
+        options: {
+          emailRedirectTo: import.meta.env.VITE_SUPABASE_REDIRECT_URL
+        }
+      });
+      
       if (error) throw error;
+      
+      if (onLogin) {
+        onLogin(email, password);
+      }
+      
       toast.success('Logged in successfully');
     } catch (error) {
       console.error('Login error:', error);
