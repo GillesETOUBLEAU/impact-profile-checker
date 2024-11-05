@@ -45,13 +45,12 @@ const Index = () => {
           curious_score: profileData.scores.curiousScore,
           profiles: profileData.profiles
         }])
-        .select()
-        .single();
+        .select();
 
       if (error) throw error;
       
-      setTestId(data.id);
-      return data.id;
+      setTestId(data[0].id);
+      return data[0].id;
     } catch (error) {
       console.error('Error saving test results:', error);
       toast.error("Une erreur est survenue lors de l'enregistrement des résultats.");
