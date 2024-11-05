@@ -3,7 +3,7 @@ import UserInfoForm from '../components/UserInfoForm';
 import QuestionSlider from '../components/QuestionSlider';
 import ResultsDisplay from '../components/ResultsDisplay';
 import { questions, calculateProfiles } from '../utils/profileUtils';
-import { useAddImpactProfileTest, useUpdateImpactProfileTest } from '../integrations/supabase/hooks/useImpactProfileTests';
+import { useAddImpactProfileTest, useUpdateImpactProfileTest } from '../integrations/supabase';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 
@@ -34,8 +34,6 @@ const Index = () => {
     try {
       setIsSubmitting(true);
       const profileData = calculateProfiles(answers);
-      
-      console.log('Calculated profiles:', profileData);
       
       if (!profileData || !profileData.profiles || profileData.profiles.length === 0) {
         toast.error('Erreur lors du calcul des profils');
@@ -71,7 +69,6 @@ const Index = () => {
         return;
       }
 
-      console.log('Saved test data:', data);
       setTestId(data.id);
       setProfiles(profileData.profiles);
       setStep('results');

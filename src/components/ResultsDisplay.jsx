@@ -7,6 +7,7 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
   const handleProfileSelect = async (profile) => {
     try {
       await onProfileSelect(profile);
+      toast.success('Profil sélectionné avec succès!');
     } catch (error) {
       console.error('Error saving profile:', error);
       toast.error('Une erreur est survenue lors de l\'enregistrement');
@@ -38,7 +39,7 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
       <CardContent className="space-y-4">
         {finalProfile ? (
           <div className="space-y-4">
-            <p className="text-xl font-medium">Vous êtes un <strong>{finalProfile}</strong></p>
+            <p className="text-xl font-medium text-center">Vous êtes un <strong>{finalProfile}</strong></p>
             <Button onClick={onReset} variant="outline" className="w-full">
               Retour au test
             </Button>
