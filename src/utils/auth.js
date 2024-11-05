@@ -3,7 +3,10 @@ import { supabase } from '../lib/supabase';
 export const checkAdminRole = async () => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
+    if (!user) {
+      console.log('No user found'); // Debug log
+      return false;
+    }
 
     const { data, error } = await supabase
       .from('user_roles')
@@ -16,9 +19,10 @@ export const checkAdminRole = async () => {
       return false;
     }
 
+    console.log('User role data:', data); // Debug log
     return data?.role === 'admin';
   } catch (error) {
-    console.error('Error checking admin role:', error);
+    console.error('Error in checkAdminRole:', error);
     return false;
   }
 };

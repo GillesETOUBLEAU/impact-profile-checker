@@ -11,27 +11,52 @@ const AdminPage = () => {
   const navigate = useNavigate();
   const { session, logout } = useSupabaseAuth();
   const [isAdmin, setIsAdmin] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (!session) {
+      try {
+        setIsLoading(true);
+        if (!session) {
+          toast.error("Please log in first");
+          navigate('/admin/login');
+          return;
+        }
+        
+        const adminStatus = await checkAdminRole();
+        console.log('Admin status:', adminStatus); // Debug log
+        setIsAdmin(adminStatus);
+        
+        if (!adminStatus) {
+          toast.error("You don't have admin privileges");
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        toast.error("Authentication error occurred");
         navigate('/admin/login');
-        return;
-      }
-      const adminStatus = await checkAdminRole();
-      setIsAdmin(adminStatus);
-      if (!adminStatus) {
-        toast.error("You don't have admin privileges.");
-        navigate('/');
+      } finally {
+        setIsLoading(false);
       }
     };
+    
     checkAuth();
   }, [session, navigate]);
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/admin/login');
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      navigate('/admin/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Error during logout');
+    }
   };
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+  }
 
   if (!isAdmin) {
     return null;
