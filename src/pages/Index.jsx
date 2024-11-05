@@ -32,20 +32,23 @@ const Index = () => {
 
   const saveTestResults = async (profileData) => {
     try {
+      // Create a simplified payload with only essential data
+      const payload = {
+        first_name: userInfo.firstName,
+        last_name: userInfo.lastName,
+        email: userInfo.email,
+        answers: answers.join(','), // Store answers as a comma-separated string
+        humanist_score: Math.round(profileData.scores.humanistScore * 100) / 100,
+        innovative_score: Math.round(profileData.scores.innovativeScore * 100) / 100,
+        eco_guide_score: Math.round(profileData.scores.ecoGuideScore * 100) / 100,
+        curious_score: Math.round(profileData.scores.curiousScore * 100) / 100,
+        profiles: profileData.profiles,
+        created_at: new Date().toISOString()
+      };
+
       const { data, error } = await supabase
         .from('impact_profile_tests')
-        .insert([{
-          first_name: userInfo.firstName,
-          last_name: userInfo.lastName,
-          email: userInfo.email,
-          ...Object.fromEntries(answers.map((value, index) => [`question_${index + 1}`, value])),
-          humanist_score: profileData.scores.humanistScore,
-          innovative_score: profileData.scores.innovativeScore,
-          eco_guide_score: profileData.scores.ecoGuideScore,
-          curious_score: profileData.scores.curiousScore,
-          profiles: profileData.profiles,
-          created_at: new Date().toISOString()
-        }])
+        .insert([payload])
         .select();
 
       if (error) throw error;
@@ -60,11 +63,7 @@ const Index = () => {
 
   const handleSubmitAnswers = async () => {
     try {
-      console.log('Starting handleSubmitAnswers...'); // New debug log
-      console.log('Current answers:', answers); // New debug log
-      
       const profileData = calculateProfiles(answers);
-      console.log('Profile data calculated:', profileData); // New debug log
       
       if (!profileData || !profileData.profiles || profileData.profiles.length === 0) {
         toast.error('Erreur lors du calcul des profils');
