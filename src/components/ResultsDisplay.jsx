@@ -2,32 +2,15 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAddProfileResult } from '../integrations/supabase';
 
-const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, userInfo, testId }) => {
-  const addProfileResult = useAddProfileResult();
-
+const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, userInfo }) => {
   const handleProfileSelect = async (profile) => {
-    if (!testId) {
-      toast.error('Test ID manquant');
-      return;
-    }
-
     try {
-      await addProfileResult.mutateAsync({
-        test_id: testId,
-        first_name: userInfo.firstName,
-        last_name: userInfo.lastName,
-        email: userInfo.email,
-        selected_profile: profile,
-        profiles: profiles
-      });
-
       await onProfileSelect(profile);
       toast.success('Profil sélectionné avec succès!');
     } catch (error) {
-      console.error('Error saving profile:', error);
-      toast.error('Une erreur est survenue lors de l\'enregistrement');
+      console.error('Error selecting profile:', error);
+      toast.error('Une erreur est survenue lors de la sélection');
     }
   };
 
