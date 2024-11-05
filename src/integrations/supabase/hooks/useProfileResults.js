@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 const fetchProfileResults = async () => {
   const { data, error } = await supabase
     .from('impact_profile_tests')
-    .select('first_name,selected_profile,created_at')
+    .select('first_name,selected_profile')
     .order('created_at', { ascending: false });
 
   if (error) {

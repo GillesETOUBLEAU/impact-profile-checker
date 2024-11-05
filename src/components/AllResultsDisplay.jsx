@@ -1,36 +1,9 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../integrations/supabase';
+import React from 'react';
+import { useProfileResults } from '../integrations/supabase';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
-import { toast } from "sonner";
 
 const AllResultsDisplay = () => {
-  const [sortField, setSortField] = useState('created_at');
-  const [sortDirection, setSortDirection] = useState('desc');
-
-  const { data: results, isLoading, error } = useQuery({
-    queryKey: ['all_results', sortField, sortDirection],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('impact_profile_tests')
-        .select('*')
-        .order(sortField, { ascending: sortDirection === 'asc' });
-
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const handleSort = (field) => {
-    if (field === sortField) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
+  const { data: results, isLoading, error } = useProfileResults();
 
   if (isLoading) return <p>Loading results...</p>;
   if (error) return <p className="text-red-500">Error: {error.message}</p>;
@@ -42,16 +15,8 @@ const AllResultsDisplay = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>
-              <Button variant="ghost" onClick={() => handleSort('first_name')}>
-                First Name <ArrowUpDown className="ml-2 h-4 w-4" />
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button variant="ghost" onClick={() => handleSort('selected_profile')}>
-                Selected Profile <ArrowUpDown className="ml-2 h-4 w-4" />
-              </Button>
-            </TableHead>
+            <TableHead>First Name</TableHead>
+            <TableHead>Selected Profile</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
