@@ -82,12 +82,24 @@ const Index = () => {
     try {
       setFinalProfile(profile);
       if (testId) {
-        const { error } = await supabase
+        // Update impact_profile_tests
+        const { error: updateError } = await supabase
           .from('impact_profile_tests')
           .update({ selected_profile: profile })
           .eq('id', testId);
 
-        if (error) throw error;
+        if (updateError) throw updateError;
+
+        // Insert into profile_results
+        const { error: insertError } = await supabase
+          .from('profile_results')
+          .insert([{
+            profile_type: profile,
+            user_id: session?.user?.id || null
+          }]);
+
+        if (insertError) throw insertError;
+        
         toast.success('Profil sélectionné avec succès!');
       }
     } catch (error) {
