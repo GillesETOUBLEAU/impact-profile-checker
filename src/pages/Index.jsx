@@ -35,8 +35,7 @@ const Index = () => {
         innovative_score: Math.round(profileData.scores.innovativeScore * 100) / 100,
         eco_guide_score: Math.round(profileData.scores.ecoGuideScore * 100) / 100,
         curious_score: Math.round(profileData.scores.curiousScore * 100) / 100,
-        profiles: profileData.profiles,
-        created_at: new Date().toISOString()
+        profiles: profileData.profiles
       };
 
       const { data, error } = await supabase
