@@ -7,10 +7,6 @@ import { useAddProfileResult } from '../integrations/supabase';
 const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, userInfo, testId }) => {
   const addProfileResult = useAddProfileResult();
 
-  // Add console log to debug profiles data
-  console.log('ResultsDisplay - profiles:', profiles);
-  console.log('ResultsDisplay - finalProfile:', finalProfile);
-
   const handleProfileSelect = async (profile) => {
     if (!testId) {
       toast.error('Test ID manquant');
@@ -35,8 +31,7 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, user
     }
   };
 
-  // Add null check for profiles
-  if (!profiles || (Array.isArray(profiles) && profiles.length === 0)) {
+  if (!profiles || profiles.length === 0) {
     return (
       <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
@@ -60,7 +55,7 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, user
         <CardTitle>Votre profil d'Impacteur</CardTitle>
         {!finalProfile && (
           <CardDescription>
-            {Array.isArray(profiles) && profiles.length > 1 
+            {profiles.length > 1 
               ? "Plusieurs profils correspondent à vos réponses. Veuillez choisir celui qui vous correspond le mieux :"
               : "Voici le profil qui correspond à vos réponses :"}
           </CardDescription>
@@ -76,7 +71,7 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, user
           </div>
         ) : (
           <div className="space-y-2">
-            {Array.isArray(profiles) && profiles.map((profile) => (
+            {profiles.map((profile) => (
               <Button 
                 key={profile} 
                 onClick={() => handleProfileSelect(profile)} 

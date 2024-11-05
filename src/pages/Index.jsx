@@ -63,10 +63,10 @@ const Index = () => {
         question_8: answers[7],
         question_9: answers[8],
         question_10: answers[9],
-        humanist_score: profileData.scores.humanistScore,
-        innovative_score: profileData.scores.innovativeScore,
-        eco_guide_score: profileData.scores.ecoGuideScore,
-        curious_score: profileData.scores.curiousScore,
+        humanist_score: Math.round(profileData.scores.humanistScore * 100) / 100,
+        innovative_score: Math.round(profileData.scores.innovativeScore * 100) / 100,
+        eco_guide_score: Math.round(profileData.scores.ecoGuideScore * 100) / 100,
+        curious_score: Math.round(profileData.scores.curiousScore * 100) / 100,
         profiles: profileData.profiles
       };
 
@@ -84,6 +84,26 @@ const Index = () => {
       toast.error('Une erreur est survenue lors de la soumission des réponses');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleProfileSelect = async (profile) => {
+    if (!testId) {
+      toast.error('ID du test non trouvé');
+      return;
+    }
+
+    try {
+      await updateProfileTest.mutateAsync({
+        id: testId,
+        selected_profile: profile
+      });
+
+      setFinalProfile(profile);
+      toast.success('Profil sélectionné avec succès!');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast.error('Erreur lors de la sélection du profil');
     }
   };
 
@@ -115,7 +135,7 @@ const Index = () => {
         </div>
       )}
       
-      {step === 'results' && profiles && profiles.length > 0 && (
+      {step === 'results' && (
         <ResultsDisplay
           profiles={profiles}
           finalProfile={finalProfile}

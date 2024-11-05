@@ -12,17 +12,14 @@ export const questions = [
 ];
 
 export const calculateProfiles = (answers) => {
-  // Calculate base scores with more balanced weights
   const humanistScore = (answers[0] * 1.5 + answers[4] * 1.5) / 3;
   const innovativeScore = (answers[1] + answers[5] + answers[8]) / 3;
   const ecoGuideScore = (answers[2] * 1.5 + answers[6] * 1.5) / 3;
   const curiousScore = (answers[3] + answers[7] + answers[9]) / 3;
 
-  // Lower threshold for more variety in results
   const threshold = 5.5;
   const profiles = [];
 
-  // Add profiles that meet the threshold
   if (humanistScore >= threshold) profiles.push('Humaniste');
   if (innovativeScore >= threshold) profiles.push('Innovant');
   if (ecoGuideScore >= threshold) profiles.push('Éco-guide');
