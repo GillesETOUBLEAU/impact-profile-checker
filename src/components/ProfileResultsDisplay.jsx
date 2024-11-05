@@ -13,6 +13,7 @@ const ProfileResultsDisplay = () => {
 
   React.useEffect(() => {
     if (error) {
+      console.error('Error loading results:', error);
       toast.error("Error loading results: " + error.message);
     }
   }, [error]);
@@ -28,6 +29,7 @@ const ProfileResultsDisplay = () => {
 
   const sortedResults = React.useMemo(() => {
     if (!results) return [];
+    console.log('Sorting results:', results);
     return [...results].sort((a, b) => {
       const aValue = a[sortField];
       const bValue = b[sortField];
@@ -37,9 +39,9 @@ const ProfileResultsDisplay = () => {
     });
   }, [results, sortField, sortDirection]);
 
-  if (isLoading) return <p>Chargement des résultats...</p>;
-  if (error) return <p className="text-red-500">Erreur lors du chargement des résultats</p>;
-  if (!results?.length) return <p>Aucun résultat trouvé</p>;
+  if (isLoading) return <div className="flex justify-center p-4">Chargement des résultats...</div>;
+  if (error) return <div className="text-red-500 p-4">Erreur lors du chargement des résultats: {error.message}</div>;
+  if (!results?.length) return <div className="p-4">Aucun résultat trouvé</div>;
 
   return (
     <div className="mt-6">
