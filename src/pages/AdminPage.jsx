@@ -4,7 +4,7 @@ import { useSupabaseAuth } from '../integrations/supabase';
 import { checkAdminRole } from '../utils/auth';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
-import AllResultsDisplay from '../components/AllResultsDisplay';
+import ProfileResultsDisplay from '../components/ProfileResultsDisplay';
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ const AdminPage = () => {
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <Button onClick={handleLogout}>Logout</Button>
       </div>
-      <AllResultsDisplay />
+      <ProfileResultsDisplay />
     </div>
   );
 };
