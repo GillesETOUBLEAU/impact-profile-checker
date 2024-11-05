@@ -57,18 +57,19 @@ const Index = () => {
           curious_score: Math.round(profileData.scores.curiousScore * 100) / 100,
           profiles: profileData.profiles
         }])
-        .select();
+        .select()
+        .single();
 
       if (error) {
         console.error('Supabase error:', error);
         throw error;
       }
 
-      if (!data || data.length === 0) {
+      if (!data) {
         throw new Error('No data returned from Supabase');
       }
 
-      setTestId(data[0].id);
+      setTestId(data.id);
       setProfiles(profileData.profiles);
       setStep('results');
 

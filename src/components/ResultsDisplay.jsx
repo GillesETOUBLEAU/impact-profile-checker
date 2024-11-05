@@ -22,9 +22,11 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Votre profil d'Impacteur</CardTitle>
-        {!finalProfile && profiles.length > 1 && (
+        {!finalProfile && profiles.length > 0 && (
           <CardDescription>
-            Plusieurs profils correspondent à vos réponses. Veuillez choisir celui qui vous correspond le mieux :
+            {profiles.length > 1 
+              ? "Plusieurs profils correspondent à vos réponses. Veuillez choisir celui qui vous correspond le mieux :"
+              : "Voici le profil qui correspond à vos réponses :"}
           </CardDescription>
         )}
       </CardHeader>
