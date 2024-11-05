@@ -1,69 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../integrations/supabase';
-import AdminConfigForm from '../components/AdminConfigForm';
+import { checkAdminRole } from '../utils/auth';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
-import Auth from '../components/Auth';
-import { checkAdminRole } from '../utils/auth';
+import AllResultsDisplay from '../components/AllResultsDisplay';
 
 const AdminPage = () => {
   const navigate = useNavigate();
   const { session, logout } = useSupabaseAuth();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = React.useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (session) {
-        const adminStatus = await checkAdminRole();
-        setIsAdmin(adminStatus);
-        if (!adminStatus) {
-          toast.error("Vous n'avez pas les privilèges d'administrateur.");
-          navigate('/');
-        }
-      } else {
+      if (!session) {
         navigate('/admin/login');
+        return;
       }
-      setIsLoading(false);
+      const adminStatus = await checkAdminRole();
+      setIsAdmin(adminStatus);
+      if (!adminStatus) {
+        toast.error("You don't have admin privileges.");
+        navigate('/');
+      }
     };
     checkAuth();
   }, [session, navigate]);
 
   const handleLogout = async () => {
-    try {
-      await logout();
-      toast.success('Déconnexion réussie');
-      navigate('/admin/login');
-    } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error);
-      toast.error('Erreur lors de la déconnexion');
-    }
+    await logout();
+    navigate('/admin/login');
   };
 
-  if (isLoading) {
-    return <div>Chargement...</div>;
+  if (!isAdmin) {
+    return null;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-6">Page d'administration</h1>
-      {!session && <Auth />}
-      {session && !isAdmin && (
-        <div>
-          <p>Vous êtes connecté, mais vous n'avez pas les privilèges d'administrateur.</p>
-          <Button onClick={handleLogout} className="mt-4">Déconnexion</Button>
-        </div>
-      )}
-      {session && isAdmin && (
-        <>
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Configuration d'administration</h2>
-            <AdminConfigForm />
-          </div>
-          <Button onClick={handleLogout} className="mt-4">Déconnexion</Button>
-        </>
-      )}
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <Button onClick={handleLogout}>Logout</Button>
+      </div>
+      <AllResultsDisplay />
     </div>
   );
 };
