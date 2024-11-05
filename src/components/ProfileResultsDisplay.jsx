@@ -68,7 +68,7 @@ const ProfileResultsDisplay = () => {
               </Button>
             </TableHead>
             <TableHead>
-              <Button variant="ghost" onClick={() => handleSort('profile_type')}>
+              <Button variant="ghost" onClick={() => handleSort('selected_profile')}>
                 Type de profil <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
@@ -87,7 +87,7 @@ const ProfileResultsDisplay = () => {
               <TableCell>{result.first_name}</TableCell>
               <TableCell>{result.last_name}</TableCell>
               <TableCell>{result.email}</TableCell>
-              <TableCell>{result.profile_type || 'Non sélectionné'}</TableCell>
+              <TableCell>{result.selected_profile || 'Non sélectionné'}</TableCell>
             </TableRow>
           ))}
         </TableBody>

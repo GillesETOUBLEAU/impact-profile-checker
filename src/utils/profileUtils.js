@@ -12,48 +12,36 @@ export const questions = [
 ];
 
 export const calculateProfiles = (answers) => {
-  console.log('Starting profile calculation with answers:', answers);
+  // Calculate weighted scores for each profile type
+  const humanistScore = (answers[0] * 1.2 + answers[4] * 1.3) / 2.5;
+  const innovativeScore = (answers[1] * 1.2 + answers[5] * 1.1 + answers[8] * 1.2) / 3.5;
+  const ecoGuideScore = (answers[2] * 1.3 + answers[6] * 1.2) / 2.5;
+  const curiousScore = (answers[3] * 1.1 + answers[7] * 1.2 + answers[9] * 1.1) / 3.4;
 
-  // Calculate scores (questions are grouped by profile type)
-  const humanistScore = (answers[0] + answers[4]) / 2;
-  const innovativeScore = (answers[1] + answers[5] + answers[8]) / 3;
-  const ecoGuideScore = (answers[2] + answers[6]) / 2;
-  const curiousScore = (answers[3] + answers[7] + answers[9]) / 3;
+  // Set a threshold for profile determination
+  const threshold = 6.5;
+  const profiles = [];
 
-  console.log('Calculated scores:', {
-    humanistScore,
-    innovativeScore,
-    ecoGuideScore,
-    curiousScore
-  });
+  if (humanistScore >= threshold) profiles.push('Humaniste');
+  if (innovativeScore >= threshold) profiles.push('Innovant');
+  if (ecoGuideScore >= threshold) profiles.push('Éco-guide');
+  if (curiousScore >= threshold) profiles.push('Curieux');
 
-  // Determine profiles that meet the threshold (6 instead of 7 to make it easier to get multiple profiles)
-  const possibleProfiles = [];
-  if (humanistScore >= 6) possibleProfiles.push('Humaniste');
-  if (innovativeScore >= 6) possibleProfiles.push('Innovant');
-  if (ecoGuideScore >= 6) possibleProfiles.push('Éco-guide');
-  if (curiousScore >= 6) possibleProfiles.push('Curieux');
-
-  // If no profile meets the threshold, select the top two highest scoring profiles
-  if (possibleProfiles.length === 0) {
+  // If no profile meets the threshold, select the highest scoring profile
+  if (profiles.length === 0) {
     const scores = [
-      { profile: 'Humaniste', score: humanistScore },
-      { profile: 'Innovant', score: innovativeScore },
-      { profile: 'Éco-guide', score: ecoGuideScore },
-      { profile: 'Curieux', score: curiousScore }
+      { type: 'Humaniste', score: humanistScore },
+      { type: 'Innovant', score: innovativeScore },
+      { type: 'Éco-guide', score: ecoGuideScore },
+      { type: 'Curieux', score: curiousScore }
     ];
     
     scores.sort((a, b) => b.score - a.score);
-    possibleProfiles.push(scores[0].profile);
-    if (scores[1].score > 4) { // Only add second profile if score is decent
-      possibleProfiles.push(scores[1].profile);
-    }
+    profiles.push(scores[0].type);
   }
 
-  console.log('Final profiles determined:', possibleProfiles);
-
   return {
-    profiles: possibleProfiles,
+    profiles,
     scores: {
       humanistScore,
       innovativeScore,
