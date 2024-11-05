@@ -1,6 +1,5 @@
 import React from 'react';
 import { useProfileResults } from '../integrations/supabase';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Card } from "@/components/ui/card";
@@ -82,27 +81,6 @@ const ProfileResultsDisplay = () => {
           </ResponsiveContainer>
         </div>
       </Card>
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>First Name</TableHead>
-            <TableHead>Last Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Selected Profile</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {results.map((result, index) => (
-            <TableRow key={index}>
-              <TableCell>{result.first_name}</TableCell>
-              <TableCell>{result.last_name}</TableCell>
-              <TableCell>{result.email}</TableCell>
-              <TableCell>{result.selected_profile || 'Not selected'}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
     </div>
   );
 };
