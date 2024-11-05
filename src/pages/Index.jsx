@@ -71,7 +71,6 @@ const Index = () => {
       await saveTestResults(profileData);
       setProfiles(profileData.profiles);
       setStep('results');
-      toast.success('Résultats calculés avec succès!');
     } catch (error) {
       console.error('Error submitting answers:', error);
       toast.error('Une erreur est survenue lors de la soumission des réponses.');
