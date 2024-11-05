@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -6,35 +7,21 @@ import { ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 
 const AllResultsDisplay = () => {
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [sortField, setSortField] = useState('created_at');
   const [sortDirection, setSortDirection] = useState('desc');
 
-  useEffect(() => {
-    const fetchResults = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('impact_profile_tests')
-          .select('*')
-          .order(sortField, { ascending: sortDirection === 'asc' });
+  const { data: results, isLoading, error } = useQuery({
+    queryKey: ['all_results', sortField, sortDirection],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('impact_profile_tests')
+        .select('*')
+        .order(sortField, { ascending: sortDirection === 'asc' });
 
-        if (error) throw error;
-
-        setResults(data || []);
-        toast.success('Data loaded successfully');
-      } catch (error) {
-        console.error('Error in fetchResults:', error);
-        setError(error.message);
-        toast.error(`Error loading results: ${error.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResults();
-  }, [sortField, sortDirection]);
+      if (error) throw error;
+      return data;
+    }
+  });
 
   const handleSort = (field) => {
     if (field === sortField) {
@@ -45,9 +32,9 @@ const AllResultsDisplay = () => {
     }
   };
 
-  if (loading) return <p>Loading results...</p>;
-  if (error) return <p className="text-red-500">Error: {error}</p>;
-  if (!results.length) return <p>No results found in the database.</p>;
+  if (isLoading) return <p>Loading results...</p>;
+  if (error) return <p className="text-red-500">Error: {error.message}</p>;
+  if (!results?.length) return <p>No results found in the database.</p>;
 
   return (
     <div className="mt-6">
