@@ -89,10 +89,7 @@ const Index = () => {
         // Update impact_profile_tests
         const { error: updateError } = await supabase
           .from('impact_profile_tests')
-          .update({ 
-            selected_profile: profile,
-            updated_at: timestamp 
-          })
+          .update({ selected_profile: profile })
           .eq('id', testId);
 
         if (updateError) throw updateError;
