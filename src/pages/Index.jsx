@@ -54,13 +54,13 @@ const Index = () => {
       return data[0].id;
     } catch (error) {
       console.error('Error saving test results:', error);
-      toast.error("Une erreur est survenue lors de l'enregistrement des résultats.");
       throw error;
     }
   };
 
   const handleSubmitAnswers = async () => {
     try {
+      console.log('Calculating profiles...'); // Debug log
       const profileData = calculateProfiles(answers);
       
       if (!profileData || !profileData.profiles || profileData.profiles.length === 0) {
@@ -68,9 +68,16 @@ const Index = () => {
         return;
       }
 
+      console.log('Saving test results...'); // Debug log
       await saveTestResults(profileData);
+      
+      console.log('Setting profiles...', profileData.profiles); // Debug log
       setProfiles(profileData.profiles);
+      
+      console.log('Changing step to results...'); // Debug log
       setStep('results');
+      
+      toast.success('Résultats calculés avec succès!');
     } catch (error) {
       console.error('Error submitting answers:', error);
       toast.error('Une erreur est survenue lors de la soumission des réponses.');

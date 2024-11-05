@@ -12,11 +12,15 @@ export const questions = [
 ];
 
 export const calculateProfiles = (answers) => {
+  console.log('Calculating profiles with answers:', answers); // Debug log
+  
   // Calculate scores
   const humanistScore = (answers[0] + answers[4]) / 2;
   const innovativeScore = (answers[1] + answers[5] + answers[8]) / 3;
   const ecoGuideScore = (answers[2] + answers[6]) / 2;
   const curiousScore = (answers[3] + answers[7] + answers[9]) / 3;
+
+  console.log('Scores calculated:', { humanistScore, innovativeScore, ecoGuideScore, curiousScore }); // Debug log
 
   // Determine which profiles meet the threshold
   const possibleProfiles = [];
@@ -37,6 +41,8 @@ export const calculateProfiles = (answers) => {
     scores.sort((a, b) => b.score - a.score);
     possibleProfiles.push(scores[0].profile);
   }
+
+  console.log('Final profiles:', possibleProfiles); // Debug log
 
   return {
     profiles: possibleProfiles,
