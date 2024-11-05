@@ -4,7 +4,7 @@ import QuestionSlider from '../components/QuestionSlider';
 import ResultsDisplay from '../components/ResultsDisplay';
 import ProfileResultsDisplay from '../components/ProfileResultsDisplay';
 import { questions, calculateProfiles } from '../utils/profileUtils';
-import { useAddImpactProfileTest, useUpdateImpactProfileTest, useImpactProfileTests } from '../integrations/supabase';
+import { useAddImpactProfileTest, useUpdateImpactProfileTest } from '../integrations/supabase';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 
@@ -19,9 +19,6 @@ const Index = () => {
 
   const addProfileTest = useAddImpactProfileTest();
   const updateProfileTest = useUpdateImpactProfileTest();
-  const { data: allTests } = useImpactProfileTests();
-
-  const validatedTestsCount = allTests?.filter(test => test.selected_profile).length || 0;
 
   const handleUserInfoSubmit = useCallback((info) => {
     setUserInfo(info);
@@ -158,12 +155,7 @@ const Index = () => {
       )}
 
       <div className="mt-12 border-t pt-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">Résultats précédents</h2>
-          <span className="text-sm text-gray-600">
-            {validatedTestsCount} profils validés
-          </span>
-        </div>
+        <h2 className="text-2xl font-bold mb-4">Résultats précédents</h2>
         <ProfileResultsDisplay />
       </div>
     </div>
