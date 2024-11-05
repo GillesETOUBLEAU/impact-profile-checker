@@ -3,17 +3,12 @@ import { useProfileResults } from '../integrations/supabase';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
-import { toast } from "sonner";
 
 const ProfileResultsDisplay = () => {
   const [sortField, setSortField] = React.useState('created_at');
   const [sortDirection, setSortDirection] = React.useState('desc');
   
   const { data: results, isLoading, error } = useProfileResults();
-
-  React.useEffect(() => {
-    console.log('Component mounted, query state:', { results, isLoading, error });
-  }, []);
 
   const handleSort = (field) => {
     if (field === sortField) {
@@ -48,7 +43,6 @@ const ProfileResultsDisplay = () => {
     return (
       <div className="text-red-500 p-4 border border-red-300 rounded-md">
         <p>Error loading results: {error.message}</p>
-        <pre className="mt-2 text-sm">{JSON.stringify(error, null, 2)}</pre>
       </div>
     );
   }
