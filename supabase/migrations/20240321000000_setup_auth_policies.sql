@@ -75,6 +75,10 @@ DROP FUNCTION IF EXISTS public.assign_admin_role(uuid);
 CREATE OR REPLACE FUNCTION public.assign_admin_role(p_user_id UUID)
 RETURNS VOID AS $$
 BEGIN
+  IF p_user_id IS NULL THEN
+    RAISE EXCEPTION 'User ID cannot be null';
+  END IF;
+  
   INSERT INTO public.user_roles (user_id, role)
   VALUES (p_user_id, 'admin')
   ON CONFLICT (user_id, role) DO NOTHING;
@@ -87,7 +91,11 @@ DECLARE
   new_user_id UUID;
 BEGIN
   -- Get the current user's ID
-  new_user_id := auth.uid();
+  SELECT auth.uid() INTO new_user_id;
+  
+  IF new_user_id IS NULL THEN
+    RAISE EXCEPTION 'No authenticated user found';
+  END IF;
   
   -- Assign admin role to the new user
   PERFORM public.assign_admin_role(new_user_id);
