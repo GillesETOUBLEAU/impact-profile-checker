@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../integrations/supabase';
 import { checkAdminRole } from '../utils/auth';
+import AdminConfigForm from '../components/AdminConfigForm';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import ProfileResultsDisplay from '../components/ProfileResultsDisplay';
@@ -42,7 +43,10 @@ const AdminPage = () => {
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <Button onClick={handleLogout}>Logout</Button>
       </div>
-      <ProfileResultsDisplay />
+      <div className="space-y-8">
+        <AdminConfigForm />
+        <ProfileResultsDisplay />
+      </div>
     </div>
   );
 };
