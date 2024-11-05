@@ -1,73 +1,97 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useProfileResults } from '../integrations/supabase';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, userInfo }) => {
-  const handleProfileSelect = async (profile) => {
-    try {
-      await onProfileSelect(profile);
-      toast.success('Profil sélectionné avec succès!');
-    } catch (error) {
-      console.error('Error selecting profile:', error);
-      toast.error('Une erreur est survenue lors de la sélection');
-    }
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, userInfo, testId }) => {
+  const { data: results, isLoading } = useProfileResults();
+
+  const calculateProfileDistribution = (data) => {
+    if (!data) return [];
+    
+    const profileCounts = data.reduce((acc, result) => {
+      if (result.selected_profile) {
+        acc[result.selected_profile] = (acc[result.selected_profile] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    return Object.entries(profileCounts).map(([name, value]) => ({
+      name,
+      value,
+      percentage: Math.round((value / data.length) * 100)
+    }));
   };
 
-  if (!profiles || profiles.length === 0) {
-    return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>Aucun résultat</CardTitle>
-          <CardDescription>
-            Aucun profil n'a été calculé. Veuillez réessayer.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={onReset} variant="outline" className="w-full">
-            Retour au test
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
+  const chartData = calculateProfileDistribution(results);
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Votre profil d'Impacteur</CardTitle>
-        {!finalProfile && (
-          <CardDescription>
-            {profiles.length > 1 
-              ? "Plusieurs profils correspondent à vos réponses. Veuillez choisir celui qui vous correspond le mieux :"
-              : "Voici le profil qui correspond à vos réponses :"}
-          </CardDescription>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {finalProfile ? (
-          <div className="space-y-4">
-            <p className="text-xl font-medium text-center">Vous êtes un <strong>{finalProfile}</strong></p>
-            <Button onClick={onReset} variant="outline" className="w-full">
-              Retour au test
-            </Button>
+    <div className="space-y-8">
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-4">Vos résultats</h2>
+        <p className="mb-4">
+          Basé sur vos réponses, voici les profils qui correspondent le mieux à votre personnalité :
+        </p>
+        <div className="space-y-4">
+          {!finalProfile ? (
+            <>
+              <Select onValueChange={onProfileSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisissez votre profil" />
+                </SelectTrigger>
+                <SelectContent>
+                  {profiles.map((profile) => (
+                    <SelectItem key={profile} value={profile}>
+                      {profile}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500">
+                Veuillez sélectionner le profil qui vous correspond le mieux
+              </p>
+            </>
+          ) : (
+            <div className="space-y-4">
+              <p className="font-medium">Vous avez choisi le profil : {finalProfile}</p>
+              <Button onClick={onReset}>Recommencer le test</Button>
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {!isLoading && results?.length > 0 && (
+        <Card className="p-6">
+          <h3 className="text-xl font-semibold mb-4">Distribution des profils</h3>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={true}
+                  label={({ name, percentage }) => `${name} (${percentage}%)`}
+                  outerRadius={150}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
-        ) : (
-          <div className="space-y-2">
-            {profiles.map((profile) => (
-              <Button 
-                key={profile} 
-                onClick={() => handleProfileSelect(profile)} 
-                className="w-full"
-                variant="outline"
-              >
-                {profile}
-              </Button>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+        </Card>
+      )}
+    </div>
   );
 };
 
