@@ -89,12 +89,13 @@ const Index = () => {
 
         if (updateError) throw updateError;
 
-        // Insert into profile_results
+        // Insert into profile_results with the same timestamp
         const { error: insertError } = await supabase
           .from('profile_results')
           .insert([{
             profile_type: profile,
-            user_id: session?.user?.id // This will be null for anonymous users
+            user_id: session?.user?.id, // This will be null for anonymous users
+            created_at: new Date().toISOString() // Use the same timestamp
           }]);
 
         if (insertError) throw insertError;

@@ -29,8 +29,10 @@ const ProfileResultsDisplay = () => {
   const sortedResults = React.useMemo(() => {
     if (!results) return [];
     return [...results].sort((a, b) => {
-      if (a[sortField] < b[sortField]) return sortDirection === 'asc' ? -1 : 1;
-      if (a[sortField] > b[sortField]) return sortDirection === 'asc' ? 1 : -1;
+      const aValue = a[sortField];
+      const bValue = b[sortField];
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
   }, [results, sortField, sortDirection]);
