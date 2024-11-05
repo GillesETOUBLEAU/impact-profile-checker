@@ -12,12 +12,11 @@ const ProfileResultsDisplay = () => {
   const { data: results, isLoading, error } = useProfileResults();
 
   React.useEffect(() => {
-    console.log('ProfileResultsDisplay - Query state:', { results, isLoading, error });
     if (error) {
       console.error('Error loading results:', error);
       toast.error("Error loading results: " + error.message);
     }
-  }, [results, isLoading, error]);
+  }, [error]);
 
   const handleSort = (field) => {
     if (field === sortField) {
@@ -39,57 +38,59 @@ const ProfileResultsDisplay = () => {
     });
   }, [results, sortField, sortDirection]);
 
-  if (isLoading) return <div className="flex justify-center p-4">Loading results...</div>;
+  if (isLoading) return <div className="flex justify-center items-center p-4">Loading results...</div>;
   if (error) return <div className="text-red-500 p-4">Error loading results: {error.message}</div>;
   if (!results?.length) return <div className="p-4">No results found in the database</div>;
 
   return (
-    <div className="mt-6">
+    <div className="container mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold mb-4">Profile Results</h2>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>
-              <Button variant="ghost" onClick={() => handleSort('created_at')}>
-                Date <ArrowUpDown className="ml-2 h-4 w-4" />
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button variant="ghost" onClick={() => handleSort('first_name')}>
-                First Name <ArrowUpDown className="ml-2 h-4 w-4" />
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button variant="ghost" onClick={() => handleSort('last_name')}>
-                Last Name <ArrowUpDown className="ml-2 h-4 w-4" />
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button variant="ghost" onClick={() => handleSort('email')}>
-                Email <ArrowUpDown className="ml-2 h-4 w-4" />
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button variant="ghost" onClick={() => handleSort('selected_profile')}>
-                Profile Type <ArrowUpDown className="ml-2 h-4 w-4" />
-              </Button>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedResults.map((result) => (
-            <TableRow key={result.id}>
-              <TableCell>
-                {new Date(result.created_at).toLocaleDateString()}
-              </TableCell>
-              <TableCell>{result.first_name}</TableCell>
-              <TableCell>{result.last_name}</TableCell>
-              <TableCell>{result.email}</TableCell>
-              <TableCell>{result.selected_profile || 'Not selected'}</TableCell>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>
+                <Button variant="ghost" onClick={() => handleSort('created_at')}>
+                  Date <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button variant="ghost" onClick={() => handleSort('first_name')}>
+                  First Name <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button variant="ghost" onClick={() => handleSort('last_name')}>
+                  Last Name <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button variant="ghost" onClick={() => handleSort('email')}>
+                  Email <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button variant="ghost" onClick={() => handleSort('selected_profile')}>
+                  Profile Type <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {sortedResults.map((result) => (
+              <TableRow key={result.id}>
+                <TableCell>
+                  {new Date(result.created_at).toLocaleDateString()}
+                </TableCell>
+                <TableCell>{result.first_name}</TableCell>
+                <TableCell>{result.last_name}</TableCell>
+                <TableCell>{result.email}</TableCell>
+                <TableCell>{result.selected_profile || 'Not selected'}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
