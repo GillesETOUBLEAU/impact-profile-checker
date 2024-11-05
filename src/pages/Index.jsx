@@ -5,7 +5,7 @@ import ResultsDisplay from '../components/ResultsDisplay';
 import { questions, calculateProfiles } from '../utils/profileUtils';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
-import { Button } from "@/components/ui/button"; // Add this import
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [step, setStep] = useState('userInfo');
@@ -26,8 +26,10 @@ const Index = () => {
     setAnswers(newAnswers);
   };
 
-  const saveTestResults = async (profileData) => {
+  const handleSubmitAnswers = async () => {
     try {
+      const profileData = calculateProfiles(answers);
+      
       const { data, error } = await supabase
         .from('impact_profile_tests')
         .insert([{
@@ -52,42 +54,18 @@ const Index = () => {
         }])
         .select();
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
+      if (error) throw error;
       
-      if (!data || data.length === 0) {
-        throw new Error('No data returned from Supabase');
+      if (data && data[0]) {
+        setTestId(data[0].id);
       }
 
-      setTestId(data[0].id);
-      return data[0].id;
-    } catch (error) {
-      console.error('Error saving test results:', error);
-      toast.error('Une erreur est survenue lors de l\'enregistrement des résultats');
-      throw error;
-    }
-  };
-
-  const handleSubmitAnswers = async () => {
-    try {
-      const profileData = calculateProfiles(answers);
-      
-      if (!profileData || !profileData.profiles || profileData.profiles.length === 0) {
-        toast.error('Erreur lors du calcul des profils');
-        return;
-      }
-
-      await saveTestResults(profileData);
       setProfiles(profileData.profiles);
       setStep('results');
       
       if (profileData.profiles.length === 1) {
         await handleProfileSelect(profileData.profiles[0]);
       }
-      
-      toast.success('Résultats calculés avec succès!');
     } catch (error) {
       console.error('Error submitting answers:', error);
       toast.error('Une erreur est survenue lors de la soumission des réponses');
@@ -100,12 +78,12 @@ const Index = () => {
         throw new Error('Test ID not found');
       }
 
-      const { error: updateError } = await supabase
+      const { error } = await supabase
         .from('impact_profile_tests')
         .update({ selected_profile: profile })
         .eq('id', testId);
 
-      if (updateError) throw updateError;
+      if (error) throw error;
 
       setFinalProfile(profile);
       return true;
@@ -144,7 +122,7 @@ const Index = () => {
           ))}
           <Button 
             onClick={handleSubmitAnswers}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md"
+            className="w-full"
           >
             Voir les résultats
           </Button>

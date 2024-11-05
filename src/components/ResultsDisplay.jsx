@@ -4,12 +4,14 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) => {
-  const handleProfileSelect = (profile) => {
-    toast.promise(onProfileSelect(profile), {
-      loading: 'Enregistrement de votre profil...',
-      success: 'Votre profil a été enregistré avec succès!',
-      error: 'Une erreur est survenue lors de l\'enregistrement'
-    });
+  const handleProfileSelect = async (profile) => {
+    try {
+      await onProfileSelect(profile);
+      toast.success('Votre profil a été enregistré avec succès!');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast.error('Une erreur est survenue lors de l\'enregistrement');
+    }
   };
 
   if (!profiles || profiles.length === 0) {
@@ -29,7 +31,7 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
       <CardContent className="space-y-4">
         {finalProfile ? (
           <div className="space-y-4">
-            <p className="text-xl">Vous êtes un <strong>{finalProfile}</strong></p>
+            <p className="text-xl font-medium">Vous êtes un <strong>{finalProfile}</strong></p>
             <Button onClick={onReset} variant="outline" className="w-full">
               Retour au test
             </Button>
