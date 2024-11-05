@@ -51,7 +51,15 @@ const Index = () => {
         }])
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      if (!data || data.length === 0) {
+        throw new Error('No data returned from Supabase');
+      }
+
       setTestId(data[0].id);
       return data[0].id;
     } catch (error) {
@@ -73,6 +81,10 @@ const Index = () => {
       await saveTestResults(profileData);
       setProfiles(profileData.profiles);
       setStep('results');
+      
+      if (profileData.profiles.length === 1) {
+        await handleProfileSelect(profileData.profiles[0]);
+      }
       
       toast.success('Résultats calculés avec succès!');
     } catch (error) {
@@ -129,12 +141,12 @@ const Index = () => {
               onChange={(value) => handleAnswerChange(index, value)}
             />
           ))}
-          <button 
+          <Button 
             onClick={handleSubmitAnswers}
             className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md"
           >
             Voir les résultats
-          </button>
+          </Button>
         </div>
       )}
       

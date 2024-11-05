@@ -1,10 +1,9 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) => {
-  const displayProfile = finalProfile || (profiles.length === 1 ? profiles[0] : null);
-
   const handleProfileSelect = (profile) => {
     toast.promise(onProfileSelect(profile), {
       loading: 'Enregistrement de votre profil...',
@@ -13,17 +12,29 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
     });
   };
 
+  if (!profiles || profiles.length === 0) {
+    return <p>Aucun profil n'a été déterminé</p>;
+  }
+
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Votre profil d'Impacteur</h2>
-      {displayProfile ? (
-        <div className="space-y-4">
-          <p className="text-xl">Vous êtes un <strong>{displayProfile}</strong></p>
-          <Button onClick={onReset} variant="outline">Retour au test</Button>
-        </div>
-      ) : (
-        <>
-          <p>Veuillez choisir votre profil :</p>
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle>Votre profil d'Impacteur</CardTitle>
+        {!finalProfile && profiles.length > 1 && (
+          <CardDescription>
+            Plusieurs profils correspondent à vos réponses. Veuillez choisir celui qui vous correspond le mieux :
+          </CardDescription>
+        )}
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {finalProfile ? (
+          <div className="space-y-4">
+            <p className="text-xl">Vous êtes un <strong>{finalProfile}</strong></p>
+            <Button onClick={onReset} variant="outline" className="w-full">
+              Retour au test
+            </Button>
+          </div>
+        ) : (
           <div className="space-y-2">
             {profiles.map((profile) => (
               <Button 
@@ -36,9 +47,9 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
               </Button>
             ))}
           </div>
-        </>
-      )}
-    </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

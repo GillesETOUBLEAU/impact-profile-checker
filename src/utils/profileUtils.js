@@ -14,12 +14,7 @@ export const questions = [
 export const calculateProfiles = (answers) => {
   console.log('Starting profile calculation with answers:', answers);
 
-  if (!Array.isArray(answers) || answers.length !== 10) {
-    console.error('Invalid answers format:', answers);
-    throw new Error('Invalid answers format');
-  }
-
-  // Calculate scores
+  // Calculate scores (questions are grouped by profile type)
   const humanistScore = (answers[0] + answers[4]) / 2;
   const innovativeScore = (answers[1] + answers[5] + answers[8]) / 3;
   const ecoGuideScore = (answers[2] + answers[6]) / 2;
@@ -32,14 +27,14 @@ export const calculateProfiles = (answers) => {
     curiousScore
   });
 
-  // Determine which profiles meet the threshold
+  // Determine profiles that meet the threshold (6 instead of 7 to make it easier to get multiple profiles)
   const possibleProfiles = [];
-  if (humanistScore >= 7) possibleProfiles.push('Humaniste');
-  if (innovativeScore >= 7) possibleProfiles.push('Innovant');
-  if (ecoGuideScore >= 7) possibleProfiles.push('Éco-guide');
-  if (curiousScore >= 7) possibleProfiles.push('Curieux');
+  if (humanistScore >= 6) possibleProfiles.push('Humaniste');
+  if (innovativeScore >= 6) possibleProfiles.push('Innovant');
+  if (ecoGuideScore >= 6) possibleProfiles.push('Éco-guide');
+  if (curiousScore >= 6) possibleProfiles.push('Curieux');
 
-  // If no profile meets the threshold, select the highest scoring profile
+  // If no profile meets the threshold, select the top two highest scoring profiles
   if (possibleProfiles.length === 0) {
     const scores = [
       { profile: 'Humaniste', score: humanistScore },
@@ -50,6 +45,9 @@ export const calculateProfiles = (answers) => {
     
     scores.sort((a, b) => b.score - a.score);
     possibleProfiles.push(scores[0].profile);
+    if (scores[1].score > 4) { // Only add second profile if score is decent
+      possibleProfiles.push(scores[1].profile);
+    }
   }
 
   console.log('Final profiles determined:', possibleProfiles);
