@@ -58,10 +58,6 @@ const AdminPage = () => {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
-  if (!isAdmin) {
-    return null;
-  }
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex justify-between items-center mb-6">

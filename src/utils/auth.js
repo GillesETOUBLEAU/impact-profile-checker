@@ -8,6 +8,8 @@ export const checkAdminRole = async () => {
       return false;
     }
 
+    console.log('Checking admin role for user:', user.id);
+
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
@@ -19,7 +21,7 @@ export const checkAdminRole = async () => {
       return false;
     }
 
-    console.log('User role data:', data); // Debug log
+    console.log('User role data:', data);
     return data?.role === 'admin';
   } catch (error) {
     console.error('Error in checkAdminRole:', error);
