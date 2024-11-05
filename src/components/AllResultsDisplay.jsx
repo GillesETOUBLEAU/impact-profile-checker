@@ -15,17 +15,23 @@ const AllResultsDisplay = () => {
   useEffect(() => {
     const fetchResults = async () => {
       try {
+        console.log('Fetching results from Supabase...');
         const { data, error } = await supabase
           .from('impact_profile_tests')
           .select('first_name,selected_profile')
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        setResults(data);
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
+
+        console.log('Fetched data:', data);
+        setResults(data || []);
       } catch (error) {
         console.error('Error fetching results:', error);
         setError('Une erreur est survenue lors du chargement des résultats.');
-        toast.error('Erreur lors du chargement des résultats');
+        toast.error('Erreur lors du chargement des résultats: ' + error.message);
       } finally {
         setLoading(false);
       }
@@ -53,6 +59,7 @@ const AllResultsDisplay = () => {
 
   if (loading) return <p>Chargement des résultats...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
+  if (!results.length) return <p>Aucun résultat trouvé dans la base de données.</p>;
 
   return (
     <div className="mt-6">
