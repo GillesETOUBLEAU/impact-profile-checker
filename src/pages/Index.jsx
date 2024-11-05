@@ -30,6 +30,11 @@ const Index = () => {
     try {
       const profileData = calculateProfiles(answers);
       
+      if (!profileData || !profileData.profiles || profileData.profiles.length === 0) {
+        toast.error('Erreur lors du calcul des profils');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('impact_profile_tests')
         .insert([{
@@ -54,18 +59,24 @@ const Index = () => {
         }])
         .select();
 
-      if (error) throw error;
-      
-      if (data && data[0]) {
-        setTestId(data[0].id);
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
       }
 
+      if (!data || data.length === 0) {
+        throw new Error('No data returned from Supabase');
+      }
+
+      setTestId(data[0].id);
       setProfiles(profileData.profiles);
       setStep('results');
-      
+
       if (profileData.profiles.length === 1) {
         await handleProfileSelect(profileData.profiles[0]);
       }
+
+      toast.success('Résultats calculés avec succès!');
     } catch (error) {
       console.error('Error submitting answers:', error);
       toast.error('Une erreur est survenue lors de la soumission des réponses');
@@ -83,12 +94,15 @@ const Index = () => {
         .update({ selected_profile: profile })
         .eq('id', testId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
 
       setFinalProfile(profile);
       return true;
     } catch (error) {
-      console.error('Error updating selected profile:', error);
+      console.error('Error saving profile:', error);
       throw error;
     }
   };
