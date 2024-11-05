@@ -16,6 +16,9 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     persistSession: true,
     detectSessionInUrl: true
   },
+  db: {
+    schema: 'public'
+  },
   global: {
     headers: {
       'x-retry-after': '5'
@@ -30,20 +33,30 @@ export const checkSupabaseConnection = async () => {
 
   const tryConnection = async () => {
     try {
-      const { data, error } = await supabase.from('impact_profile_tests').select('count').limit(1);
-      if (error) throw error;
-      console.log('Supabase connection check successful');
+      console.log('Attempting Supabase connection...');
+      const { data, error } = await supabase
+        .from('impact_profile_tests')
+        .select('count')
+        .limit(1);
+        
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Supabase connection successful:', data);
       return true;
     } catch (error) {
+      console.error('Connection attempt failed:', error);
+      
       if (error.status === 429 && retryCount < maxRetries) {
         retryCount++;
         const waitTime = Math.pow(2, retryCount) * 1000;
-        toast.error(`Rate limit exceeded. Retrying in ${waitTime/1000} seconds...`);
+        console.log(`Retrying in ${waitTime/1000} seconds...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
         return tryConnection();
       }
       
-      console.error('Supabase connection check failed:', error.message);
       toast.error('Failed to connect to the database. Please check your internet connection and try again.');
       return false;
     }
@@ -51,3 +64,12 @@ export const checkSupabaseConnection = async () => {
 
   return tryConnection();
 };
+
+// Initialize connection check
+checkSupabaseConnection().then(isConnected => {
+  if (isConnected) {
+    console.log('Database connection established successfully');
+  } else {
+    console.error('Failed to establish database connection');
+  }
+});
