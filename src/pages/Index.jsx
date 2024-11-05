@@ -94,7 +94,7 @@ const Index = () => {
           .from('profile_results')
           .insert([{
             profile_type: profile,
-            user_id: session?.user?.id || null
+            user_id: session?.user?.id // This will be null for anonymous users
           }]);
 
         if (insertError) throw insertError;
