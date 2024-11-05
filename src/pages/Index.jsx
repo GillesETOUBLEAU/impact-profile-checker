@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import UserInfoForm from '../components/UserInfoForm';
 import QuestionSlider from '../components/QuestionSlider';
 import ResultsDisplay from '../components/ResultsDisplay';
+import ProfileResultsDisplay from '../components/ProfileResultsDisplay';
 import { questions, calculateProfiles } from '../utils/profileUtils';
 import { useAddImpactProfileTest, useUpdateImpactProfileTest } from '../integrations/supabase';
 import { toast } from 'sonner';
@@ -152,6 +153,11 @@ const Index = () => {
           testId={testId}
         />
       )}
+
+      <div className="mt-12 border-t pt-8">
+        <h2 className="text-2xl font-bold mb-4">Résultats précédents</h2>
+        <ProfileResultsDisplay />
+      </div>
     </div>
   );
 };
