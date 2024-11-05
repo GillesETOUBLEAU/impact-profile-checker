@@ -7,6 +7,10 @@ import { useAddProfileResult } from '../integrations/supabase';
 const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, userInfo, testId }) => {
   const addProfileResult = useAddProfileResult();
 
+  // Add console log to debug profiles data
+  console.log('ResultsDisplay - profiles:', profiles);
+  console.log('ResultsDisplay - finalProfile:', finalProfile);
+
   const handleProfileSelect = async (profile) => {
     if (!testId) {
       toast.error('Test ID manquant');
@@ -30,6 +34,25 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, user
       toast.error('Une erreur est survenue lors de l\'enregistrement');
     }
   };
+
+  // Add null check for profiles
+  if (!profiles || (Array.isArray(profiles) && profiles.length === 0)) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Aucun résultat</CardTitle>
+          <CardDescription>
+            Aucun profil n'a été calculé. Veuillez réessayer.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={onReset} variant="outline" className="w-full">
+            Retour au test
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
