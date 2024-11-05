@@ -2,10 +2,23 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAddProfileResult } from '../integrations/supabase';
 
-const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) => {
+const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, userInfo }) => {
+  const addProfileResult = useAddProfileResult();
+
   const handleProfileSelect = async (profile) => {
     try {
+      // First save to Supabase
+      await addProfileResult.mutateAsync({
+        first_name: userInfo.firstName,
+        last_name: userInfo.lastName,
+        email: userInfo.email,
+        selected_profile: profile,
+        profiles: profiles
+      });
+
+      // Then update local state
       await onProfileSelect(profile);
       toast.success('Profil sélectionné avec succès!');
     } catch (error) {

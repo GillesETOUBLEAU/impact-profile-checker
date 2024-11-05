@@ -61,18 +61,14 @@ const Index = () => {
         profiles: profileData.profiles
       };
 
-      const { data, error } = await addProfileTest.mutateAsync(testData);
+      const { data } = await addProfileTest.mutateAsync(testData);
 
-      if (error) {
-        console.error('Error saving test:', error);
-        toast.error('Erreur lors de la sauvegarde: ' + error.message);
-        return;
+      if (data) {
+        setTestId(data.id);
+        setProfiles(profileData.profiles);
+        setStep('results');
+        toast.success('Résultats calculés avec succès!');
       }
-
-      setTestId(data.id);
-      setProfiles(profileData.profiles);
-      setStep('results');
-      toast.success('Résultats calculés avec succès!');
 
     } catch (error) {
       console.error('Error submitting answers:', error);
@@ -145,6 +141,7 @@ const Index = () => {
           finalProfile={finalProfile}
           onProfileSelect={handleProfileSelect}
           onReset={resetTest}
+          userInfo={userInfo}
         />
       )}
     </div>
