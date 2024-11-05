@@ -37,12 +37,13 @@ const ProfileResultsDisplay = () => {
     });
   }, [results, sortField, sortDirection]);
 
-  if (isLoading) return <p>Loading results...</p>;
-  if (error) return <p className="text-red-500">Failed to load results</p>;
+  if (isLoading) return <p>Chargement des résultats...</p>;
+  if (error) return <p className="text-red-500">Erreur lors du chargement des résultats</p>;
+  if (!results?.length) return <p>Aucun résultat trouvé</p>;
 
   return (
     <div className="mt-6">
-      <h2 className="text-2xl font-bold mb-4">Profile Results</h2>
+      <h2 className="text-2xl font-bold mb-4">Résultats des profils</h2>
       <Table>
         <TableHeader>
           <TableRow>
@@ -53,7 +54,7 @@ const ProfileResultsDisplay = () => {
             </TableHead>
             <TableHead>
               <Button variant="ghost" onClick={() => handleSort('profile_type')}>
-                Profile Type <ArrowUpDown className="ml-2 h-4 w-4" />
+                Type de profil <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
           </TableRow>
@@ -61,8 +62,14 @@ const ProfileResultsDisplay = () => {
         <TableBody>
           {sortedResults.map((result) => (
             <TableRow key={result.id}>
-              <TableCell>{new Date(result.created_at).toLocaleDateString()}</TableCell>
-              <TableCell>{result.profile_type || 'Not selected'}</TableCell>
+              <TableCell>
+                {new Date(result.created_at).toLocaleDateString('fr-FR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </TableCell>
+              <TableCell>{result.profile_type || 'Non sélectionné'}</TableCell>
             </TableRow>
           ))}
         </TableBody>

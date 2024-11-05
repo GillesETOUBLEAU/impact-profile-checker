@@ -99,7 +99,6 @@ const Index = () => {
           .from('profile_results')
           .insert([{
             profile_type: profile,
-            user_id: session?.user?.id,
             created_at: timestamp
           }]);
 
