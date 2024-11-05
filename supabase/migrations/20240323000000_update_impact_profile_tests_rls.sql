@@ -1,9 +1,13 @@
--- Drop existing policies
+-- First drop all existing policies
+DROP POLICY IF EXISTS "Allow anyone to read impact_profile_tests" ON public.impact_profile_tests;
+DROP POLICY IF EXISTS "Allow anyone to insert impact_profile_tests" ON public.impact_profile_tests;
+DROP POLICY IF EXISTS "Allow anyone to update their own impact_profile_tests" ON public.impact_profile_tests;
+DROP POLICY IF EXISTS "Allow authenticated users to insert impact_profile_tests" ON public.impact_profile_tests;
+DROP POLICY IF EXISTS "Allow authenticated users to read impact_profile_tests" ON public.impact_profile_tests;
 DROP POLICY IF EXISTS "Allow public read access to impact_profile_tests" ON public.impact_profile_tests;
 DROP POLICY IF EXISTS "Allow admins to manage impact_profile_tests" ON public.impact_profile_tests;
-DROP POLICY IF EXISTS "Allow authenticated users to insert impact_profile_tests" ON public.impact_profile_tests;
 
--- Create new policies that allow both authenticated and anonymous users to interact with the table
+-- Then create new policies
 CREATE POLICY "Allow anyone to insert impact_profile_tests"
 ON public.impact_profile_tests FOR INSERT
 TO anon, authenticated
