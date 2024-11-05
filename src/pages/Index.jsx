@@ -2,12 +2,9 @@ import React, { useState } from 'react';
 import UserInfoForm from '../components/UserInfoForm';
 import QuestionSlider from '../components/QuestionSlider';
 import ResultsDisplay from '../components/ResultsDisplay';
-import ProfileResultsDisplay from '../components/ProfileResultsDisplay';
-import { Button } from "@/components/ui/button";
-import { supabase } from '../lib/supabase';
 import { questions, calculateProfiles } from '../utils/profileUtils';
+import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
-import { useSupabaseAuth } from '../integrations/supabase';
 
 const Index = () => {
   const [step, setStep] = useState('userInfo');
@@ -16,8 +13,6 @@ const Index = () => {
   const [profiles, setProfiles] = useState([]);
   const [finalProfile, setFinalProfile] = useState(null);
   const [testId, setTestId] = useState(null);
-  const [showAllResults, setShowAllResults] = useState(false);
-  const { session } = useSupabaseAuth();
 
   const handleUserInfoSubmit = (info) => {
     setUserInfo(info);
@@ -108,17 +103,16 @@ const Index = () => {
     setProfiles([]);
     setFinalProfile(null);
     setTestId(null);
-    setShowAllResults(false);
-  };
-
-  const toggleAllResults = () => {
-    setShowAllResults(!showAllResults);
   };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <h1 className="text-3xl font-bold mb-6">Test de Profil d'Impacteur</h1>
-      {step === 'userInfo' && <UserInfoForm onSubmit={handleUserInfoSubmit} />}
+      
+      {step === 'userInfo' && (
+        <UserInfoForm onSubmit={handleUserInfoSubmit} />
+      )}
+      
       {step === 'questions' && (
         <div className="space-y-6">
           {questions.map((question, index) => (
@@ -129,31 +123,22 @@ const Index = () => {
               onChange={(value) => handleAnswerChange(index, value)}
             />
           ))}
-          <Button 
+          <button 
             onClick={handleSubmitAnswers}
-            className="w-full mt-4"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md"
           >
             Voir les résultats
-          </Button>
+          </button>
         </div>
       )}
+      
       {step === 'results' && (
-        <>
-          <ResultsDisplay
-            profiles={profiles}
-            finalProfile={finalProfile}
-            onProfileSelect={handleProfileSelect}
-            onReset={resetTest}
-          />
-          {session && (
-            <div className="mt-4 space-x-4">
-              <Button onClick={toggleAllResults}>
-                {showAllResults ? 'Masquer tous les résultats' : 'Voir tous les résultats'}
-              </Button>
-            </div>
-          )}
-          {showAllResults && <ProfileResultsDisplay />}
-        </>
+        <ResultsDisplay
+          profiles={profiles}
+          finalProfile={finalProfile}
+          onProfileSelect={handleProfileSelect}
+          onReset={resetTest}
+        />
       )}
     </div>
   );
