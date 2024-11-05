@@ -32,12 +32,10 @@ const Index = () => {
 
   const saveTestResults = async (profileData) => {
     try {
-      // Create a simplified payload with only essential data
       const payload = {
         first_name: userInfo.firstName,
         last_name: userInfo.lastName,
         email: userInfo.email,
-        answers: answers.join(','), // Store answers as a comma-separated string
         humanist_score: Math.round(profileData.scores.humanistScore * 100) / 100,
         innovative_score: Math.round(profileData.scores.innovativeScore * 100) / 100,
         eco_guide_score: Math.round(profileData.scores.ecoGuideScore * 100) / 100,
@@ -57,6 +55,7 @@ const Index = () => {
       return data[0].id;
     } catch (error) {
       console.error('Error saving test results:', error);
+      toast.error('Une erreur est survenue lors de l\'enregistrement des résultats');
       throw error;
     }
   };
@@ -77,7 +76,7 @@ const Index = () => {
       toast.success('Résultats calculés avec succès!');
     } catch (error) {
       console.error('Error submitting answers:', error);
-      toast.error('Une erreur est survenue lors de la soumission des réponses.');
+      toast.error('Une erreur est survenue lors de la soumission des réponses');
     }
   };
 
