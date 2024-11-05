@@ -85,19 +85,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Create an admin user and assign the role
+-- Insert a default admin user directly into user_roles
 DO $$
-DECLARE
-  new_user_id UUID;
 BEGIN
-  -- Get the current user's ID
-  SELECT auth.uid() INTO new_user_id;
-  
-  IF new_user_id IS NULL THEN
-    RAISE EXCEPTION 'No authenticated user found';
-  END IF;
-  
-  -- Assign admin role to the new user
-  PERFORM public.assign_admin_role(new_user_id);
+  -- Insert a default admin role
+  INSERT INTO public.user_roles (user_id, role)
+  SELECT id, 'admin'
+  FROM auth.users
+  WHERE email = 'admin@example.com'
+  ON CONFLICT (user_id, role) DO NOTHING;
 END
 $$;
