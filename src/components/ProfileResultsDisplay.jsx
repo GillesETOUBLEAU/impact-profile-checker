@@ -53,6 +53,21 @@ const ProfileResultsDisplay = () => {
               </Button>
             </TableHead>
             <TableHead>
+              <Button variant="ghost" onClick={() => handleSort('first_name')}>
+                Prénom <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button variant="ghost" onClick={() => handleSort('last_name')}>
+                Nom <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button variant="ghost" onClick={() => handleSort('email')}>
+                Email <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </TableHead>
+            <TableHead>
               <Button variant="ghost" onClick={() => handleSort('profile_type')}>
                 Type de profil <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
@@ -69,6 +84,9 @@ const ProfileResultsDisplay = () => {
                   day: 'numeric'
                 })}
               </TableCell>
+              <TableCell>{result.first_name}</TableCell>
+              <TableCell>{result.last_name}</TableCell>
+              <TableCell>{result.email}</TableCell>
               <TableCell>{result.profile_type || 'Non sélectionné'}</TableCell>
             </TableRow>
           ))}

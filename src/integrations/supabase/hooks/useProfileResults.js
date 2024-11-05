@@ -7,33 +7,20 @@ const fromSupabase = async (query) => {
     return data;
 };
 
-/*
-### profile_results
-
-| name         | type   | format | required |
-|--------------|--------|--------|----------|
-| id           | string | uuid   | true     |
-| user_id      | string | uuid   | false    |
-| profile_type | string | text   | false    |
-
-Foreign Key Relationships:
-- user_id references profiles.id
-*/
-
 export const useProfileResult = (id) => useQuery({
     queryKey: ['profile_results', id],
-    queryFn: () => fromSupabase(supabase.from('profile_results').select('*').eq('id', id).single()),
+    queryFn: () => fromSupabase(supabase.from('impact_profile_tests').select('*').eq('id', id).single()),
 });
 
 export const useProfileResults = () => useQuery({
     queryKey: ['profile_results'],
-    queryFn: () => fromSupabase(supabase.from('profile_results').select('*')),
+    queryFn: () => fromSupabase(supabase.from('impact_profile_tests').select('*').order('created_at', { ascending: false })),
 });
 
 export const useAddProfileResult = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newProfileResult) => fromSupabase(supabase.from('profile_results').insert([newProfileResult])),
+        mutationFn: (newProfileResult) => fromSupabase(supabase.from('impact_profile_tests').insert([newProfileResult])),
         onSuccess: () => {
             queryClient.invalidateQueries('profile_results');
         },
@@ -43,7 +30,7 @@ export const useAddProfileResult = () => {
 export const useUpdateProfileResult = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, ...updateData }) => fromSupabase(supabase.from('profile_results').update(updateData).eq('id', id)),
+        mutationFn: ({ id, ...updateData }) => fromSupabase(supabase.from('impact_profile_tests').update(updateData).eq('id', id)),
         onSuccess: () => {
             queryClient.invalidateQueries('profile_results');
         },
@@ -53,7 +40,7 @@ export const useUpdateProfileResult = () => {
 export const useDeleteProfileResult = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id) => fromSupabase(supabase.from('profile_results').delete().eq('id', id)),
+        mutationFn: (id) => fromSupabase(supabase.from('impact_profile_tests').delete().eq('id', id)),
         onSuccess: () => {
             queryClient.invalidateQueries('profile_results');
         },
