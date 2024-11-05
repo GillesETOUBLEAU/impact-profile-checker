@@ -13,9 +13,10 @@ const AllResultsDisplay = () => {
   const [sortDirection, setSortDirection] = useState('desc');
 
   useEffect(() => {
+    console.log('Component mounted - starting data fetch...');
     const fetchResults = async () => {
       try {
-        console.log('AllResultsDisplay - Fetching results from Supabase...');
+        console.log('Attempting to fetch results from Supabase...');
         const { data, error } = await supabase
           .from('impact_profile_tests')
           .select('*')
@@ -26,13 +27,14 @@ const AllResultsDisplay = () => {
           throw error;
         }
 
-        console.log('AllResultsDisplay - Fetched data:', data);
+        console.log('Successfully fetched data:', data);
         setResults(data || []);
       } catch (error) {
-        console.error('Error fetching results:', error);
+        console.error('Error in fetchResults:', error);
         setError(error.message);
         toast.error('Error loading results: ' + error.message);
       } finally {
+        console.log('Fetch operation completed');
         setLoading(false);
       }
     };
@@ -41,6 +43,7 @@ const AllResultsDisplay = () => {
   }, []);
 
   const handleSort = (field) => {
+    console.log('Sorting by field:', field);
     if (field === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
