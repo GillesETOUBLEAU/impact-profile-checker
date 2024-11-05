@@ -72,10 +72,6 @@ const Index = () => {
       setProfiles(profileData.profiles);
       setStep('results');
 
-      if (profileData.profiles.length === 1) {
-        await handleProfileSelect(profileData.profiles[0]);
-      }
-
       toast.success('Résultats calculés avec succès!');
     } catch (error) {
       console.error('Error submitting answers:', error);
@@ -100,9 +96,11 @@ const Index = () => {
       }
 
       setFinalProfile(profile);
+      toast.success('Profil sélectionné avec succès!');
       return true;
     } catch (error) {
       console.error('Error saving profile:', error);
+      toast.error('Erreur lors de la sélection du profil');
       throw error;
     }
   };
