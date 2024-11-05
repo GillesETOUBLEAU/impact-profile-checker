@@ -20,14 +20,24 @@ export const useProfileResult = (id) => useQuery({
 export const useProfileResults = () => useQuery({
     queryKey: ['profile_results'],
     queryFn: async () => {
-        console.log('Fetching profile results...');
-        const data = await fromSupabase(
-            supabase.from('impact_profile_tests')
+        console.log('useProfileResults - Fetching data...');
+        try {
+            const { data, error } = await supabase
+                .from('impact_profile_tests')
                 .select('*')
-                .order('created_at', { ascending: false })
-        );
-        console.log('Fetched data:', data);
-        return data;
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Supabase query error:', error);
+                throw error;
+            }
+
+            console.log('useProfileResults - Fetched data:', data);
+            return data || [];
+        } catch (error) {
+            console.error('useProfileResults - Error:', error);
+            throw error;
+        }
     }
 });
 

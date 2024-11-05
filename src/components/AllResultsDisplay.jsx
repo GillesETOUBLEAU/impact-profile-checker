@@ -15,10 +15,10 @@ const AllResultsDisplay = () => {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        console.log('Fetching results from Supabase...');
+        console.log('AllResultsDisplay - Fetching results from Supabase...');
         const { data, error } = await supabase
           .from('impact_profile_tests')
-          .select('first_name,selected_profile')
+          .select('*')
           .order('created_at', { ascending: false });
 
         if (error) {
@@ -26,12 +26,12 @@ const AllResultsDisplay = () => {
           throw error;
         }
 
-        console.log('Fetched data:', data);
+        console.log('AllResultsDisplay - Fetched data:', data);
         setResults(data || []);
       } catch (error) {
         console.error('Error fetching results:', error);
-        setError('Une erreur est survenue lors du chargement des résultats.');
-        toast.error('Erreur lors du chargement des résultats: ' + error.message);
+        setError(error.message);
+        toast.error('Error loading results: ' + error.message);
       } finally {
         setLoading(false);
       }
@@ -57,24 +57,24 @@ const AllResultsDisplay = () => {
     return 0;
   });
 
-  if (loading) return <p>Chargement des résultats...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
-  if (!results.length) return <p>Aucun résultat trouvé dans la base de données.</p>;
+  if (loading) return <p>Loading results...</p>;
+  if (error) return <p className="text-red-500">Error: {error}</p>;
+  if (!results.length) return <p>No results found in the database.</p>;
 
   return (
     <div className="mt-6">
-      <h2 className="text-2xl font-bold mb-4">Résultats des tests</h2>
+      <h2 className="text-2xl font-bold mb-4">Test Results</h2>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>
               <Button variant="ghost" onClick={() => handleSort('first_name')}>
-                Prénom <ArrowUpDown className="ml-2 h-4 w-4" />
+                First Name <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
             <TableHead>
               <Button variant="ghost" onClick={() => handleSort('selected_profile')}>
-                Profil sélectionné <ArrowUpDown className="ml-2 h-4 w-4" />
+                Selected Profile <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
           </TableRow>
@@ -83,7 +83,7 @@ const AllResultsDisplay = () => {
           {sortedResults.map((result, index) => (
             <TableRow key={index}>
               <TableCell>{result.first_name}</TableCell>
-              <TableCell>{result.selected_profile || 'Non sélectionné'}</TableCell>
+              <TableCell>{result.selected_profile || 'Not selected'}</TableCell>
             </TableRow>
           ))}
         </TableBody>
