@@ -26,23 +26,17 @@ const Layout = ({ children }) => {
     }
   };
 
-  const handleHomeClick = () => {
-    navigate('/');
-  };
-
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-primary text-primary-foreground p-4">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">Impact Profile Checker</h1>
           <nav className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              onClick={handleHomeClick}
-              className="hover:underline"
-            >
-              Home
-            </Button>
+            <Link to="/">
+              <Button variant="ghost" className="hover:underline">
+                Home
+              </Button>
+            </Link>
             {session ? (
               <>
                 <Link to="/admin" className="hover:underline">Admin</Link>
