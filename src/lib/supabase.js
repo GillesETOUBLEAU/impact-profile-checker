@@ -37,7 +37,7 @@ export const checkSupabaseConnection = async () => {
 
   const tryConnection = async () => {
     try {
-      const { data, error } = await supabase.from('site_config').select('*').limit(1)
+      const { data, error } = await supabase.from('impact_profile_tests').select('count').limit(1)
       if (error) throw error
       console.log('Supabase connection check successful')
       return true
