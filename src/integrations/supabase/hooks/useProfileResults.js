@@ -37,6 +37,21 @@ export const useProfileResults = () => useQuery({
     }
 });
 
+export const useProfileResult = (id) => useQuery({
+    queryKey: ['profile_result', id],
+    queryFn: async () => {
+        const { data, error } = await supabase
+            .from('impact_profile_tests')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+    enabled: !!id
+});
+
 export const useAddProfileResult = () => {
     const queryClient = useQueryClient();
     return useMutation({
