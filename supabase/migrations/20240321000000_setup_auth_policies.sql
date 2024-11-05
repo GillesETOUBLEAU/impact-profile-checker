@@ -79,7 +79,6 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Create an admin user and assign the role
--- Replace 'your_email@example.com' and 'your_password' with actual values
 DO $$
 DECLARE
   new_user_id UUID;
