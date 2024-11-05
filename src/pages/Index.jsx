@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import UserInfoForm from '../components/UserInfoForm';
 import QuestionSlider from '../components/QuestionSlider';
 import ResultsDisplay from '../components/ResultsDisplay';
-import AllResultsDisplay from '../components/AllResultsDisplay';
+import ProfileResultsDisplay from '../components/ProfileResultsDisplay';
 import { Button } from "@/components/ui/button";
 import { supabase } from '../lib/supabase';
 import { questions, calculateProfiles } from '../utils/profileUtils';
@@ -80,31 +80,22 @@ const Index = () => {
 
   const handleProfileSelect = async (profile) => {
     try {
-      setFinalProfile(profile);
-      const timestamp = new Date().toISOString();
-
-      if (testId) {
-        const { error: updateError } = await supabase
-          .from('impact_profile_tests')
-          .update({ selected_profile: profile })
-          .eq('id', testId);
-
-        if (updateError) throw updateError;
-
-        const { error: insertError } = await supabase
-          .from('profile_results')
-          .insert([{
-            profile_type: profile,
-            created_at: timestamp
-          }]);
-
-        if (insertError) throw insertError;
-        
-        toast.success('Profil sélectionné avec succès!');
+      if (!testId) {
+        throw new Error('Test ID not found');
       }
+
+      const { error: updateError } = await supabase
+        .from('impact_profile_tests')
+        .update({ profile_type: profile })
+        .eq('id', testId);
+
+      if (updateError) throw updateError;
+
+      setFinalProfile(profile);
+      return true;
     } catch (error) {
       console.error('Error updating selected profile:', error);
-      toast.error('Une erreur est survenue lors de la mise à jour du profil.');
+      throw error;
     }
   };
 
@@ -159,7 +150,7 @@ const Index = () => {
               </Button>
             </div>
           )}
-          {showAllResults && <AllResultsDisplay />}
+          {showAllResults && <ProfileResultsDisplay />}
         </>
       )}
     </div>

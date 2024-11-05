@@ -12,16 +12,31 @@ export const questions = [
 ];
 
 export const calculateProfiles = (answers) => {
+  // Calculate scores
   const humanistScore = (answers[0] + answers[4]) / 2;
   const innovativeScore = (answers[1] + answers[5] + answers[8]) / 3;
   const ecoGuideScore = (answers[2] + answers[6]) / 2;
   const curiousScore = (answers[3] + answers[7] + answers[9]) / 3;
 
+  // Determine which profiles meet the threshold
   const possibleProfiles = [];
-  if (humanistScore >= 5) possibleProfiles.push('Humaniste');
-  if (innovativeScore >= 5) possibleProfiles.push('Innovant');
-  if (ecoGuideScore >= 5) possibleProfiles.push('Éco-guide');
-  if (curiousScore >= 5) possibleProfiles.push('Curieux');
+  if (humanistScore >= 7) possibleProfiles.push('Humaniste');
+  if (innovativeScore >= 7) possibleProfiles.push('Innovant');
+  if (ecoGuideScore >= 7) possibleProfiles.push('Éco-guide');
+  if (curiousScore >= 7) possibleProfiles.push('Curieux');
+
+  // If no profile meets the threshold, select the highest scoring profile
+  if (possibleProfiles.length === 0) {
+    const scores = [
+      { profile: 'Humaniste', score: humanistScore },
+      { profile: 'Innovant', score: innovativeScore },
+      { profile: 'Éco-guide', score: ecoGuideScore },
+      { profile: 'Curieux', score: curiousScore }
+    ];
+    
+    scores.sort((a, b) => b.score - a.score);
+    possibleProfiles.push(scores[0].profile);
+  }
 
   return {
     profiles: possibleProfiles,
