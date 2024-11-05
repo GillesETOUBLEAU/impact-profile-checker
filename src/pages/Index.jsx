@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import UserInfoForm from '../components/UserInfoForm';
 import QuestionSlider from '../components/QuestionSlider';
 import ResultsDisplay from '../components/ResultsDisplay';
@@ -19,23 +19,30 @@ const Index = () => {
   const addProfileTest = useAddImpactProfileTest();
   const updateProfileTest = useUpdateImpactProfileTest();
 
-  const handleUserInfoSubmit = (info) => {
+  const handleUserInfoSubmit = useCallback((info) => {
     setUserInfo(info);
     setStep('questions');
-  };
+  }, []);
 
-  const handleAnswerChange = (index, value) => {
-    const newAnswers = [...answers];
-    newAnswers[index] = value;
-    setAnswers(newAnswers);
-  };
+  const handleAnswerChange = useCallback((index, value) => {
+    setAnswers(prev => {
+      const newAnswers = [...prev];
+      newAnswers[index] = value;
+      return newAnswers;
+    });
+  }, []);
 
   const handleSubmitAnswers = async () => {
+    if (!userInfo) {
+      toast.error('Informations utilisateur manquantes');
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       const profileData = calculateProfiles(answers);
       
-      if (!profileData || !profileData.profiles || profileData.profiles.length === 0) {
+      if (!profileData?.profiles?.length) {
         toast.error('Erreur lors du calcul des profils');
         return;
       }
@@ -61,13 +68,19 @@ const Index = () => {
         profiles: profileData.profiles
       };
 
-      const { data } = await addProfileTest.mutateAsync(testData);
+      const { data, error } = await addProfileTest.mutateAsync(testData);
 
-      if (data) {
+      if (error) {
+        throw error;
+      }
+
+      if (data?.id) {
         setTestId(data.id);
         setProfiles(profileData.profiles);
         setStep('results');
         toast.success('Résultats calculés avec succès!');
+      } else {
+        throw new Error('No test ID returned');
       }
 
     } catch (error) {
@@ -79,16 +92,18 @@ const Index = () => {
   };
 
   const handleProfileSelect = async (profile) => {
-    try {
-      if (!testId) {
-        toast.error('ID du test non trouvé');
-        return;
-      }
+    if (!testId) {
+      toast.error('ID du test non trouvé');
+      return;
+    }
 
-      await updateProfileTest.mutateAsync({
+    try {
+      const { error } = await updateProfileTest.mutateAsync({
         id: testId,
         selected_profile: profile
       });
+
+      if (error) throw error;
 
       setFinalProfile(profile);
       toast.success('Profil sélectionné avec succès!');
@@ -98,14 +113,14 @@ const Index = () => {
     }
   };
 
-  const resetTest = () => {
+  const resetTest = useCallback(() => {
     setStep('userInfo');
     setUserInfo(null);
     setAnswers(Array(10).fill(5));
     setProfiles([]);
     setFinalProfile(null);
     setTestId(null);
-  };
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -142,6 +157,7 @@ const Index = () => {
           onProfileSelect={handleProfileSelect}
           onReset={resetTest}
           userInfo={userInfo}
+          testId={testId}
         />
       )}
     </div>

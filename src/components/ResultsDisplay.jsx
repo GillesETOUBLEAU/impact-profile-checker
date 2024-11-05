@@ -4,13 +4,18 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAddProfileResult } from '../integrations/supabase';
 
-const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, userInfo }) => {
+const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, userInfo, testId }) => {
   const addProfileResult = useAddProfileResult();
 
   const handleProfileSelect = async (profile) => {
+    if (!testId) {
+      toast.error('Test ID manquant');
+      return;
+    }
+
     try {
-      // First save to Supabase
       await addProfileResult.mutateAsync({
+        test_id: testId,
         first_name: userInfo.firstName,
         last_name: userInfo.lastName,
         email: userInfo.email,
@@ -18,7 +23,6 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, user
         profiles: profiles
       });
 
-      // Then update local state
       await onProfileSelect(profile);
       toast.success('Profil sélectionné avec succès!');
     } catch (error) {
@@ -27,23 +31,13 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, user
     }
   };
 
-  if (!profiles || profiles.length === 0) {
-    return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardContent className="pt-6">
-          <p className="text-center text-red-500">Aucun profil n'a été déterminé</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Votre profil d'Impacteur</CardTitle>
         {!finalProfile && (
           <CardDescription>
-            {profiles.length > 1 
+            {Array.isArray(profiles) && profiles.length > 1 
               ? "Plusieurs profils correspondent à vos réponses. Veuillez choisir celui qui vous correspond le mieux :"
               : "Voici le profil qui correspond à vos réponses :"}
           </CardDescription>
@@ -59,7 +53,7 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, user
           </div>
         ) : (
           <div className="space-y-2">
-            {profiles.map((profile) => (
+            {Array.isArray(profiles) && profiles.map((profile) => (
               <Button 
                 key={profile} 
                 onClick={() => handleProfileSelect(profile)} 
