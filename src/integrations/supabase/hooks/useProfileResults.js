@@ -6,7 +6,7 @@ const fetchProfileResults = async () => {
   try {
     const { data, error } = await supabase
       .from('impact_profile_tests')
-      .select('*')  // Select all columns to ensure we have the data
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -15,7 +15,7 @@ const fetchProfileResults = async () => {
       throw error;
     }
 
-    console.log('Fetched data:', data); // Debug log to see what data we're getting
+    console.log('Fetched data:', data);
     return data || [];
   } catch (error) {
     console.error('Fetch error:', error);
@@ -27,7 +27,9 @@ const fetchProfileResults = async () => {
 export const useProfileResults = () => useQuery({
   queryKey: ['profile_results'],
   queryFn: fetchProfileResults,
-  staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
-  retry: 2,
-  refetchOnWindowFocus: true
+  staleTime: 0, // Consider data stale immediately
+  refetchInterval: 5000, // Refetch every 5 seconds
+  refetchOnWindowFocus: true,
+  refetchOnMount: true,
+  retry: 2
 });
