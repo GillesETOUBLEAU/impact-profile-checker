@@ -12,32 +12,41 @@ export const questions = [
 ];
 
 export const calculateProfiles = (answers) => {
-  // Calculate weighted scores for each profile type
-  const humanistScore = (answers[0] * 1.2 + answers[4] * 1.3) / 2.5;
-  const innovativeScore = (answers[1] * 1.2 + answers[5] * 1.1 + answers[8] * 1.2) / 3.5;
-  const ecoGuideScore = (answers[2] * 1.3 + answers[6] * 1.2) / 2.5;
-  const curiousScore = (answers[3] * 1.1 + answers[7] * 1.2 + answers[9] * 1.1) / 3.4;
+  // Calculate base scores with more balanced weights
+  const humanistScore = (answers[0] * 1.5 + answers[4] * 1.5) / 3;
+  const innovativeScore = (answers[1] + answers[5] + answers[8]) / 3;
+  const ecoGuideScore = (answers[2] * 1.5 + answers[6] * 1.5) / 3;
+  const curiousScore = (answers[3] + answers[7] + answers[9]) / 3;
 
-  // Set a threshold for profile determination
-  const threshold = 6.5;
+  // Lower threshold for more variety in results
+  const threshold = 5.5;
   const profiles = [];
 
+  // Add profiles that meet the threshold
   if (humanistScore >= threshold) profiles.push('Humaniste');
   if (innovativeScore >= threshold) profiles.push('Innovant');
   if (ecoGuideScore >= threshold) profiles.push('Éco-guide');
   if (curiousScore >= threshold) profiles.push('Curieux');
 
-  // If no profile meets the threshold, select the highest scoring profile
-  if (profiles.length === 0) {
+  // If no profile meets the threshold or only one profile is selected,
+  // add the next highest scoring profile(s)
+  if (profiles.length < 2) {
     const scores = [
       { type: 'Humaniste', score: humanistScore },
       { type: 'Innovant', score: innovativeScore },
       { type: 'Éco-guide', score: ecoGuideScore },
       { type: 'Curieux', score: curiousScore }
-    ];
+    ].sort((a, b) => b.score - a.score);
+
+    // Add highest scoring profile if no profiles met the threshold
+    if (profiles.length === 0) {
+      profiles.push(scores[0].type);
+    }
     
-    scores.sort((a, b) => b.score - a.score);
-    profiles.push(scores[0].type);
+    // Add second highest scoring profile if score is decent
+    if (profiles.length === 1 && scores[1].score > 4) {
+      profiles.push(scores[1].type);
+    }
   }
 
   return {
