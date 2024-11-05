@@ -40,13 +40,17 @@ const Index = () => {
 
     try {
       setIsSubmitting(true);
-      const profileData = calculateProfiles(answers);
       
-      if (!profileData?.profiles?.length) {
+      // Calculate profiles first
+      const profileData = calculateProfiles(answers);
+      console.log('Profile calculation result:', profileData); // Debug log
+      
+      if (!profileData || !profileData.profiles) {
         toast.error('Erreur lors du calcul des profils');
         return;
       }
 
+      // Prepare test data
       const testData = {
         first_name: userInfo.firstName,
         last_name: userInfo.lastName,
@@ -68,20 +72,18 @@ const Index = () => {
         profiles: profileData.profiles
       };
 
-      const { data, error } = await addProfileTest.mutateAsync(testData);
+      // Save test data
+      const result = await addProfileTest.mutateAsync(testData);
 
-      if (error) {
-        throw error;
+      if (!result || !result.data) {
+        throw new Error('Failed to save test data');
       }
 
-      if (data?.id) {
-        setTestId(data.id);
-        setProfiles(profileData.profiles);
-        setStep('results');
-        toast.success('Résultats calculés avec succès!');
-      } else {
-        throw new Error('No test ID returned');
-      }
+      // Update state with results
+      setTestId(result.data.id);
+      setProfiles(profileData.profiles);
+      setStep('results');
+      toast.success('Résultats calculés avec succès!');
 
     } catch (error) {
       console.error('Error submitting answers:', error);
@@ -98,12 +100,10 @@ const Index = () => {
     }
 
     try {
-      const { error } = await updateProfileTest.mutateAsync({
+      await updateProfileTest.mutateAsync({
         id: testId,
         selected_profile: profile
       });
-
-      if (error) throw error;
 
       setFinalProfile(profile);
       toast.success('Profil sélectionné avec succès!');
