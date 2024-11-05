@@ -5,14 +5,12 @@ import { toast } from "sonner";
 const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) => {
   const displayProfile = finalProfile || (profiles.length === 1 ? profiles[0] : null);
 
-  const handleProfileSelect = async (profile) => {
-    try {
-      await onProfileSelect(profile);
-      toast.success('Votre profil a été enregistré avec succès!');
-    } catch (error) {
-      toast.error('Une erreur est survenue lors de l\'enregistrement');
-      throw error;
-    }
+  const handleProfileSelect = (profile) => {
+    toast.promise(onProfileSelect(profile), {
+      loading: 'Enregistrement de votre profil...',
+      success: 'Votre profil a été enregistré avec succès!',
+      error: 'Une erreur est survenue lors de l\'enregistrement'
+    });
   };
 
   return (

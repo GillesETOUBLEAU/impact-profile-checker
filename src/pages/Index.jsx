@@ -12,6 +12,7 @@ const Index = () => {
   const [answers, setAnswers] = useState(Array(10).fill(5));
   const [profiles, setProfiles] = useState([]);
   const [finalProfile, setFinalProfile] = useState(null);
+  const [testId, setTestId] = useState(null);
 
   const handleUserInfoSubmit = (info) => {
     setUserInfo(info);
@@ -26,33 +27,32 @@ const Index = () => {
 
   const saveTestResults = async (profileData) => {
     try {
-      const payload = {
-        first_name: userInfo.firstName,
-        last_name: userInfo.lastName,
-        email: userInfo.email,
-        question_1: answers[0],
-        question_2: answers[1],
-        question_3: answers[2],
-        question_4: answers[3],
-        question_5: answers[4],
-        question_6: answers[5],
-        question_7: answers[6],
-        question_8: answers[7],
-        question_9: answers[8],
-        question_10: answers[9],
-        humanist_score: Math.round(profileData.scores.humanistScore * 100) / 100,
-        innovative_score: Math.round(profileData.scores.innovativeScore * 100) / 100,
-        eco_guide_score: Math.round(profileData.scores.ecoGuideScore * 100) / 100,
-        curious_score: Math.round(profileData.scores.curiousScore * 100) / 100,
-        profiles: profileData.profiles
-      };
-
       const { data, error } = await supabase
         .from('impact_profile_tests')
-        .insert([payload])
+        .insert([{
+          first_name: userInfo.firstName,
+          last_name: userInfo.lastName,
+          email: userInfo.email,
+          question_1: answers[0],
+          question_2: answers[1],
+          question_3: answers[2],
+          question_4: answers[3],
+          question_5: answers[4],
+          question_6: answers[5],
+          question_7: answers[6],
+          question_8: answers[7],
+          question_9: answers[8],
+          question_10: answers[9],
+          humanist_score: Math.round(profileData.scores.humanistScore * 100) / 100,
+          innovative_score: Math.round(profileData.scores.innovativeScore * 100) / 100,
+          eco_guide_score: Math.round(profileData.scores.ecoGuideScore * 100) / 100,
+          curious_score: Math.round(profileData.scores.curiousScore * 100) / 100,
+          profiles: profileData.profiles
+        }])
         .select();
 
       if (error) throw error;
+      setTestId(data[0].id);
       return data[0].id;
     } catch (error) {
       console.error('Error saving test results:', error);
@@ -83,6 +83,17 @@ const Index = () => {
 
   const handleProfileSelect = async (profile) => {
     try {
+      if (!testId) {
+        throw new Error('Test ID not found');
+      }
+
+      const { error: updateError } = await supabase
+        .from('impact_profile_tests')
+        .update({ selected_profile: profile })
+        .eq('id', testId);
+
+      if (updateError) throw updateError;
+
       setFinalProfile(profile);
       return true;
     } catch (error) {
@@ -97,6 +108,7 @@ const Index = () => {
     setAnswers(Array(10).fill(5));
     setProfiles([]);
     setFinalProfile(null);
+    setTestId(null);
   };
 
   return (
