@@ -12,11 +12,8 @@ const ProfileResultsDisplay = () => {
   const { data: results, isLoading, error } = useProfileResults();
 
   React.useEffect(() => {
-    if (error) {
-      console.error('Error loading results:', error);
-      toast.error("Error loading results: " + error.message);
-    }
-  }, [error]);
+    console.log('Component mounted, query state:', { results, isLoading, error });
+  }, []);
 
   const handleSort = (field) => {
     if (field === sortField) {
@@ -38,9 +35,31 @@ const ProfileResultsDisplay = () => {
     });
   }, [results, sortField, sortDirection]);
 
-  if (isLoading) return <div className="flex justify-center items-center p-4">Loading results...</div>;
-  if (error) return <div className="text-red-500 p-4">Error loading results: {error.message}</div>;
-  if (!results?.length) return <div className="p-4">No results found in the database</div>;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <p>Loading results...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error('Display error:', error);
+    return (
+      <div className="text-red-500 p-4 border border-red-300 rounded-md">
+        <p>Error loading results: {error.message}</p>
+        <pre className="mt-2 text-sm">{JSON.stringify(error, null, 2)}</pre>
+      </div>
+    );
+  }
+
+  if (!results?.length) {
+    return (
+      <div className="p-4 text-center">
+        <p>No results found in the database</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

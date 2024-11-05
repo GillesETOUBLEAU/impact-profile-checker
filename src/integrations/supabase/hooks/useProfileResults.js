@@ -11,27 +11,29 @@ const fromSupabase = async (query) => {
     return data;
 };
 
-export const useProfileResult = (id) => useQuery({
-    queryKey: ['profile_results', id],
-    queryFn: () => fromSupabase(supabase.from('impact_profile_tests').select('*').eq('id', id).single()),
-    enabled: !!id
-});
-
 export const useProfileResults = () => useQuery({
     queryKey: ['profile_results'],
     queryFn: async () => {
-        try {
-            const { data, error } = await supabase
-                .from('impact_profile_tests')
-                .select('*')
-                .order('created_at', { ascending: false });
+        console.log('Fetching profile results...');
+        const { data, error } = await supabase
+            .from('impact_profile_tests')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-            if (error) throw error;
-            return data || [];
-        } catch (error) {
-            console.error('Error fetching profile results:', error);
+        console.log('Fetch response:', { data, error });
+
+        if (error) {
+            console.error('Fetch error:', error);
             throw error;
         }
+
+        if (!data) {
+            console.log('No data returned');
+            return [];
+        }
+
+        console.log('Fetched data:', data);
+        return data;
     }
 });
 
