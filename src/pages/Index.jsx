@@ -25,11 +25,9 @@ const Index = () => {
   };
 
   const handleAnswerChange = (index, value) => {
-    setAnswers(prev => {
-      const newAnswers = [...prev];
-      newAnswers[index] = value;
-      return newAnswers;
-    });
+    const newAnswers = [...answers];
+    newAnswers[index] = value;
+    setAnswers(newAnswers);
   };
 
   const saveTestResults = async (profileData) => {
@@ -54,15 +52,22 @@ const Index = () => {
       if (error) throw error;
       toast.success('Résultats enregistrés avec succès!');
       setTestId(data[0].id);
+      return data[0].id;
     } catch (error) {
       console.error('Error saving test results:', error);
       toast.error('Une erreur est survenue lors de l\'enregistrement des résultats.');
+      throw error;
     }
   };
 
   const handleSubmitAnswers = async () => {
     try {
       const profileData = calculateProfiles(answers);
+      if (!profileData || !profileData.profiles) {
+        toast.error('Erreur lors du calcul des profils');
+        return;
+      }
+      
       setProfiles(profileData.profiles);
       await saveTestResults(profileData);
       setStep('results');
@@ -73,9 +78,9 @@ const Index = () => {
   };
 
   const handleProfileSelect = async (profile) => {
-    setFinalProfile(profile);
-    if (testId) {
-      try {
+    try {
+      setFinalProfile(profile);
+      if (testId) {
         const { error } = await supabase
           .from('impact_profile_tests')
           .update({ selected_profile: profile })
@@ -83,10 +88,10 @@ const Index = () => {
 
         if (error) throw error;
         toast.success('Profil sélectionné mis à jour avec succès!');
-      } catch (error) {
-        console.error('Error updating selected profile:', error);
-        toast.error('Une erreur est survenue lors de la mise à jour du profil.');
       }
+    } catch (error) {
+      console.error('Error updating selected profile:', error);
+      toast.error('Une erreur est survenue lors de la mise à jour du profil.');
     }
   };
 
@@ -118,7 +123,12 @@ const Index = () => {
               onChange={(value) => handleAnswerChange(index, value)}
             />
           ))}
-          <Button onClick={handleSubmitAnswers}>Voir les résultats</Button>
+          <Button 
+            onClick={handleSubmitAnswers}
+            className="w-full mt-4"
+          >
+            Voir les résultats
+          </Button>
         </div>
       )}
       {step === 'results' && (
