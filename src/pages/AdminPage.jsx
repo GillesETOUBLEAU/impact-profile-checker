@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '../integrations/supabase';
 import { checkAdminRole } from '../utils/auth';
-import AdminConfigForm from '../components/AdminConfigForm';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import ProfileResultsDisplay from '../components/ProfileResultsDisplay';
@@ -17,20 +16,26 @@ const AdminPage = () => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
+        console.log('Current session:', session); // Debug log
+
         if (!session) {
+          console.log('No session found, redirecting to login'); // Debug log
           toast.error("Please log in first");
           navigate('/admin/login');
           return;
         }
         
         const adminStatus = await checkAdminRole();
-        console.log('Admin status:', adminStatus); // Debug log
-        setIsAdmin(adminStatus);
+        console.log('Admin status check result:', adminStatus); // Debug log
         
         if (!adminStatus) {
+          console.log('User is not admin, redirecting'); // Debug log
           toast.error("You don't have admin privileges");
           navigate('/');
+          return;
         }
+
+        setIsAdmin(true);
       } catch (error) {
         console.error('Auth check error:', error);
         toast.error("Authentication error occurred");
@@ -58,6 +63,12 @@ const AdminPage = () => {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
+  if (!isAdmin) {
+    return <div className="flex justify-center items-center min-h-screen">
+      Access denied. Please log in with an admin account.
+    </div>;
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex justify-between items-center mb-6">
@@ -65,7 +76,6 @@ const AdminPage = () => {
         <Button onClick={handleLogout}>Logout</Button>
       </div>
       <div className="space-y-8">
-        <AdminConfigForm />
         <ProfileResultsDisplay />
       </div>
     </div>
