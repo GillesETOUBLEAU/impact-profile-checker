@@ -17,7 +17,7 @@ const AllResultsDisplay = () => {
       try {
         const { data, error } = await supabase
           .from('impact_profile_tests')
-          .select('*')
+          .select('first_name,selected_profile')
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -56,15 +56,10 @@ const AllResultsDisplay = () => {
 
   return (
     <div className="mt-6">
-      <h2 className="text-2xl font-bold mb-4">Tous les résultats</h2>
+      <h2 className="text-2xl font-bold mb-4">Résultats des tests</h2>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>
-              <Button variant="ghost" onClick={() => handleSort('created_at')}>
-                Date <ArrowUpDown className="ml-2 h-4 w-4" />
-              </Button>
-            </TableHead>
             <TableHead>
               <Button variant="ghost" onClick={() => handleSort('first_name')}>
                 Prénom <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -80,7 +75,6 @@ const AllResultsDisplay = () => {
         <TableBody>
           {sortedResults.map((result, index) => (
             <TableRow key={index}>
-              <TableCell>{new Date(result.created_at).toLocaleDateString()}</TableCell>
               <TableCell>{result.first_name}</TableCell>
               <TableCell>{result.selected_profile || 'Non sélectionné'}</TableCell>
             </TableRow>
