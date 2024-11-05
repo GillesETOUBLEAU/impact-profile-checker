@@ -32,8 +32,6 @@ const Index = () => {
 
   const saveTestResults = async (profileData) => {
     try {
-      const timestamp = new Date().toISOString();
-      
       const { data, error } = await supabase
         .from('impact_profile_tests')
         .insert([{
@@ -46,14 +44,14 @@ const Index = () => {
           eco_guide_score: profileData.scores.ecoGuideScore,
           curious_score: profileData.scores.curiousScore,
           profiles: profileData.profiles,
-          created_at: timestamp
+          created_at: new Date().toISOString()
         }])
         .select();
 
       if (error) throw error;
       
       setTestId(data[0].id);
-      return { id: data[0].id, timestamp };
+      return data[0].id;
     } catch (error) {
       console.error('Error saving test results:', error);
       toast.error("Une erreur est survenue lors de l'enregistrement des résultats.");
