@@ -10,17 +10,22 @@ CREATE TABLE IF NOT EXISTS user_roles (
 -- Enable Row Level Security (RLS) on the user_roles table
 ALTER TABLE user_roles ENABLE ROW LEVEL SECURITY;
 
--- Create a policy that allows authenticated users to read their own role
-CREATE POLICY "Allow users to read their own role" ON user_roles
-    FOR SELECT
-    TO authenticated
-    USING (auth.uid() = user_id);
+-- Drop existing policies to avoid conflicts
+DROP POLICY IF EXISTS "Allow users to read their own role" ON user_roles;
+DROP POLICY IF EXISTS "Allow superusers to read all roles" ON user_roles;
 
--- Create a policy that allows superusers to read all roles
-CREATE POLICY "Allow superusers to read all roles" ON user_roles
-    FOR SELECT
-    TO authenticated
-    USING (auth.jwt() ->> 'role' = 'service_role');
+-- Create a simplified policy that allows authenticated users to read roles
+CREATE POLICY "Allow authenticated to read roles"
+ON user_roles FOR SELECT
+TO authenticated
+USING (true);
+
+-- Create a policy that allows only service_role to modify roles
+CREATE POLICY "Allow service_role to modify roles"
+ON user_roles FOR ALL
+TO authenticated
+USING (auth.jwt() ->> 'role' = 'service_role')
+WITH CHECK (auth.jwt() ->> 'role' = 'service_role');
 
 -- Grant usage on the user_roles table to the authenticated role
 GRANT USAGE ON SCHEMA public TO authenticated;
@@ -50,9 +55,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Grant execute permission on the function to authenticated users
 GRANT EXECUTE ON FUNCTION assign_admin_role TO authenticated;
 
--- Drop the existing is_admin function if it exists
-DROP FUNCTION IF EXISTS is_admin(UUID);
-
 -- Function to check if a user is an admin
 CREATE OR REPLACE FUNCTION is_admin(user_id UUID)
 RETURNS BOOLEAN AS $$
@@ -60,7 +62,7 @@ BEGIN
   RETURN EXISTS (
     SELECT 1
     FROM user_roles
-    WHERE user_roles.user_id = user_id AND role = 'admin'
+    WHERE user_roles.user_id = $1 AND role = 'admin'
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -83,31 +85,3 @@ CREATE TRIGGER assign_default_role_trigger
 AFTER INSERT ON auth.users
 FOR EACH ROW
 EXECUTE FUNCTION assign_default_role();
-
--- Update RLS policy for site_config table to allow admin access
-DROP POLICY IF EXISTS "Allow admins to update site_config" ON site_config;
-CREATE POLICY "Allow admins to update site_config" ON site_config
-    FOR ALL
-    TO authenticated
-    USING (
-      EXISTS (
-        SELECT 1 FROM user_roles
-        WHERE user_roles.user_id = auth.uid()
-        AND user_roles.role = 'admin'
-      )
-    );
-
--- Assign roles to existing users
-DO $$
-DECLARE
-  user_record RECORD;
-BEGIN
-  FOR user_record IN SELECT id FROM auth.users
-  LOOP
-    PERFORM assign_user_role(user_record.id, 'user');
-  END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
--- Example: Assign admin role to a specific user (replace 'USER_ID_HERE' with actual UUID)
--- SELECT assign_admin_role('USER_ID_HERE');
