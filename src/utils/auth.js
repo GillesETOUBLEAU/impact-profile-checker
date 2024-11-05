@@ -16,10 +16,9 @@ export const checkAdminRole = async () => {
       return false;
     }
 
-    console.log('User role data:', data);
-    return data && data.role === 'admin';
+    return data?.role === 'admin';
   } catch (error) {
-    console.error('Unexpected error checking admin role:', error);
+    console.error('Error checking admin role:', error);
     return false;
   }
 };
