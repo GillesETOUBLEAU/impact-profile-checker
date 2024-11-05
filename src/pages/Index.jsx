@@ -5,6 +5,7 @@ import ResultsDisplay from '../components/ResultsDisplay';
 import { questions, calculateProfiles } from '../utils/profileUtils';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
+import { Button } from "@/components/ui/button"; // Add this import
 
 const Index = () => {
   const [step, setStep] = useState('userInfo');
