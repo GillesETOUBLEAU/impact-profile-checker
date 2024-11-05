@@ -34,28 +34,27 @@ const Index = () => {
     try {
       const { data, error } = await supabase
         .from('impact_profile_tests')
-        .insert([
-          {
-            first_name: userInfo.firstName,
-            last_name: userInfo.lastName,
-            email: userInfo.email,
-            ...Object.fromEntries(answers.map((value, index) => [`question_${index + 1}`, value])),
-            humanist_score: profileData.scores.humanistScore,
-            innovative_score: profileData.scores.innovativeScore,
-            eco_guide_score: profileData.scores.ecoGuideScore,
-            curious_score: profileData.scores.curiousScore,
-            profiles: profileData.profiles,
-          }
-        ])
-        .select();
+        .insert([{
+          first_name: userInfo.firstName,
+          last_name: userInfo.lastName,
+          email: userInfo.email,
+          ...Object.fromEntries(answers.map((value, index) => [`question_${index + 1}`, value])),
+          humanist_score: profileData.scores.humanistScore,
+          innovative_score: profileData.scores.innovativeScore,
+          eco_guide_score: profileData.scores.ecoGuideScore,
+          curious_score: profileData.scores.curiousScore,
+          profiles: profileData.profiles
+        }])
+        .select()
+        .single();
 
       if (error) throw error;
-      toast.success('Résultats enregistrés avec succès!');
-      setTestId(data[0].id);
-      return data[0].id;
+      
+      setTestId(data.id);
+      return data.id;
     } catch (error) {
       console.error('Error saving test results:', error);
-      toast.error('Une erreur est survenue lors de l\'enregistrement des résultats.');
+      toast.error("Une erreur est survenue lors de l'enregistrement des résultats.");
       throw error;
     }
   };
@@ -63,14 +62,16 @@ const Index = () => {
   const handleSubmitAnswers = async () => {
     try {
       const profileData = calculateProfiles(answers);
-      if (!profileData || !profileData.profiles) {
+      
+      if (!profileData || !profileData.profiles || profileData.profiles.length === 0) {
         toast.error('Erreur lors du calcul des profils');
         return;
       }
-      
-      setProfiles(profileData.profiles);
+
       await saveTestResults(profileData);
+      setProfiles(profileData.profiles);
       setStep('results');
+      toast.success('Résultats calculés avec succès!');
     } catch (error) {
       console.error('Error submitting answers:', error);
       toast.error('Une erreur est survenue lors de la soumission des réponses.');
@@ -87,7 +88,7 @@ const Index = () => {
           .eq('id', testId);
 
         if (error) throw error;
-        toast.success('Profil sélectionné mis à jour avec succès!');
+        toast.success('Profil sélectionné avec succès!');
       }
     } catch (error) {
       console.error('Error updating selected profile:', error);
