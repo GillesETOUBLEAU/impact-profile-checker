@@ -13,10 +13,46 @@ const AllResultsDisplay = () => {
   const [sortDirection, setSortDirection] = useState('desc');
 
   useEffect(() => {
-    console.log('Component mounted - checking Supabase connection...');
+    console.log('==========================================');
+    console.log('COMPONENT MOUNTED - STARTING DATA FETCH');
+    console.log('==========================================');
+
+    const testConnection = async () => {
+      try {
+        // Test the connection with a simple query first
+        const { data: testData, error: testError } = await supabase
+          .from('impact_profile_tests')
+          .select('count')
+          .limit(1);
+
+        console.log('Connection test results:', {
+          success: !testError,
+          error: testError,
+          testData
+        });
+
+        if (testError) {
+          throw new Error(`Connection test failed: ${testError.message}`);
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Connection test error:', error);
+        return false;
+      }
+    };
+
     const fetchResults = async () => {
       try {
-        console.log('Making Supabase query with config:', {
+        console.log('Testing Supabase connection...');
+        const connectionSuccess = await testConnection();
+
+        if (!connectionSuccess) {
+          throw new Error('Failed to establish connection with Supabase');
+        }
+
+        console.log('Connection successful, fetching data...');
+        console.log('Supabase config:', {
           url: import.meta.env.VITE_SUPABASE_PROJECT_URL,
           hasApiKey: !!import.meta.env.VITE_SUPABASE_API_KEY
         });
@@ -26,14 +62,14 @@ const AllResultsDisplay = () => {
           .select('*')
           .order('created_at', { ascending: false });
 
-        console.log('Supabase response:', { data, error });
+        console.log('Query response:', { data, error });
 
         if (error) {
-          console.error('Supabase error:', error);
+          console.error('Query error:', error);
           throw error;
         }
 
-        console.log('Successfully fetched data:', data);
+        console.log('Data fetched successfully:', data);
         setResults(data || []);
         toast.success('Data loaded successfully');
       } catch (error) {
