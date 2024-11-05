@@ -83,10 +83,9 @@ const Index = () => {
   const handleProfileSelect = async (profile) => {
     try {
       setFinalProfile(profile);
-      if (testId) {
-        const timestamp = new Date().toISOString();
+      const timestamp = new Date().toISOString();
 
-        // Update impact_profile_tests
+      if (testId) {
         const { error: updateError } = await supabase
           .from('impact_profile_tests')
           .update({ selected_profile: profile })
@@ -94,7 +93,6 @@ const Index = () => {
 
         if (updateError) throw updateError;
 
-        // Insert into profile_results
         const { error: insertError } = await supabase
           .from('profile_results')
           .insert([{
