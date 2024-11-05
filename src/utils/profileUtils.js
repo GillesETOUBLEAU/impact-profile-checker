@@ -28,9 +28,8 @@ export const calculateProfiles = (answers) => {
   if (ecoGuideScore >= threshold) profiles.push('Éco-guide');
   if (curiousScore >= threshold) profiles.push('Curieux');
 
-  // If no profile meets the threshold or only one profile is selected,
-  // add the next highest scoring profile(s)
-  if (profiles.length < 2) {
+  // If no profile meets the threshold, add the highest scoring profile
+  if (profiles.length === 0) {
     const scores = [
       { type: 'Humaniste', score: humanistScore },
       { type: 'Innovant', score: innovativeScore },
@@ -38,15 +37,7 @@ export const calculateProfiles = (answers) => {
       { type: 'Curieux', score: curiousScore }
     ].sort((a, b) => b.score - a.score);
 
-    // Add highest scoring profile if no profiles met the threshold
-    if (profiles.length === 0) {
-      profiles.push(scores[0].type);
-    }
-    
-    // Add second highest scoring profile if score is decent
-    if (profiles.length === 1 && scores[1].score > 4) {
-      profiles.push(scores[1].type);
-    }
+    profiles.push(scores[0].type);
   }
 
   return {

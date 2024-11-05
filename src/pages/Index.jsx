@@ -41,16 +41,14 @@ const Index = () => {
     try {
       setIsSubmitting(true);
       
-      // Calculate profiles first
       const profileData = calculateProfiles(answers);
-      console.log('Profile calculation result:', profileData); // Debug log
+      console.log('Profile calculation result:', profileData);
       
       if (!profileData || !profileData.profiles) {
         toast.error('Erreur lors du calcul des profils');
         return;
       }
 
-      // Prepare test data
       const testData = {
         first_name: userInfo.firstName,
         last_name: userInfo.lastName,
@@ -65,25 +63,21 @@ const Index = () => {
         question_8: answers[7],
         question_9: answers[8],
         question_10: answers[9],
-        humanist_score: Math.round(profileData.scores.humanistScore * 100) / 100,
-        innovative_score: Math.round(profileData.scores.innovativeScore * 100) / 100,
-        eco_guide_score: Math.round(profileData.scores.ecoGuideScore * 100) / 100,
-        curious_score: Math.round(profileData.scores.curiousScore * 100) / 100,
+        humanist_score: profileData.scores.humanistScore,
+        innovative_score: profileData.scores.innovativeScore,
+        eco_guide_score: profileData.scores.ecoGuideScore,
+        curious_score: profileData.scores.curiousScore,
         profiles: profileData.profiles
       };
 
-      // Save test data
       const result = await addProfileTest.mutateAsync(testData);
-
-      if (!result || !result.data) {
-        throw new Error('Failed to save test data');
+      
+      if (result) {
+        setTestId(result.id);
+        setProfiles(profileData.profiles);
+        setStep('results');
+        toast.success('Résultats calculés avec succès!');
       }
-
-      // Update state with results
-      setTestId(result.data.id);
-      setProfiles(profileData.profiles);
-      setStep('results');
-      toast.success('Résultats calculés avec succès!');
 
     } catch (error) {
       console.error('Error submitting answers:', error);
@@ -92,35 +86,6 @@ const Index = () => {
       setIsSubmitting(false);
     }
   };
-
-  const handleProfileSelect = async (profile) => {
-    if (!testId) {
-      toast.error('ID du test non trouvé');
-      return;
-    }
-
-    try {
-      await updateProfileTest.mutateAsync({
-        id: testId,
-        selected_profile: profile
-      });
-
-      setFinalProfile(profile);
-      toast.success('Profil sélectionné avec succès!');
-    } catch (error) {
-      console.error('Error saving profile:', error);
-      toast.error('Erreur lors de la sélection du profil');
-    }
-  };
-
-  const resetTest = useCallback(() => {
-    setStep('userInfo');
-    setUserInfo(null);
-    setAnswers(Array(10).fill(5));
-    setProfiles([]);
-    setFinalProfile(null);
-    setTestId(null);
-  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -150,12 +115,19 @@ const Index = () => {
         </div>
       )}
       
-      {step === 'results' && (
+      {step === 'results' && profiles && profiles.length > 0 && (
         <ResultsDisplay
           profiles={profiles}
           finalProfile={finalProfile}
           onProfileSelect={handleProfileSelect}
-          onReset={resetTest}
+          onReset={() => {
+            setStep('userInfo');
+            setUserInfo(null);
+            setAnswers(Array(10).fill(5));
+            setProfiles([]);
+            setFinalProfile(null);
+            setTestId(null);
+          }}
           userInfo={userInfo}
           testId={testId}
         />
