@@ -15,7 +15,6 @@ const fetchProfileResults = async () => {
       throw error;
     }
 
-    console.log('Fetched data:', data);
     return data || [];
   } catch (error) {
     console.error('Fetch error:', error);
@@ -27,8 +26,8 @@ const fetchProfileResults = async () => {
 export const useProfileResults = () => useQuery({
   queryKey: ['profile_results'],
   queryFn: fetchProfileResults,
-  staleTime: 0, // Consider data stale immediately
-  refetchInterval: 5000, // Refetch every 5 seconds
+  staleTime: 0,
+  refetchInterval: 5000,
   refetchOnWindowFocus: true,
   refetchOnMount: true,
   retry: 2
