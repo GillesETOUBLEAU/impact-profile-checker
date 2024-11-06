@@ -12,15 +12,19 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
   const { data: results, isLoading, error } = useProfileResults();
 
   const calculateProfileDistribution = (data) => {
-    if (!data || data.length === 0) return [];
+    if (!data || data.length === 0) {
+      console.log('No data available for distribution calculation');
+      return [];
+    }
     
     const profileCounts = data.reduce((acc, result) => {
-      const profile = result.selected_profile;
-      if (profile) {
-        acc[profile] = (acc[profile] || 0) + 1;
+      if (result.selected_profile) {
+        acc[result.selected_profile] = (acc[result.selected_profile] || 0) + 1;
       }
       return acc;
     }, {});
+
+    console.log('Profile counts:', profileCounts);
 
     return Object.entries(profileCounts).map(([name, value]) => ({
       name,
@@ -36,6 +40,7 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
     }
     try {
       await onProfileSelect(profile);
+      toast.success('Profil sélectionné avec succès!');
     } catch (error) {
       console.error('Error selecting profile:', error);
       toast.error('Erreur lors de la sélection du profil');
@@ -59,6 +64,7 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
   }
 
   const chartData = calculateProfileDistribution(results);
+  console.log('Chart data:', chartData);
 
   return (
     <div className="space-y-8">
@@ -69,11 +75,17 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
             <p className="mb-4">
               Basé sur vos réponses, voici les profils qui correspondent le mieux à votre personnalité :
             </p>
-            {profiles.map((profile, index) => (
-              <p key={index} className="font-medium">{profile}</p>
-            ))}
-            
-            {!finalProfile ? (
+            {profiles.length === 1 ? (
+              <div className="space-y-4">
+                <p className="font-medium">Votre profil est : {profiles[0]}</p>
+                <Button 
+                  onClick={() => handleProfileSelect(profiles[0])}
+                  className="w-full"
+                >
+                  Valider ce profil
+                </Button>
+              </div>
+            ) : !finalProfile ? (
               <div className="space-y-4">
                 <Select onValueChange={handleProfileSelect}>
                   <SelectTrigger>
@@ -108,8 +120,8 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
       {chartData.length > 0 && (
         <Card className="p-6">
           <h3 className="text-xl font-semibold mb-4">Distribution des profils</h3>
-          <div style={{ width: '100%', height: 400 }}>
-            <ResponsiveContainer>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={chartData}

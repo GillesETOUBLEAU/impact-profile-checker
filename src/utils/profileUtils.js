@@ -12,50 +12,44 @@ export const questions = [
 ];
 
 export const calculateProfiles = (answers) => {
-  // Calculate scores
-  const humanistScore = (answers[0] * 1.5 + answers[4] * 1.5) / 3;
-  const innovativeScore = (answers[1] + answers[5] + answers[8]) / 3;
-  const ecoGuideScore = (answers[2] * 1.5 + answers[6] * 1.5) / 3;
-  const curiousScore = (answers[3] + answers[7] + answers[9]) / 3;
+  if (!answers || answers.length !== 10) {
+    console.error('Invalid answers array:', answers);
+    return { profiles: [], scores: {} };
+  }
+
+  // Calculate scores with proper weighting
+  const humanistScore = ((answers[0] || 0) + (answers[4] || 0)) / 2;
+  const innovativeScore = ((answers[1] || 0) + (answers[5] || 0) + (answers[8] || 0)) / 3;
+  const ecoGuideScore = ((answers[2] || 0) + (answers[6] || 0)) / 2;
+  const curiousScore = ((answers[3] || 0) + (answers[7] || 0) + (answers[9] || 0)) / 3;
+
+  const scores = {
+    humanistScore,
+    innovativeScore,
+    ecoGuideScore,
+    curiousScore
+  };
+
+  console.log('Raw scores:', scores);
 
   const threshold = 5.5;
   const profiles = [];
 
-  // Add profiles based on scores
   if (humanistScore >= threshold) profiles.push('Humaniste');
   if (innovativeScore >= threshold) profiles.push('Innovant');
   if (ecoGuideScore >= threshold) profiles.push('Éco-guide');
   if (curiousScore >= threshold) profiles.push('Curieux');
 
-  // If no profile meets the threshold, add the highest scoring profile
+  // If no profile meets the threshold, select the highest scoring one
   if (profiles.length === 0) {
-    const scores = [
-      { type: 'Humaniste', score: humanistScore },
-      { type: 'Innovant', score: innovativeScore },
-      { type: 'Éco-guide', score: ecoGuideScore },
-      { type: 'Curieux', score: curiousScore }
-    ].sort((a, b) => b.score - a.score);
-
-    profiles.push(scores[0].type);
+    const highestScore = Math.max(humanistScore, innovativeScore, ecoGuideScore, curiousScore);
+    if (humanistScore === highestScore) profiles.push('Humaniste');
+    else if (innovativeScore === highestScore) profiles.push('Innovant');
+    else if (ecoGuideScore === highestScore) profiles.push('Éco-guide');
+    else if (curiousScore === highestScore) profiles.push('Curieux');
   }
 
-  console.log('Profile calculation result:', {
-    profiles,
-    scores: {
-      humanistScore,
-      innovativeScore,
-      ecoGuideScore,
-      curiousScore
-    }
-  });
+  console.log('Final calculation:', { profiles, scores });
 
-  return {
-    profiles,
-    scores: {
-      humanistScore,
-      innovativeScore,
-      ecoGuideScore,
-      curiousScore
-    }
-  };
+  return { profiles, scores };
 };
