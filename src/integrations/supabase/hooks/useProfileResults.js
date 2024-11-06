@@ -27,8 +27,8 @@ const fetchProfileResults = async () => {
 export const useProfileResults = () => useQuery({
   queryKey: ['profile_results'],
   queryFn: fetchProfileResults,
-  refetchInterval: 5000,
+  staleTime: 1000 * 60, // 1 minute
+  refetchInterval: 5000, // Refetch every 5 seconds
   refetchOnWindowFocus: true,
-  refetchOnMount: true,
-  retry: 3
+  refetchOnMount: true
 });
