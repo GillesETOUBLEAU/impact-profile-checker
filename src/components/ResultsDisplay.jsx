@@ -9,13 +9,10 @@ import { toast } from 'sonner';
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) => {
-  const { data: results, isLoading, error } = useProfileResults();
+  const { data: results } = useProfileResults();
 
   const calculateProfileDistribution = (data) => {
-    if (!data || data.length === 0) {
-      console.log('No data available for distribution calculation');
-      return [];
-    }
+    if (!data || data.length === 0) return [];
     
     const profileCounts = data.reduce((acc, result) => {
       if (result.selected_profile) {
@@ -23,8 +20,6 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
       }
       return acc;
     }, {});
-
-    console.log('Profile counts:', profileCounts);
 
     return Object.entries(profileCounts).map(([name, value]) => ({
       name,
@@ -34,10 +29,6 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
   };
 
   const handleProfileSelect = async (profile) => {
-    if (!profile) {
-      toast.error('Veuillez sélectionner un profil');
-      return;
-    }
     try {
       await onProfileSelect(profile);
       toast.success('Profil sélectionné avec succès!');
@@ -47,24 +38,7 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
     }
   };
 
-  if (isLoading) {
-    return (
-      <Card className="p-6">
-        <div className="text-center">Chargement des résultats...</div>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card className="p-6">
-        <div className="text-red-500">Erreur lors du chargement des résultats</div>
-      </Card>
-    );
-  }
-
   const chartData = calculateProfileDistribution(results);
-  console.log('Chart data:', chartData);
 
   return (
     <div className="space-y-8">
@@ -99,9 +73,6 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-sm text-gray-500">
-                  Veuillez sélectionner le profil qui vous correspond le mieux
-                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -120,8 +91,8 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) =>
       {chartData.length > 0 && (
         <Card className="p-6">
           <h3 className="text-xl font-semibold mb-4">Distribution des profils</h3>
-          <div className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
+          <div style={{ width: '100%', height: '400px' }}>
+            <ResponsiveContainer>
               <PieChart>
                 <Pie
                   data={chartData}

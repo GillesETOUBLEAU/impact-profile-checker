@@ -17,11 +17,11 @@ export const calculateProfiles = (answers) => {
     return { profiles: [], scores: {} };
   }
 
-  // Calculate scores with proper weighting
-  const humanistScore = ((answers[0] || 0) + (answers[4] || 0)) / 2;
-  const innovativeScore = ((answers[1] || 0) + (answers[5] || 0) + (answers[8] || 0)) / 3;
-  const ecoGuideScore = ((answers[2] || 0) + (answers[6] || 0)) / 2;
-  const curiousScore = ((answers[3] || 0) + (answers[7] || 0) + (answers[9] || 0)) / 3;
+  // Calculate scores based on question groups
+  const humanistScore = (answers[0] + answers[4]) / 2;
+  const innovativeScore = (answers[1] + answers[5] + answers[8]) / 3;
+  const ecoGuideScore = (answers[2] + answers[6]) / 2;
+  const curiousScore = (answers[3] + answers[7] + answers[9]) / 3;
 
   const scores = {
     humanistScore,
@@ -30,8 +30,7 @@ export const calculateProfiles = (answers) => {
     curiousScore
   };
 
-  console.log('Raw scores:', scores);
-
+  // Determine profiles based on threshold
   const threshold = 5.5;
   const profiles = [];
 
@@ -42,14 +41,12 @@ export const calculateProfiles = (answers) => {
 
   // If no profile meets the threshold, select the highest scoring one
   if (profiles.length === 0) {
-    const highestScore = Math.max(humanistScore, innovativeScore, ecoGuideScore, curiousScore);
-    if (humanistScore === highestScore) profiles.push('Humaniste');
-    else if (innovativeScore === highestScore) profiles.push('Innovant');
-    else if (ecoGuideScore === highestScore) profiles.push('Éco-guide');
-    else if (curiousScore === highestScore) profiles.push('Curieux');
+    const maxScore = Math.max(humanistScore, innovativeScore, ecoGuideScore, curiousScore);
+    if (maxScore === humanistScore) profiles.push('Humaniste');
+    else if (maxScore === innovativeScore) profiles.push('Innovant');
+    else if (maxScore === ecoGuideScore) profiles.push('Éco-guide');
+    else profiles.push('Curieux');
   }
-
-  console.log('Final calculation:', { profiles, scores });
 
   return { profiles, scores };
 };
