@@ -30,5 +30,6 @@ export const useProfileResults = () => useQuery({
   staleTime: 1000 * 60, // 1 minute
   refetchInterval: 5000, // Refetch every 5 seconds
   refetchOnWindowFocus: true,
-  refetchOnMount: true
+  refetchOnMount: true,
+  retry: 3
 });

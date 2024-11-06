@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, userInfo, testId }) => {
-  const { data: results } = useProfileResults();
+  const { data: results, isLoading, error } = useProfileResults();
 
   const calculateProfileDistribution = (data) => {
     if (!data || data.length === 0) return [];
@@ -41,6 +41,22 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, user
       toast.error('Erreur lors de la sélection du profil');
     }
   };
+
+  if (isLoading) {
+    return (
+      <Card className="p-6">
+        <div className="text-center">Chargement des résultats...</div>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="p-6">
+        <div className="text-red-500">Erreur lors du chargement des résultats</div>
+      </Card>
+    );
+  }
 
   const chartData = calculateProfileDistribution(results || []);
 
@@ -98,8 +114,8 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, user
       {chartData.length > 0 && (
         <Card className="p-6">
           <h3 className="text-xl font-semibold mb-4">Distribution des profils</h3>
-          <div style={{ width: '100%', height: 400 }}>
-            <ResponsiveContainer>
+          <div className="h-[400px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={chartData}

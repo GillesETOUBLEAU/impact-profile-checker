@@ -27,19 +27,20 @@ export const useAddImpactProfileTest = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (newTest) => {
-            console.log('Saving test data:', newTest);
-            const result = await fromSupabase(
-                supabase.from('impact_profile_tests')
+            const { data, error } = await supabase
+                .from('impact_profile_tests')
                 .insert([newTest])
                 .select()
-                .single()
-            );
+                .single();
+                
+            if (error) {
+                console.error('Error saving test:', error);
+                toast.error('Failed to save test results');
+                throw error;
+            }
+            
             toast.success('Test results saved successfully!');
-            return result;
-        },
-        onError: (error) => {
-            console.error('Error saving test:', error);
-            toast.error('Failed to save test results');
+            return data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['impact_profile_tests'] });
@@ -52,20 +53,21 @@ export const useUpdateImpactProfileTest = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async ({ id, ...updateData }) => {
-            console.log('Updating test data:', { id, ...updateData });
-            const result = await fromSupabase(
-                supabase.from('impact_profile_tests')
+            const { data, error } = await supabase
+                .from('impact_profile_tests')
                 .update(updateData)
                 .eq('id', id)
                 .select()
-                .single()
-            );
+                .single();
+                
+            if (error) {
+                console.error('Error updating test:', error);
+                toast.error('Failed to update test');
+                throw error;
+            }
+            
             toast.success('Profile selection saved!');
-            return result;
-        },
-        onError: (error) => {
-            console.error('Error updating test:', error);
-            toast.error('Failed to update test');
+            return data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['impact_profile_tests'] });
