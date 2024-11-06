@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, userInfo, testId }) => {
+const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset }) => {
   const { data: results, isLoading, error } = useProfileResults();
 
   const calculateProfileDistribution = (data) => {
@@ -114,7 +114,7 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, user
       {chartData.length > 0 && (
         <Card className="p-6">
           <h3 className="text-xl font-semibold mb-4">Distribution des profils</h3>
-          <div className="h-[400px] w-full">
+          <div className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

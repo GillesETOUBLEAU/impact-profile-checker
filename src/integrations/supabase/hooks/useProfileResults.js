@@ -7,7 +7,6 @@ const fetchProfileResults = async () => {
     const { data, error } = await supabase
       .from('impact_profile_tests')
       .select('*')
-      .not('selected_profile', 'is', null)
       .order('created_at', { ascending: false });
 
     if (error) {
