@@ -15,6 +15,7 @@ const fetchProfileResults = async () => {
       throw error;
     }
 
+    console.log('Fetched profile results:', data);
     return data || [];
   } catch (error) {
     console.error('Fetch error:', error);
@@ -26,9 +27,9 @@ const fetchProfileResults = async () => {
 export const useProfileResults = () => useQuery({
   queryKey: ['profile_results'],
   queryFn: fetchProfileResults,
-  staleTime: 0,
-  refetchInterval: 5000,
+  staleTime: 1000,
+  refetchInterval: 3000,
   refetchOnWindowFocus: true,
   refetchOnMount: true,
-  retry: 2
+  retry: 3
 });

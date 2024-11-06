@@ -18,57 +18,38 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
   },
   db: {
     schema: 'public'
-  },
-  global: {
-    headers: {
-      'x-retry-after': '5'
-    }
   }
 });
 
-// Test the connection with retry logic
+// Test the connection
 export const checkSupabaseConnection = async () => {
-  const maxRetries = 3;
-  let retryCount = 0;
-
-  const tryConnection = async () => {
-    try {
-      console.log('Attempting Supabase connection...');
-      const { data, error } = await supabase
-        .from('impact_profile_tests')
-        .select('count')
-        .limit(1);
-        
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
+  try {
+    console.log('Testing Supabase connection...');
+    const { data, error } = await supabase
+      .from('impact_profile_tests')
+      .select('count')
+      .limit(1);
       
-      console.log('Supabase connection successful:', data);
-      return true;
-    } catch (error) {
-      console.error('Connection attempt failed:', error);
-      
-      if (error.status === 429 && retryCount < maxRetries) {
-        retryCount++;
-        const waitTime = Math.pow(2, retryCount) * 1000;
-        console.log(`Retrying in ${waitTime/1000} seconds...`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-        return tryConnection();
-      }
-      
-      toast.error('Failed to connect to the database. Please check your internet connection and try again.');
-      return false;
+    if (error) {
+      console.error('Supabase connection error:', error);
+      toast.error('Database connection error');
+      throw error;
     }
-  };
-
-  return tryConnection();
+    
+    console.log('Supabase connection successful');
+    return true;
+  } catch (error) {
+    console.error('Connection test failed:', error);
+    toast.error('Failed to connect to the database');
+    return false;
+  }
 };
 
 // Initialize connection check
 checkSupabaseConnection().then(isConnected => {
   if (isConnected) {
-    console.log('Database connection established successfully');
+    console.log('Database connection established');
+    toast.success('Connected to database');
   } else {
     console.error('Failed to establish database connection');
   }
