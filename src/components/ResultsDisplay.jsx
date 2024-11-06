@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProfileResults } from '../integrations/supabase';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { toast } from 'sonner';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -27,44 +28,70 @@ const ResultsDisplay = ({ profiles, finalProfile, onProfileSelect, onReset, user
     }));
   };
 
+  const handleProfileSelect = (profile) => {
+    if (!profile) {
+      toast.error('Veuillez sélectionner un profil');
+      return;
+    }
+    onProfileSelect(profile);
+    toast.success('Profil sélectionné avec succès!');
+  };
+
   const chartData = calculateProfileDistribution(results);
+
+  if (isLoading) {
+    return <div>Chargement des résultats...</div>;
+  }
 
   return (
     <div className="space-y-8">
       <Card className="p-6">
         <h2 className="text-2xl font-bold mb-4">Vos résultats</h2>
-        <p className="mb-4">
-          Basé sur vos réponses, voici les profils qui correspondent le mieux à votre personnalité :
-        </p>
-        <div className="space-y-4">
-          {!finalProfile ? (
-            <>
-              <Select onValueChange={onProfileSelect}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisissez votre profil" />
-                </SelectTrigger>
-                <SelectContent>
-                  {profiles.map((profile) => (
-                    <SelectItem key={profile} value={profile}>
-                      {profile}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-sm text-gray-500">
-                Veuillez sélectionner le profil qui vous correspond le mieux
-              </p>
-            </>
-          ) : (
+        {profiles && profiles.length > 0 ? (
+          <>
+            <p className="mb-4">
+              Basé sur vos réponses, voici les profils qui correspondent le mieux à votre personnalité :
+            </p>
             <div className="space-y-4">
-              <p className="font-medium">Vous avez choisi le profil : {finalProfile}</p>
-              <Button onClick={onReset}>Recommencer le test</Button>
+              {profiles.length === 1 ? (
+                <div className="space-y-4">
+                  <p className="font-medium">Votre profil est : {profiles[0]}</p>
+                  <Button onClick={() => handleProfileSelect(profiles[0])}>
+                    Valider ce profil
+                  </Button>
+                </div>
+              ) : !finalProfile ? (
+                <>
+                  <Select onValueChange={handleProfileSelect}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choisissez votre profil" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {profiles.map((profile) => (
+                        <SelectItem key={profile} value={profile}>
+                          {profile}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-gray-500">
+                    Veuillez sélectionner le profil qui vous correspond le mieux
+                  </p>
+                </>
+              ) : (
+                <div className="space-y-4">
+                  <p className="font-medium">Vous avez choisi le profil : {finalProfile}</p>
+                  <Button onClick={onReset}>Recommencer le test</Button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          <p className="text-red-500">Aucun profil n'a été calculé. Veuillez réessayer.</p>
+        )}
       </Card>
 
-      {!isLoading && results?.length > 0 && (
+      {results && results.length > 0 && (
         <Card className="p-6">
           <h3 className="text-xl font-semibold mb-4">Distribution des profils</h3>
           <div className="h-[400px]">
