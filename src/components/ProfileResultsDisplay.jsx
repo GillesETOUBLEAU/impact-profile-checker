@@ -10,6 +10,8 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 const ProfileResultsDisplay = () => {
   const { data: results, isLoading, error, isError } = useProfileResults();
 
+  console.log('Profile Results:', { results, isLoading, error }); // Debug log
+
   const calculateProfileDistribution = (data) => {
     if (!data) return [];
     
@@ -29,27 +31,33 @@ const ProfileResultsDisplay = () => {
 
   if (isError) {
     return (
-      <div className="text-red-500 p-4 rounded-md bg-red-50 border border-red-200">
-        Error loading results: {error.message}
-      </div>
+      <Card className="p-6">
+        <div className="text-red-500 p-4 rounded-md bg-red-50 border border-red-200">
+          Error loading results: {error.message}
+        </div>
+      </Card>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
-        {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full" />
-        ))}
-      </div>
+      <Card className="p-6">
+        <div className="space-y-3">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
+      </Card>
     );
   }
 
   if (!results?.length) {
     return (
-      <div className="text-gray-500 p-4 text-center border rounded-md">
-        No results available yet
-      </div>
+      <Card className="p-6">
+        <div className="text-gray-500 p-4 text-center border rounded-md">
+          Aucun résultat disponible pour le moment
+        </div>
+      </Card>
     );
   }
 
@@ -58,17 +66,17 @@ const ProfileResultsDisplay = () => {
   return (
     <div className="space-y-8">
       <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Profile Results Overview</h2>
+        <h2 className="text-xl font-semibold mb-4">Aperçu des résultats</h2>
         <div className="space-y-4">
           <p className="text-gray-600">
-            Total profiles completed: {results.length}
+            Total des profils complétés: {results.length}
           </p>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>Nom</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Selected Profile</TableHead>
+                <TableHead>Profil Sélectionné</TableHead>
                 <TableHead>Date</TableHead>
               </TableRow>
             </TableHeader>
@@ -77,7 +85,7 @@ const ProfileResultsDisplay = () => {
                 <TableRow key={result.id}>
                   <TableCell>{result.first_name} {result.last_name}</TableCell>
                   <TableCell>{result.email}</TableCell>
-                  <TableCell>{result.selected_profile || 'Not selected'}</TableCell>
+                  <TableCell>{result.selected_profile || 'Non sélectionné'}</TableCell>
                   <TableCell>{new Date(result.created_at).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))}
@@ -88,7 +96,7 @@ const ProfileResultsDisplay = () => {
 
       {chartData.length > 0 && (
         <Card className="p-6">
-          <h3 className="text-xl font-semibold mb-4">Profile Distribution</h3>
+          <h3 className="text-xl font-semibold mb-4">Distribution des profils</h3>
           <div className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>

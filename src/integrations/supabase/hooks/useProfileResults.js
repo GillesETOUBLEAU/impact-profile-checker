@@ -3,6 +3,8 @@ import { supabase } from '../supabase';
 import { toast } from 'sonner';
 
 const fetchProfileResults = async () => {
+  console.log('Fetching profile results...'); // Debug log
+  
   try {
     const { data, error } = await supabase
       .from('impact_profile_tests')
@@ -15,6 +17,7 @@ const fetchProfileResults = async () => {
       throw error;
     }
 
+    console.log('Fetched data:', data); // Debug log
     return data || [];
   } catch (error) {
     console.error('Fetch error:', error);
