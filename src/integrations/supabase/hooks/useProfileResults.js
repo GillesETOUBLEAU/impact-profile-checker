@@ -6,7 +6,6 @@ const fetchProfileResults = async () => {
   console.log('Starting to fetch profile results...'); // Debug log
   
   try {
-    // Fetch all results
     const { data, error } = await supabase
       .from('impact_profile_tests')
       .select('*')
@@ -32,6 +31,6 @@ export const useProfileResults = () => {
     queryFn: fetchProfileResults,
     retry: 1,
     retryDelay: 1000,
-    staleTime: 30000,
+    staleTime: 30000, // Cache data for 30 seconds
   });
 };

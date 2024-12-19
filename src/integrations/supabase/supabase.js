@@ -12,20 +12,14 @@ if (!supabaseUrl || !supabaseKey) {
 
 console.log('Initializing Supabase client with URL:', supabaseUrl);
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    storage: window.localStorage
-  }
-});
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Test the connection immediately
 console.log('Testing initial database connection...');
 supabase.from('impact_profile_tests')
   .select('count')
   .limit(1)
+  .single()
   .then(({ data, error }) => {
     if (error) {
       console.error('Initial database connection error:', error);
