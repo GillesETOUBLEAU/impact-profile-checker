@@ -28,9 +28,9 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
 // Test the connection
 export const checkSupabaseConnection = async () => {
   try {
-    console.log('Testing Supabase connection...');
-    console.log('Using URL:', supabaseUrl); // Debug log
-    
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('Current session:', session); // Debug log
+
     const { data, error } = await supabase
       .from('impact_profile_tests')
       .select('count')
