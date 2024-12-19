@@ -10,27 +10,21 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase configuration');
 }
 
+console.log('Using URL:', supabaseUrl); // Debug log
+
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
-  },
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  db: {
-    schema: 'public'
+    detectSessionInUrl: true
   }
 });
 
 // Test the connection
 export const checkSupabaseConnection = async () => {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    console.log('Current session:', session); // Debug log
-
+    console.log('Testing Supabase connection...'); // Debug log
+    
     const { data, error } = await supabase
       .from('impact_profile_tests')
       .select('count')
