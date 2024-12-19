@@ -10,47 +10,23 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase configuration');
 }
 
-console.log('Using URL:', supabaseUrl); // Debug log
-
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    autoRefreshToken: true,
     persistSession: true,
+    autoRefreshToken: true,
     detectSessionInUrl: true
   }
 });
 
-// Test the connection
-export const checkSupabaseConnection = async () => {
-  try {
-    console.log('Testing Supabase connection...'); // Debug log
-    
-    const { data, error } = await supabase
-      .from('impact_profile_tests')
-      .select('count')
-      .limit(1)
-      .single();
-      
+// Test the connection immediately
+supabase.from('impact_profile_tests')
+  .select('count')
+  .limit(1)
+  .then(({ data, error }) => {
     if (error) {
-      console.error('Supabase connection error:', error);
-      toast.error('Database connection error');
-      throw error;
+      console.error('Database connection error:', error);
+      toast.error('Failed to connect to database');
+    } else {
+      console.log('Database connection successful');
     }
-    
-    console.log('Supabase connection successful:', data);
-    return true;
-  } catch (error) {
-    console.error('Connection test failed:', error);
-    toast.error('Failed to connect to the database');
-    return false;
-  }
-};
-
-// Initialize connection check
-checkSupabaseConnection().then(isConnected => {
-  if (isConnected) {
-    console.log('Database connection established');
-  } else {
-    console.error('Failed to establish database connection');
-  }
-});
+  });
