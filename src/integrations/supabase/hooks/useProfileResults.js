@@ -17,6 +17,11 @@ const fetchProfileResults = async () => {
       throw error;
     }
 
+    if (!data) {
+      console.log('No data returned from Supabase');
+      return [];
+    }
+
     console.log('Fetched profile results:', data); // Debug log
     return data;
   } catch (error) {
@@ -30,6 +35,7 @@ export const useProfileResults = () => {
   return useQuery({
     queryKey: ['profile_results'],
     queryFn: fetchProfileResults,
+    initialData: [], // Provide initial empty array
     staleTime: 1000 * 60, // 1 minute
     refetchInterval: 1000 * 30, // Refetch every 30 seconds
     refetchOnWindowFocus: true,

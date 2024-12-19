@@ -16,6 +16,9 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce'
+  },
+  headers: {
+    'Content-Type': 'application/json'
   }
 });
 
@@ -32,6 +35,11 @@ export const checkSupabaseConnection = async () => {
       console.error('Supabase connection error:', error);
       toast.error('Database connection error');
       throw error;
+    }
+    
+    if (!data || data.length === 0) {
+      console.log('Supabase connection successful, but no records found');
+      return true;
     }
     
     console.log('Supabase connection successful, first record:', data);
