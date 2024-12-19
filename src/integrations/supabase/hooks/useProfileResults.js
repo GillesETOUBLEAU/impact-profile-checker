@@ -17,7 +17,7 @@ const fetchProfileResults = async () => {
       throw error;
     }
 
-    console.log('Fetched data:', data); // Debug log
+    console.log('Fetched profile results:', data); // Debug log
     return data || [];
   } catch (error) {
     console.error('Fetch error:', error);
@@ -26,12 +26,18 @@ const fetchProfileResults = async () => {
   }
 };
 
-export const useProfileResults = () => useQuery({
-  queryKey: ['profile_results'],
-  queryFn: fetchProfileResults,
-  staleTime: 1000 * 60, // 1 minute
-  refetchInterval: 5000, // Refetch every 5 seconds
-  refetchOnWindowFocus: true,
-  refetchOnMount: true,
-  retry: 3
-});
+export const useProfileResults = () => {
+  return useQuery({
+    queryKey: ['profile_results'],
+    queryFn: fetchProfileResults,
+    staleTime: 1000 * 60, // 1 minute
+    refetchInterval: 5000, // Refetch every 5 seconds
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    retry: 3,
+    onError: (error) => {
+      console.error('Query error:', error);
+      toast.error('Error loading results');
+    }
+  });
+};

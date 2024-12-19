@@ -8,44 +8,27 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const ProfileResultsDisplay = () => {
-  const { data: results, isLoading, error, isError } = useProfileResults();
+  const { data: results, isLoading, error } = useProfileResults();
 
   console.log('Profile Results:', { results, isLoading, error }); // Debug log
-
-  const calculateProfileDistribution = (data) => {
-    if (!data) return [];
-    
-    const profileCounts = data.reduce((acc, result) => {
-      if (result.selected_profile) {
-        acc[result.selected_profile] = (acc[result.selected_profile] || 0) + 1;
-      }
-      return acc;
-    }, {});
-
-    return Object.entries(profileCounts).map(([name, value]) => ({
-      name,
-      value,
-      percentage: Math.round((value / data.length) * 100)
-    }));
-  };
-
-  if (isError) {
-    return (
-      <Card className="p-6">
-        <div className="text-red-500 p-4 rounded-md bg-red-50 border border-red-200">
-          Error loading results: {error.message}
-        </div>
-      </Card>
-    );
-  }
 
   if (isLoading) {
     return (
       <Card className="p-6">
         <div className="space-y-3">
-          {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="p-6">
+        <div className="text-red-500 p-4 rounded-md bg-red-50 border border-red-200">
+          Error loading results: {error.message}
         </div>
       </Card>
     );
@@ -60,6 +43,21 @@ const ProfileResultsDisplay = () => {
       </Card>
     );
   }
+
+  const calculateProfileDistribution = (data) => {
+    const profileCounts = data.reduce((acc, result) => {
+      if (result.selected_profile) {
+        acc[result.selected_profile] = (acc[result.selected_profile] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    return Object.entries(profileCounts).map(([name, value]) => ({
+      name,
+      value,
+      percentage: Math.round((value / data.length) * 100)
+    }));
+  };
 
   const chartData = calculateProfileDistribution(results);
 
