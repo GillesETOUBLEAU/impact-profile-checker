@@ -61,7 +61,6 @@ export const useProfileResults = () => {
     queryKey: ['profile_results'],
     queryFn: fetchProfileResults,
     staleTime: 1000 * 60, // Consider data fresh for 1 minute
-    initialData: [],
     retry: 3,
     retryDelay: 1000,
     onError: (error) => {
