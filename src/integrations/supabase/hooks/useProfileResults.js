@@ -19,11 +19,17 @@ const fetchProfileResults = async () => {
 
     console.log('Table access test successful:', testData);
 
-    // Now fetch all results
-    const { data, error } = await supabase
+    // Now fetch all results with a timeout
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Query timeout')), 5000)
+    );
+
+    const queryPromise = supabase
       .from('impact_profile_tests')
       .select('*')
       .order('created_at', { ascending: false });
+
+    const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
     if (error) {
       console.error('Error fetching profile results:', error);
@@ -48,8 +54,11 @@ export const useProfileResults = () => {
   return useQuery({
     queryKey: ['profile_results'],
     queryFn: fetchProfileResults,
-    retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * (2 ** attemptIndex), 30000),
+    retry: 1,
+    retryDelay: 1000,
+    staleTime: 30000,
+    cacheTime: 60000,
+    refetchOnWindowFocus: false,
     onError: (error) => {
       console.error('Query error:', error);
       toast.error('Error loading results');

@@ -16,7 +16,13 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    storage: window.localStorage
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'supabase-js-web'
+    }
   }
 });
 
@@ -32,4 +38,8 @@ supabase.from('impact_profile_tests')
     } else {
       console.log('Initial database connection successful:', data);
     }
+  })
+  .catch(error => {
+    console.error('Connection test failed:', error);
+    toast.error('Database connection test failed');
   });
