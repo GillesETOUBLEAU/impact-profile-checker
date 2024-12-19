@@ -1,20 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../supabase';
 import { toast } from 'sonner';
-import { useSupabaseAuth } from '../auth';
 
 const fetchProfileResults = async () => {
   console.log('Starting to fetch profile results...'); // Debug log
   
   try {
-    const { data: session } = await supabase.auth.getSession();
-    console.log('Current session:', session); // Debug log
-    
-    if (!session?.user) {
-      console.log('No active session found');
-      return [];
-    }
-
     // Fetch all results
     const { data, error } = await supabase
       .from('impact_profile_tests')
@@ -36,20 +27,11 @@ const fetchProfileResults = async () => {
 };
 
 export const useProfileResults = () => {
-  const { session } = useSupabaseAuth();
-
   return useQuery({
-    queryKey: ['profile_results', session?.user?.id],
+    queryKey: ['profile_results'],
     queryFn: fetchProfileResults,
-    enabled: !!session?.user,
     retry: 1,
     retryDelay: 1000,
     staleTime: 30000,
-    cacheTime: 60000,
-    refetchOnWindowFocus: false,
-    onError: (error) => {
-      console.error('Query error:', error);
-      toast.error('Error loading results');
-    }
   });
 };
