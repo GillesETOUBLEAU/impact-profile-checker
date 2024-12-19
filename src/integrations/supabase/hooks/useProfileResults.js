@@ -7,13 +7,6 @@ const fetchProfileResults = async () => {
   console.log('Starting to fetch profile results...'); // Debug log
   
   try {
-    const { data: session } = await supabase.auth.getSession();
-    
-    if (!session) {
-      console.log('No active session found');
-      return [];
-    }
-
     // First verify we can access the table
     const { data: testData, error: testError } = await supabase
       .from('impact_profile_tests')
@@ -56,9 +49,8 @@ export const useProfileResults = () => {
   const { session } = useSupabaseAuth();
 
   return useQuery({
-    queryKey: ['profile_results', session?.user?.id],
+    queryKey: ['profile_results'],
     queryFn: fetchProfileResults,
-    enabled: !!session,
     retry: 1,
     retryDelay: 1000,
     staleTime: 30000,
