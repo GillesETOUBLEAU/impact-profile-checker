@@ -6,23 +6,17 @@ import { toast } from 'sonner';
 
 const Layout = ({ children }) => {
   const navigate = useNavigate();
-  const auth = useSupabaseAuth();
-  const session = auth?.session;
-  const logout = auth?.logout;
+  const { session, isAdmin, logout } = useSupabaseAuth();
 
   const handleLogout = async () => {
-    if (logout) {
-      try {
-        await logout();
-        toast.success('Déconnexion réussie');
-        navigate('/');
-      } catch (error) {
-        console.error('Error logging out:', error);
-        toast.error('Erreur lors de la déconnexion');
-      }
-    } else {
-      console.error('Logout function is not available');
-      toast.error('Erreur de configuration de la déconnexion');
+    try {
+      console.log('Attempting logout...'); // Debug log
+      await logout();
+      toast.success('Déconnexion réussie');
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Erreur lors de la déconnexion');
     }
   };
 
@@ -33,19 +27,23 @@ const Layout = ({ children }) => {
           <h1 className="text-2xl font-bold">Impact Profile Checker</h1>
           <nav className="flex items-center space-x-4">
             <Link to="/">
-              <Button variant="ghost" className="hover:underline">
-                Home
+              <Button variant="ghost">
+                Accueil
               </Button>
             </Link>
-            {session ? (
+            {session && isAdmin ? (
               <>
-                <Link to="/admin" className="hover:underline">Admin</Link>
-                <Button onClick={handleLogout} variant="outline" size="sm">
-                  Logout
+                <Link to="/admin">
+                  <Button variant="ghost">Admin</Button>
+                </Link>
+                <Button onClick={handleLogout} variant="outline">
+                  Déconnexion
                 </Button>
               </>
             ) : (
-              <Link to="/admin/login" className="hover:underline">Admin Login</Link>
+              <Link to="/admin/login">
+                <Button variant="ghost">Admin Login</Button>
+              </Link>
             )}
           </nav>
         </div>

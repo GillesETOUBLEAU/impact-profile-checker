@@ -6,28 +6,22 @@ import { toast } from 'sonner';
 
 const AdminLoginPage = () => {
   const navigate = useNavigate();
-  const supabaseAuth = useSupabaseAuth();
+  const { session, isAdmin } = useSupabaseAuth();
 
   useEffect(() => {
-    if (supabaseAuth && supabaseAuth.session) {
+    console.log('Session state:', { session, isAdmin }); // Debug log
+    if (session && isAdmin) {
       navigate('/admin');
     }
-  }, [supabaseAuth, navigate]);
+  }, [session, isAdmin, navigate]);
 
   const handleLogin = async (email, password) => {
-    if (supabaseAuth && supabaseAuth.signIn) {
-      try {
-        const { error } = await supabaseAuth.signIn({ email, password });
-        if (error) throw error;
-        toast.success('Connexion réussie');
-        navigate('/admin');
-      } catch (error) {
-        console.error('Erreur de connexion:', error);
-        toast.error(error.message || 'Erreur de connexion');
-      }
-    } else {
-      console.error('La fonction de connexion n\'est pas disponible');
-      toast.error('Erreur de configuration de l\'authentification');
+    try {
+      console.log('Login successful, redirecting...'); // Debug log
+      navigate('/admin');
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error(error.message || 'Erreur de connexion');
     }
   };
 

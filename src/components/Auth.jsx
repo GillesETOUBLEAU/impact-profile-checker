@@ -19,31 +19,23 @@ const Auth = ({ onLogin }) => {
     setError('');
     
     try {
-      const { data, error } = await signIn({ 
+      console.log('Attempting login with:', { email }); // Debug log
+      const { error: signInError } = await signIn({ 
         email, 
-        password,
-        options: {
-          emailRedirectTo: import.meta.env.VITE_SUPABASE_REDIRECT_URL
-        }
+        password
       });
       
-      if (error) throw error;
+      if (signInError) throw signInError;
       
       if (onLogin) {
-        onLogin(email, password);
+        await onLogin(email, password);
       }
       
-      toast.success('Logged in successfully');
+      toast.success('Connexion réussie');
     } catch (error) {
       console.error('Login error:', error);
-      if (error.message === 'Invalid login credentials') {
-        setError('Invalid email or password. Please try again.');
-      } else if (error.message.includes('failed to call url')) {
-        setError('Network error. Please check your internet connection and try again.');
-      } else {
-        setError(error.message || 'An error occurred during login');
-      }
-      toast.error(error.message || 'Login failed');
+      setError(error.message || 'Une erreur est survenue lors de la connexion');
+      toast.error(error.message || 'Échec de la connexion');
     } finally {
       setLoading(false);
     }
@@ -56,8 +48,8 @@ const Auth = ({ onLogin }) => {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <form onSubmit={handleLogin} className="space-y-2">
-        <div>
+      <form onSubmit={handleLogin} className="space-y-4">
+        <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
@@ -67,7 +59,7 @@ const Auth = ({ onLogin }) => {
             required
           />
         </div>
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
           <Input
             id="password"
@@ -77,8 +69,8 @@ const Auth = ({ onLogin }) => {
             required
           />
         </div>
-        <Button type="submit" disabled={loading}>
-          {loading ? 'Loading...' : 'Sign In'}
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? 'Connexion...' : 'Se connecter'}
         </Button>
       </form>
     </div>
