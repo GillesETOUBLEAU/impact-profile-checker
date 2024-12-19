@@ -7,18 +7,13 @@ const fetchProfileResults = async () => {
   console.log('Starting to fetch profile results...'); // Debug log
   
   try {
-    // First verify we can access the table
-    const { data: testData, error: testError } = await supabase
-      .from('impact_profile_tests')
-      .select('count')
-      .limit(1);
-
-    if (testError) {
-      console.error('Table access test failed:', testError);
-      throw new Error(`Cannot access table: ${testError.message}`);
+    const { data: session } = await supabase.auth.getSession();
+    console.log('Current session:', session); // Debug log
+    
+    if (!session?.user) {
+      console.log('No active session found');
+      return [];
     }
-
-    console.log('Table access test successful:', testData);
 
     // Fetch all results
     const { data, error } = await supabase
@@ -31,13 +26,8 @@ const fetchProfileResults = async () => {
       throw error;
     }
 
-    if (!data) {
-      console.log('No data returned from query');
-      return [];
-    }
-
     console.log('Successfully fetched profile results:', data);
-    return data;
+    return data || [];
   } catch (error) {
     console.error('Failed to fetch profile results:', error);
     toast.error('Failed to load profile results');
@@ -49,8 +39,9 @@ export const useProfileResults = () => {
   const { session } = useSupabaseAuth();
 
   return useQuery({
-    queryKey: ['profile_results'],
+    queryKey: ['profile_results', session?.user?.id],
     queryFn: fetchProfileResults,
+    enabled: !!session?.user,
     retry: 1,
     retryDelay: 1000,
     staleTime: 30000,
