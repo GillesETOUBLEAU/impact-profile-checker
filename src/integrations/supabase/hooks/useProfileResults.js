@@ -6,10 +6,12 @@ const fetchProfileResults = async () => {
   console.log('Fetching profile results...'); // Debug log
   
   try {
-    const { data, error } = await supabase
+    const { data, error, status, statusText } = await supabase
       .from('impact_profile_tests')
       .select('*')
       .order('created_at', { ascending: false });
+
+    console.log('Supabase response:', { data, error, status, statusText }); // Debug log
 
     if (error) {
       console.error('Supabase error:', error);
