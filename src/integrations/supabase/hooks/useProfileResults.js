@@ -6,48 +6,37 @@ const fetchProfileResults = async () => {
   console.log('Fetching profile results...'); // Debug log
   
   try {
-    // First, let's check if the table exists and count records
-    const { count, error: countError } = await supabase
+    // First, let's check if we can connect to Supabase
+    const { data: connectionTest, error: connectionError } = await supabase
       .from('impact_profile_tests')
-      .select('*', { count: 'exact', head: true });
+      .select('count')
+      .limit(1)
+      .single();
 
-    console.log('Table count check:', { count, error: countError }); // Debug log
-
-    if (countError) {
-      console.error('Count error:', countError);
-      toast.error(`Error checking table: ${countError.message}`);
-      throw countError;
+    if (connectionError) {
+      console.error('Connection test failed:', connectionError);
+      throw new Error(`Connection error: ${connectionError.message}`);
     }
 
-    // Now fetch the actual data with detailed logging
-    const { data, error, status } = await supabase
+    console.log('Connection test successful:', connectionTest);
+
+    // Now fetch the actual data
+    const { data, error } = await supabase
       .from('impact_profile_tests')
       .select('*')
       .order('created_at', { ascending: false });
 
-    console.log('Query execution details:', { 
-      status,
-      hasData: !!data,
-      dataLength: data?.length,
-      error,
-      sqlQuery: error?.query,
-      hint: error?.hint,
-      details: error?.details,
-      rawData: data // Log the actual data for inspection
-    }); // Debug log
-
     if (error) {
-      console.error('Supabase error:', error);
-      toast.error(`Error fetching data: ${error.message}`);
-      throw error;
+      console.error('Data fetch error:', error);
+      throw new Error(`Failed to fetch data: ${error.message}`);
     }
 
     if (!data) {
-      console.log('No data returned from Supabase');
+      console.log('No data returned');
       return [];
     }
 
-    console.log('Successfully fetched data:', data); // Debug log
+    console.log('Successfully fetched data:', data);
     return data;
   } catch (error) {
     console.error('Fetch error:', error);
