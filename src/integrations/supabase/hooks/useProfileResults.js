@@ -6,12 +6,21 @@ const fetchProfileResults = async () => {
   console.log('Fetching profile results...'); // Debug log
   
   try {
+    console.log('Supabase client:', supabase); // Debug log
+    
     const { data, error, status, statusText } = await supabase
       .from('impact_profile_tests')
       .select('*')
       .order('created_at', { ascending: false });
 
-    console.log('Supabase response:', { data, error, status, statusText }); // Debug log
+    console.log('Supabase response:', { 
+      data, 
+      error, 
+      status, 
+      statusText,
+      url: supabase.supabaseUrl,
+      key: supabase.supabaseKey?.slice(0, 8) + '...' // Log partial key for security
+    }); // Debug log
 
     if (error) {
       console.error('Supabase error:', error);
