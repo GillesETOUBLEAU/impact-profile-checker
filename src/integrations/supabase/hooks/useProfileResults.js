@@ -6,17 +6,33 @@ const fetchProfileResults = async () => {
   console.log('Fetching profile results...'); // Debug log
   
   try {
-    const { data, error, status, count } = await supabase
+    // First, let's check if the table exists and count records
+    const { count, error: countError } = await supabase
       .from('impact_profile_tests')
-      .select('*', { count: 'exact' })
+      .select('*', { count: 'exact', head: true });
+
+    console.log('Table count check:', { count, error: countError }); // Debug log
+
+    if (countError) {
+      console.error('Count error:', countError);
+      toast.error(`Error checking table: ${countError.message}`);
+      throw countError;
+    }
+
+    // Now fetch the actual data
+    const { data, error, status } = await supabase
+      .from('impact_profile_tests')
+      .select('*')
       .order('created_at', { ascending: false });
 
-    console.log('Supabase query details:', { 
+    console.log('Query details:', { 
       status,
-      count,
       hasData: !!data,
       dataLength: data?.length,
-      error
+      error,
+      sqlQuery: error?.query, // Log the SQL query if there's an error
+      hint: error?.hint,
+      details: error?.details
     }); // Debug log
 
     if (error) {
