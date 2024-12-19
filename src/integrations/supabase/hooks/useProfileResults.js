@@ -19,20 +19,21 @@ const fetchProfileResults = async () => {
       throw countError;
     }
 
-    // Now fetch the actual data
+    // Now fetch the actual data with detailed logging
     const { data, error, status } = await supabase
       .from('impact_profile_tests')
       .select('*')
       .order('created_at', { ascending: false });
 
-    console.log('Query details:', { 
+    console.log('Query execution details:', { 
       status,
       hasData: !!data,
       dataLength: data?.length,
       error,
-      sqlQuery: error?.query, // Log the SQL query if there's an error
+      sqlQuery: error?.query,
       hint: error?.hint,
-      details: error?.details
+      details: error?.details,
+      rawData: data // Log the actual data for inspection
     }); // Debug log
 
     if (error) {
