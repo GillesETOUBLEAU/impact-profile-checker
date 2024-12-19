@@ -18,7 +18,7 @@ const fetchProfileResults = async () => {
     }
 
     console.log('Fetched profile results:', data); // Debug log
-    return data || [];
+    return data;
   } catch (error) {
     console.error('Fetch error:', error);
     toast.error('Failed to fetch results');
@@ -31,7 +31,7 @@ export const useProfileResults = () => {
     queryKey: ['profile_results'],
     queryFn: fetchProfileResults,
     staleTime: 1000 * 60, // 1 minute
-    refetchInterval: 5000, // Refetch every 5 seconds
+    refetchInterval: 1000 * 30, // Refetch every 30 seconds
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     retry: 3,

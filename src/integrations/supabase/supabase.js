@@ -16,14 +16,6 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce'
-  },
-  db: {
-    schema: 'public'
-  },
-  global: {
-    headers: {
-      'Content-Type': 'application/json'
-    }
   }
 });
 
@@ -31,7 +23,10 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
 export const checkSupabaseConnection = async () => {
   try {
     console.log('Testing Supabase connection...');
-    const { data, error } = await supabase.from('impact_profile_tests').select('count').limit(1);
+    const { data, error } = await supabase
+      .from('impact_profile_tests')
+      .select('*')
+      .limit(1);
       
     if (error) {
       console.error('Supabase connection error:', error);
@@ -39,7 +34,7 @@ export const checkSupabaseConnection = async () => {
       throw error;
     }
     
-    console.log('Supabase connection successful:', data);
+    console.log('Supabase connection successful, first record:', data);
     return true;
   } catch (error) {
     console.error('Connection test failed:', error);
