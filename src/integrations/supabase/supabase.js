@@ -19,6 +19,9 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
   },
   headers: {
     'Content-Type': 'application/json'
+  },
+  db: {
+    schema: 'public'
   }
 });
 
@@ -26,10 +29,13 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
 export const checkSupabaseConnection = async () => {
   try {
     console.log('Testing Supabase connection...');
+    console.log('Using URL:', supabaseUrl); // Debug log
+    
     const { data, error } = await supabase
       .from('impact_profile_tests')
-      .select('*')
-      .limit(1);
+      .select('count')
+      .limit(1)
+      .single();
       
     if (error) {
       console.error('Supabase connection error:', error);
@@ -37,12 +43,7 @@ export const checkSupabaseConnection = async () => {
       throw error;
     }
     
-    if (!data || data.length === 0) {
-      console.log('Supabase connection successful, but no records found');
-      return true;
-    }
-    
-    console.log('Supabase connection successful, first record:', data);
+    console.log('Supabase connection successful:', data);
     return true;
   } catch (error) {
     console.error('Connection test failed:', error);
