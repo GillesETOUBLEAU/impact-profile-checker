@@ -16,18 +16,13 @@ console.log('Redirect URL:', redirectTo);
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
+    autoRefreshToken: true,
     storage: window?.localStorage
   },
-  db: {
-    schema: 'public'
-  },
   global: {
-    headers: {
-      'X-Client-Info': 'impact-profile-checker'
-    }
+    headers: { 'x-application-name': 'impact-profile-checker' }
   }
 });
 
@@ -40,7 +35,7 @@ supabase.from('impact_profile_tests')
   .then(({ data, error }) => {
     if (error) {
       console.error('Initial database connection error:', error);
-      toast.error('Failed to connect to database');
+      toast.error(`Database connection error: ${error.message}`);
     } else {
       console.log('Initial database connection successful:', data);
     }
