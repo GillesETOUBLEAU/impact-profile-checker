@@ -19,20 +19,25 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true
+  },
+  db: {
+    schema: 'public'
   }
 });
 
-// Test the connection immediately
-console.log('Testing initial database connection...');
+// Test the connection and table access immediately
+console.log('Testing database connection and table access...');
 supabase
   .from('impact_profile_tests')
   .select('*')
   .limit(1)
   .then(({ data, error }) => {
     if (error) {
-      console.error('Initial database connection error:', error);
-      toast.error(`Database connection error: ${error.message}`);
+      console.error('Database connection error:', error);
+      toast.error(`Database error: ${error.message}`);
     } else {
-      console.log('Initial database connection successful. Sample data:', data);
+      console.log('Database connection successful');
+      console.log('Sample data:', data);
+      console.log('Table structure:', Object.keys(data?.[0] || {}));
     }
   });
