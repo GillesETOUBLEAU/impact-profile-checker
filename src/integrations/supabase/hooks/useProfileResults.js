@@ -17,8 +17,13 @@ const fetchProfileResults = async () => {
       throw error;
     }
 
+    if (!data) {
+      console.log('No data returned from query');
+      return [];
+    }
+
     console.log('Successfully fetched profile results:', data);
-    return data || [];
+    return data;
   } catch (error) {
     console.error('Failed to fetch profile results:', error);
     toast.error('Failed to load profile results');
@@ -30,6 +35,7 @@ export const useProfileResults = () => {
   return useQuery({
     queryKey: ['profile_results'],
     queryFn: fetchProfileResults,
+    initialData: [], // Provide initial empty array to prevent undefined
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 30000,

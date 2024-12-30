@@ -8,7 +8,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const ProfileResultsDisplay = () => {
-  const { data: results, isLoading, error } = useProfileResults();
+  const { data: results = [], isLoading, error } = useProfileResults();
 
   console.log('Profile Results:', { results, isLoading, error }); // Debug log
 
@@ -34,7 +34,7 @@ const ProfileResultsDisplay = () => {
     );
   }
 
-  if (!results?.length) {
+  if (!Array.isArray(results) || results.length === 0) {
     return (
       <Card className="p-6">
         <div className="text-gray-500 p-4 text-center border rounded-md">
