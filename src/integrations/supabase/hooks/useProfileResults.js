@@ -8,12 +8,27 @@ const fetchProfileResults = async () => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     console.log('Current session state:', session ? 'Authenticated' : 'Not authenticated');
+    console.log('Session details:', session); // Add more detailed session logging
 
     if (!session) {
       console.log('No active session found');
       return [];
     }
 
+    // First, test if we can access the table at all
+    const { count, error: countError } = await supabase
+      .from('impact_profile_tests')
+      .select('*', { count: 'exact', head: true });
+
+    console.log('Table access test:', { count, error: countError });
+
+    if (countError) {
+      console.error('Error accessing table:', countError);
+      toast.error(`Database access error: ${countError.message}`);
+      throw countError;
+    }
+
+    // Now fetch the actual data
     const { data, error } = await supabase
       .from('impact_profile_tests')
       .select('*')
