@@ -14,17 +14,7 @@ if (!supabaseUrl || !supabaseKey) {
 console.log('Initializing Supabase client with URL:', supabaseUrl);
 console.log('Redirect URL:', redirectTo);
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: true,
-    detectSessionInUrl: false,
-    autoRefreshToken: true,
-    storage: window?.localStorage
-  },
-  global: {
-    headers: { 'x-application-name': 'impact-profile-checker' }
-  }
-});
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Test the connection immediately
 console.log('Testing initial database connection...');

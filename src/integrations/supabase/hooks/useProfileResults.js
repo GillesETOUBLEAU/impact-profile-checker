@@ -30,9 +30,10 @@ export const useProfileResults = () => {
   return useQuery({
     queryKey: ['profile_results'],
     queryFn: fetchProfileResults,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 30000,
-    refetchOnWindowFocus: true
+    retry: 1,
+    retryDelay: 1000,
+    staleTime: 1000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true
   });
 };
