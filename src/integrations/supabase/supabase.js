@@ -14,19 +14,25 @@ if (!supabaseUrl || !supabaseKey) {
 console.log('Initializing Supabase client with URL:', supabaseUrl);
 console.log('Redirect URL:', redirectTo);
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+});
 
 // Test the connection immediately
 console.log('Testing initial database connection...');
-supabase.from('impact_profile_tests')
-  .select('count')
+supabase
+  .from('impact_profile_tests')
+  .select('*')
   .limit(1)
-  .single()
   .then(({ data, error }) => {
     if (error) {
       console.error('Initial database connection error:', error);
       toast.error(`Database connection error: ${error.message}`);
     } else {
-      console.log('Initial database connection successful:', data);
+      console.log('Initial database connection successful. Sample data:', data);
     }
   });
