@@ -14,11 +14,22 @@ if (!supabaseUrl || !supabaseKey) {
 console.log('Initializing Supabase client with URL:', supabaseUrl);
 console.log('Redirect URL:', redirectTo);
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage
+  }
+});
 
 // Test the connection and table access immediately
 const testConnection = async () => {
   try {
+    console.log('Testing database connection...');
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('Current session:', session ? 'Active' : 'None');
+
     const { data, error } = await supabase
       .from('impact_profile_tests')
       .select('*')

@@ -6,6 +6,14 @@ const fetchProfileResults = async () => {
   console.log('Starting to fetch profile results...');
   
   try {
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('Current session state:', session ? 'Authenticated' : 'Not authenticated');
+
+    if (!session) {
+      console.log('No active session found');
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('impact_profile_tests')
       .select('*')
